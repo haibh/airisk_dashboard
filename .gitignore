@@ -74,3 +74,97 @@ ck.md
 # Gemini CLI settings (symlink to .claude/.mcp.json)
 .gemini/settings.json
 .claude/settings.bak.json
+
+# ===========================================
+# AI Assistants & Code Tracking
+# ===========================================
+.claude/
+.cursor/
+.aider/
+.opencode/
+.codeium/
+.tabnine/
+.copilot/
+.windsurf/
+.continue/
+.sourcegraph/
+AGENTS.md
+release-manifest.json
+.repomixignore
+
+# AI conversation logs and transcripts
+*.jsonl
+transcripts/
+conversations/
+
+# ===========================================
+# Sensitive Data & Secrets
+# ===========================================
+# API keys and tokens
+*.key
+*.secret
+secrets/
+.secrets/
+credentials/
+.credentials/
+
+# SSH keys
+id_rsa*
+id_ed25519*
+id_ecdsa*
+*.ppk
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+database.json
+
+# Certificates
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# AWS
+.aws/
+aws-credentials*
+
+# Google Cloud
+*.json.enc
+service-account*.json
+gcloud/
+
+# ===========================================
+# IDE & Editor Settings (Local)
+# ===========================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.sublime-*
+
+# ===========================================
+# Local Development
+# ===========================================
+.local/
+local/
+tmp/
+temp/
+*.tmp
+*.temp
+*.log
+logs/
+
+# Docker local
+docker-compose.override.yml
+.docker/
+
+# Personal notes
+notes.md
+TODO.md
+NOTES.md
+personal/
