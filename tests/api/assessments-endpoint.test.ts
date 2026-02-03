@@ -2,7 +2,11 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getServerSession, hasMinimumRole } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { mockSession, mockUser, mockOrganization } from '../mocks/mock-session';
+import { mockSession, mockUser, mockOrganization, mockSessionUser } from '../mocks/mock-session';
+
+// Valid UUIDs for testing (Zod validation requires UUID format)
+const MOCK_AI_SYSTEM_ID = '550e8400-e29b-41d4-a716-446655440001';
+const MOCK_FRAMEWORK_ID = '660e8400-e29b-41d4-a716-446655440002';
 
 // Dynamic import to avoid module resolution issues
 const importRoute = async () => {
@@ -58,9 +62,9 @@ describe('GET /api/assessments', () => {
           id: 'assess-1',
           title: 'Annual Risk Assessment',
           description: 'Comprehensive annual assessment',
-          status: 'COMPLETED',
+          status: 'APPROVED',
           assessmentDate: new Date('2024-01-15'),
-          aiSystem: { id: 'ai-1', name: 'ChatBot', systemType: 'GENERATIVE' },
+          aiSystem: { id: 'ai-1', name: 'ChatBot', systemType: 'GENAI' },
           framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
           createdBy: { id: 'user-1', name: 'John', email: 'john@example.com' },
           _count: { risks: 5 },
@@ -111,13 +115,13 @@ describe('GET /api/assessments', () => {
       vi.mocked(prisma.riskAssessment.findMany).mockResolvedValue([]);
 
       const { GET } = await importRoute();
-      const response = await GET(createRequest('?status=COMPLETED'));
+      const response = await GET(createRequest('?status=APPROVED'));
 
       expect(response.status).toBe(200);
       expect(prisma.riskAssessment.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            status: 'COMPLETED',
+            status: 'APPROVED',
           }),
         })
       );
@@ -128,13 +132,13 @@ describe('GET /api/assessments', () => {
       vi.mocked(prisma.riskAssessment.findMany).mockResolvedValue([]);
 
       const { GET } = await importRoute();
-      const response = await GET(createRequest('?aiSystemId=ai-123'));
+      const response = await GET(createRequest(`?aiSystemId=${MOCK_AI_SYSTEM_ID}`));
 
       expect(response.status).toBe(200);
       expect(prisma.riskAssessment.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            aiSystemId: 'ai-123',
+            aiSystemId: MOCK_AI_SYSTEM_ID,
           }),
         })
       );
@@ -145,13 +149,13 @@ describe('GET /api/assessments', () => {
       vi.mocked(prisma.riskAssessment.findMany).mockResolvedValue([]);
 
       const { GET } = await importRoute();
-      const response = await GET(createRequest('?frameworkId=fw-456'));
+      const response = await GET(createRequest(`?frameworkId=${MOCK_FRAMEWORK_ID}`));
 
       expect(response.status).toBe(200);
       expect(prisma.riskAssessment.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            frameworkId: 'fw-456',
+            frameworkId: MOCK_FRAMEWORK_ID,
           }),
         })
       );
@@ -198,7 +202,7 @@ describe('GET /api/assessments', () => {
         {
           id: 'assess-1',
           title: 'Test Assessment',
-          aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
+          aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENAI' },
           framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
           createdBy: { id: 'user-1', name: 'Creator', email: 'creator@example.com' },
           _count: { risks: 3 },
@@ -252,7 +256,7 @@ describe('GET /api/assessments', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to fetch assessments');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });
@@ -281,8 +285,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -306,15 +310,15 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(403);
       const data = await response.json();
-      expect(data.error).toBe('Insufficient permissions');
+      expect(data.error).toContain('role');
     });
 
     it('should allow ASSESSOR role', async () => {
@@ -328,16 +332,16 @@ describe('POST /api/assessments', () => {
       const mockAssessment = {
         id: 'assess-1',
         title: 'Test Assessment',
-        aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
-        framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
+        aiSystem: { id: MOCK_AI_SYSTEM_ID, name: 'System 1', systemType: 'GENAI' },
+        framework: { id: MOCK_FRAMEWORK_ID, name: 'NIST', shortName: 'NIST' },
         createdBy: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
       vi.mocked(prisma.aISystem.findFirst).mockResolvedValue({
-        id: 'ai-1',
+        id: MOCK_AI_SYSTEM_ID,
       } as any);
       vi.mocked(prisma.framework.findUnique).mockResolvedValue({
-        id: 'fw-1',
+        id: MOCK_FRAMEWORK_ID,
       } as any);
       vi.mocked(prisma.riskAssessment.create).mockResolvedValue(
         mockAssessment as any
@@ -346,8 +350,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -366,16 +370,16 @@ describe('POST /api/assessments', () => {
       const mockAssessment = {
         id: 'assess-1',
         title: 'Test Assessment',
-        aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
-        framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
+        aiSystem: { id: MOCK_AI_SYSTEM_ID, name: 'System 1', systemType: 'GENAI' },
+        framework: { id: MOCK_FRAMEWORK_ID, name: 'NIST', shortName: 'NIST' },
         createdBy: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
       vi.mocked(prisma.aISystem.findFirst).mockResolvedValue({
-        id: 'ai-1',
+        id: MOCK_AI_SYSTEM_ID,
       } as any);
       vi.mocked(prisma.framework.findUnique).mockResolvedValue({
-        id: 'fw-1',
+        id: MOCK_FRAMEWORK_ID,
       } as any);
       vi.mocked(prisma.riskAssessment.create).mockResolvedValue(
         mockAssessment as any
@@ -384,8 +388,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -403,43 +407,43 @@ describe('POST /api/assessments', () => {
     it('should return 400 when title is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('title');
     });
 
     it('should return 400 when aiSystemId is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        frameworkId: 'fw-1',
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('aiSystemId');
     });
 
     it('should return 400 when frameworkId is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('frameworkId');
     });
   });
 
@@ -455,8 +459,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-invalid',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -468,15 +472,15 @@ describe('POST /api/assessments', () => {
 
     it('should return 404 when framework not found', async () => {
       vi.mocked(prisma.aISystem.findFirst).mockResolvedValue({
-        id: 'ai-1',
+        id: MOCK_AI_SYSTEM_ID,
       } as any);
       vi.mocked(prisma.framework.findUnique).mockResolvedValue(null);
 
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-invalid',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -492,8 +496,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-other-org',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       await POST(request);
@@ -514,10 +518,10 @@ describe('POST /api/assessments', () => {
       vi.mocked(hasMinimumRole).mockReturnValue(true);
 
       vi.mocked(prisma.aISystem.findFirst).mockResolvedValue({
-        id: 'ai-1',
+        id: MOCK_AI_SYSTEM_ID,
       } as any);
       vi.mocked(prisma.framework.findUnique).mockResolvedValue({
-        id: 'fw-1',
+        id: MOCK_FRAMEWORK_ID,
       } as any);
     });
 
@@ -529,11 +533,11 @@ describe('POST /api/assessments', () => {
         assessmentDate: expect.any(Date),
         nextReviewDate: null,
         organizationId: 'test-org-123',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
         createdById: 'test-user-123',
-        aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
-        framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
+        aiSystem: { id: MOCK_AI_SYSTEM_ID, name: 'System 1', systemType: 'GENAI' },
+        framework: { id: MOCK_FRAMEWORK_ID, name: 'NIST', shortName: 'NIST' },
         createdBy: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
@@ -544,8 +548,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'New Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -555,8 +559,8 @@ describe('POST /api/assessments', () => {
 
       expect(data).toHaveProperty('id');
       expect(data.title).toBe('New Assessment');
-      expect(data.aiSystemId).toBe('ai-1');
-      expect(data.frameworkId).toBe('fw-1');
+      expect(data.aiSystemId).toBe(MOCK_AI_SYSTEM_ID);
+      expect(data.frameworkId).toBe(MOCK_FRAMEWORK_ID);
     });
 
     it('should create assessment with all optional fields', async () => {
@@ -570,11 +574,11 @@ describe('POST /api/assessments', () => {
         assessmentDate,
         nextReviewDate,
         organizationId: 'test-org-123',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
         createdById: 'test-user-123',
-        aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
-        framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
+        aiSystem: { id: MOCK_AI_SYSTEM_ID, name: 'System 1', systemType: 'GENAI' },
+        framework: { id: MOCK_FRAMEWORK_ID, name: 'NIST', shortName: 'NIST' },
         createdBy: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
@@ -586,8 +590,8 @@ describe('POST /api/assessments', () => {
       const request = await createRequest({
         title: 'Complete Assessment',
         description: 'Detailed assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
         assessmentDate: assessmentDate.toISOString(),
         nextReviewDate: nextReviewDate.toISOString(),
       });
@@ -607,8 +611,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       await POST(request);
@@ -627,8 +631,8 @@ describe('POST /api/assessments', () => {
       const mockAssessment = {
         id: 'assess-1',
         title: 'Test Assessment',
-        aiSystem: { id: 'ai-1', name: 'System 1', systemType: 'GENERATIVE' },
-        framework: { id: 'fw-1', name: 'NIST', shortName: 'NIST' },
+        aiSystem: { id: MOCK_AI_SYSTEM_ID, name: 'System 1', systemType: 'GENAI' },
+        framework: { id: MOCK_FRAMEWORK_ID, name: 'NIST', shortName: 'NIST' },
         createdBy: { id: 'user-1', name: 'Creator', email: 'creator@example.com' },
       };
 
@@ -639,8 +643,8 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
@@ -658,10 +662,10 @@ describe('POST /api/assessments', () => {
       vi.mocked(hasMinimumRole).mockReturnValue(true);
 
       vi.mocked(prisma.aISystem.findFirst).mockResolvedValue({
-        id: 'ai-1',
+        id: MOCK_AI_SYSTEM_ID,
       } as any);
       vi.mocked(prisma.framework.findUnique).mockResolvedValue({
-        id: 'fw-1',
+        id: MOCK_FRAMEWORK_ID,
       } as any);
     });
 
@@ -673,24 +677,15 @@ describe('POST /api/assessments', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         title: 'Test Assessment',
-        aiSystemId: 'ai-1',
-        frameworkId: 'fw-1',
+        aiSystemId: MOCK_AI_SYSTEM_ID,
+        frameworkId: MOCK_FRAMEWORK_ID,
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to create assessment');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });
-
-// Mock session user for authorization tests
-const mockSessionUser = {
-  id: 'test-user-123',
-  email: 'test@example.com',
-  name: 'Test User',
-  organizationId: 'test-org-123',
-  role: 'ASSESSOR',
-};

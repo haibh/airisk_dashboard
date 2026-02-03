@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { mockSession, mockUser, mockOrganization } from '../mocks/mock-session';
+import { mockSession, mockUser, mockOrganization, mockSessionUser } from '../mocks/mock-session';
 
 // Dynamic import to avoid module resolution issues
 const importRoute = async () => {
@@ -58,8 +58,8 @@ describe('GET /api/ai-systems', () => {
           id: 'ai-1',
           name: 'ChatBot System',
           description: 'Customer service chatbot',
-          systemType: 'GENERATIVE',
-          dataClassification: 'SENSITIVE',
+          systemType: 'GENAI',
+          dataClassification: 'CONFIDENTIAL',
           lifecycleStatus: 'PRODUCTION',
           riskTier: 'HIGH',
           owner: { id: 'user-1', name: 'John', email: 'john@example.com' },
@@ -109,13 +109,13 @@ describe('GET /api/ai-systems', () => {
       vi.mocked(prisma.aISystem.findMany).mockResolvedValue([]);
 
       const { GET } = await importRoute();
-      const response = await GET(createRequest('?systemType=GENERATIVE'));
+      const response = await GET(createRequest('?systemType=GENAI'));
 
       expect(response.status).toBe(200);
       expect(prisma.aISystem.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            systemType: 'GENERATIVE',
+            systemType: 'GENAI',
           }),
         })
       );
@@ -143,13 +143,13 @@ describe('GET /api/ai-systems', () => {
       vi.mocked(prisma.aISystem.findMany).mockResolvedValue([]);
 
       const { GET } = await importRoute();
-      const response = await GET(createRequest('?riskTier=CRITICAL'));
+      const response = await GET(createRequest('?riskTier=HIGH'));
 
       expect(response.status).toBe(200);
       expect(prisma.aISystem.count).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            riskTier: 'CRITICAL',
+            riskTier: 'HIGH',
           }),
         })
       );
@@ -244,7 +244,7 @@ describe('GET /api/ai-systems', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to fetch AI systems');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });
@@ -274,8 +274,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
@@ -296,15 +296,15 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(403);
       const data = await response.json();
-      expect(data.error).toBe('Insufficient permissions');
+      expect(data.error).toContain('Risk Managers and Admins');
     });
 
     it('should allow RISK_MANAGER role', async () => {
@@ -316,8 +316,8 @@ describe('POST /api/ai-systems', () => {
       const mockAISystem = {
         id: 'ai-1',
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
         owner: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
@@ -326,8 +326,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
@@ -344,8 +344,8 @@ describe('POST /api/ai-systems', () => {
       const mockAISystem = {
         id: 'ai-1',
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
         owner: { id: 'user-1', name: 'Test User', email: 'test@example.com' },
       };
 
@@ -354,8 +354,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
@@ -372,43 +372,43 @@ describe('POST /api/ai-systems', () => {
     it('should return 400 when name is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('name');
     });
 
     it('should return 400 when systemType is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        dataClassification: 'SENSITIVE',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('systemType');
     });
 
     it('should return 400 when dataClassification is missing', async () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
+        systemType: 'GENAI',
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toContain('Missing required fields');
+      expect(data.error).toContain('dataClassification');
     });
   });
 
@@ -422,8 +422,8 @@ describe('POST /api/ai-systems', () => {
         id: 'ai-1',
         name: 'Test System',
         description: null,
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
         lifecycleStatus: 'DEVELOPMENT',
         riskTier: null,
         organizationId: 'test-org-123',
@@ -436,8 +436,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
@@ -447,8 +447,8 @@ describe('POST /api/ai-systems', () => {
 
       expect(data).toHaveProperty('id');
       expect(data.name).toBe('Test System');
-      expect(data.systemType).toBe('GENERATIVE');
-      expect(data.dataClassification).toBe('SENSITIVE');
+      expect(data.systemType).toBe('GENAI');
+      expect(data.dataClassification).toBe('CONFIDENTIAL');
       expect(data.lifecycleStatus).toBe('DEVELOPMENT');
     });
 
@@ -457,7 +457,7 @@ describe('POST /api/ai-systems', () => {
         id: 'ai-1',
         name: 'Advanced System',
         description: 'Advanced AI system',
-        systemType: 'GENERATIVE',
+        systemType: 'GENAI',
         dataClassification: 'PUBLIC',
         lifecycleStatus: 'PRODUCTION',
         riskTier: 'HIGH',
@@ -478,7 +478,7 @@ describe('POST /api/ai-systems', () => {
       const request = await createRequest({
         name: 'Advanced System',
         description: 'Advanced AI system',
-        systemType: 'GENERATIVE',
+        systemType: 'GENAI',
         dataClassification: 'PUBLIC',
         lifecycleStatus: 'PRODUCTION',
         riskTier: 'HIGH',
@@ -507,8 +507,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       await POST(request);
@@ -539,8 +539,8 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
@@ -567,24 +567,15 @@ describe('POST /api/ai-systems', () => {
       const { POST } = await importRoute();
       const request = await createRequest({
         name: 'Test System',
-        systemType: 'GENERATIVE',
-        dataClassification: 'SENSITIVE',
+        systemType: 'GENAI',
+        dataClassification: 'CONFIDENTIAL',
       });
 
       const response = await POST(request);
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to create AI system');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });
-
-// Mock session user for authorization tests
-const mockSessionUser = {
-  id: 'test-user-123',
-  email: 'test@example.com',
-  name: 'Test User',
-  organizationId: 'test-org-123',
-  role: 'RISK_MANAGER',
-};
