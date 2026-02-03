@@ -82,6 +82,30 @@
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Keyboard accessibility - visible focus indicators */
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  /* Skip link for keyboard users */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    z-index: 100;
+    transition: top 0.2s;
+  }
+
+  .skip-link:focus-visible {
+    top: 0;
+  }
 }
 
 /* Custom scrollbar */

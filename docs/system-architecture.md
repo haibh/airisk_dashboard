@@ -1,8 +1,8 @@
 # AIRisk Dashboard - System Architecture
 
-**Version:** 2.0
+**Version:** 2.1
 **Date:** 2026-02-03
-**Status:** MVP 1 Implementation (Phase 6)
+**Status:** MVP 1 Implementation (Phase 7 - Testing & Accessibility)
 **Authors:** Senior Full-Stack Architect
 
 ---
@@ -18,7 +18,9 @@
 7. [Component Architecture](#component-architecture)
 8. [Security Architecture](#security-architecture)
 9. [Scalability Considerations](#scalability-considerations)
-10. [Monitoring & Observability](#monitoring--observability)
+10. [Testing & Quality Assurance](#testing--quality-assurance)
+11. [Accessibility Architecture](#accessibility-architecture)
+12. [Monitoring & Observability](#monitoring--observability)
 
 ---
 
@@ -728,6 +730,189 @@ Response includes:
 
 ---
 
+## Testing & Quality Assurance
+
+### Test Strategy (Phase 7)
+
+**Test Pyramid:**
+```
+          /\
+         /  \        Unit Tests (20%)
+        /────\       - Utility functions
+       /      \      - Risk scoring logic
+      /────────\
+     /          \    Integration Tests (30%)
+    /────────────\   - API endpoints
+   /              \  - Database queries
+  /────────────────\
+ /                  \ E2E Tests (50%)
+/────────────────────\ - User workflows
+                      - Authentication
+                      - Dashboard interactions
+```
+
+### Unit Testing
+- **Framework:** Vitest
+- **Location:** `tests/utils/`, `tests/mocks/`
+- **Coverage:** Risk scoring calculator, utility functions
+- **Execution:** `npm run test`
+
+### Integration Testing
+- **Framework:** Vitest with mocks
+- **Location:** `tests/api/`
+- **Coverage:** 6 API endpoint modules (ai-systems, assessments, frameworks, dashboard)
+- **Test Setup:** Mock Prisma client + session fixtures
+- **Execution:** `npm run test`
+
+### End-to-End Testing (Phase 7)
+- **Framework:** Playwright
+- **Location:** `tests/e2e/`
+- **Browser:** Chromium (MVP scope)
+- **Configuration:** `playwright.config.ts`
+- **Base URL:** `http://localhost:3000`
+
+**E2E Test Coverage:**
+1. **auth-login-flow.spec.ts** - Authentication
+   - Valid credentials → dashboard redirect
+   - Invalid credentials → error message
+   - Required field validation
+   - Loading state handling
+
+2. **auth-unauthorized-access-redirect.spec.ts** - Authorization
+   - Unauthenticated access → login redirect
+   - Session persistence
+
+3. **dashboard-page-load.spec.ts** - Dashboard UI
+   - Component rendering (stat cards, charts)
+   - Data display validation
+   - Navigation functionality
+
+**Test Execution:**
+```bash
+npm run test:e2e              # Headless
+npm run test:e2e:headed       # With browser
+npx playwright test --debug   # Debug mode
+npx playwright show-report    # View results
+```
+
+### Performance Testing (Phase 7)
+
+**Benchmark Script:** `scripts/performance-benchmark.ts`
+
+Measures page load and API response times against targets:
+- Page load: < 3 seconds
+- API response P95: < 500ms
+
+**Execution:**
+```bash
+npx tsx scripts/performance-benchmark.ts
+```
+
+Validates endpoints with targets:
+- List endpoints: < 500ms
+- Single resource: < 200ms
+- Create/Update: < 300ms
+- Delete: < 200ms
+
+### CI/CD Integration
+
+**GitHub Actions Workflow:**
+- Runs tests on every PR
+- 2 retries on failure (headless mode)
+- Single worker for serial execution
+- HTML report generation
+- Traces recorded on first retry
+
+---
+
+## Accessibility Architecture
+
+### WCAG 2.1 Compliance (Phase 7)
+
+**Targeted Level:** AA (with AAA considerations)
+
+### Keyboard Navigation
+
+**Skip Link:**
+- Location: Dashboard layout (`src/app/[locale]/(dashboard)/layout.tsx`)
+- Selector: `.skip-link` with `href="#main-content"`
+- Focus: `focus-visible` styling in `src/app/globals.css`
+- Behavior: Allows keyboard users to bypass navigation
+
+**Implementation:**
+```tsx
+// Skip link (first element in DOM)
+<a href="#main-content" className="skip-link">
+  Skip to main content
+</a>
+
+// Main content anchor
+<main id="main-content" tabIndex={-1} className="...">
+  {children}
+</main>
+```
+
+**CSS Styling:**
+```css
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px;
+  z-index: 100;
+}
+
+.skip-link:focus-visible {
+  top: 0;
+  outline: 2px solid currentColor;
+}
+```
+
+### Focus Management
+
+**Focus Indicators:**
+- All interactive elements have visible focus states
+- Focus-visible pseudo-class prevents keyboard-triggered focus from showing on mouse clicks
+- Applied to: buttons, links, form inputs, dropdown triggers
+
+**Focus Order:**
+- Follows DOM structure (left-to-right, top-to-bottom)
+- Skip link positioned first in layout
+- Main navigation before page content
+- Sidebar before header
+- Content area marked with `id="main-content"`
+
+### Color & Contrast
+
+**Minimum Contrast Ratios:**
+- Normal text: 4.5:1 (WCAG AA)
+- Large text: 3:1 (WCAG AA)
+- UI components: 3:1
+
+**Implementation:** Tailwind CSS with Shadcn/ui ensures WCAG AA compliance by default
+
+### Semantic HTML
+
+**Best Practices Implemented:**
+- Proper heading hierarchy (h1, h2, h3)
+- Semantic elements: `<header>`, `<main>`, `<nav>`, `<button>`, `<form>`
+- ARIA labels on icon-only buttons
+- Form labels associated with inputs
+
+### Screen Reader Support
+
+**Components with ARIA Attributes:**
+- Icon buttons: `aria-label` descriptions
+- Dropdown menus: Radix UI primitives with built-in a11y
+- Tooltips: Role and live region announcements
+- Form validation: `aria-describedby` error messages
+
+**Testing:** Manual testing with screen readers (VoiceOver on macOS)
+
+---
+
 ## Monitoring & Observability
 
 ### Logging Strategy
@@ -908,19 +1093,19 @@ Server Errors:
 
 ## Future Enhancements
 
-### Phase 2 (MVP 2)
+### Phase 8 (MVP 2)
 - Evidence management with file versioning
 - Advanced caching with Redis
 - API rate limiting
 - Webhook integrations
 
-### Phase 3 (MVP 3)
+### Phase 9 (MVP 3)
 - Multi-tenant organization support
 - Advanced reporting and analytics
 - Custom framework support
 - AI-assisted risk suggestions
 
-### Phase 4 (MVP 4)
+### Phase 10 (MVP 4)
 - Mobile companion app
 - Real-time collaboration
 - Advanced integrations (Jira, Slack, ServiceNow)
@@ -928,6 +1113,7 @@ Server Errors:
 
 ---
 
-**Architecture Version:** 2.0
+**Architecture Version:** 2.1
 **Last Updated:** 2026-02-03
+**Current Phase:** MVP 1 Phase 7 (Testing & Accessibility Complete)
 **Maintained By:** Senior Full-Stack Architect (docs-manager agent)

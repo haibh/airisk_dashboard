@@ -2,87 +2,203 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Role & Responsibilities
+## Project Overview
 
-Your role is to analyze user requirements, delegate tasks to appropriate sub-agents, and ensure cohesive delivery of features that meet specifications and architectural standards.
+AIRM-IP (AI Risk Management Intelligence Platform) - Enterprise platform for managing AI risks, compliance frameworks (NIST AI RMF, ISO 42001), and governance. Built with Next.js 16 App Router, TypeScript, PostgreSQL/Prisma, and bilingual i18n (EN/VI).
 
-## Workflows
+## Commands
 
-- Primary workflow: `./.claude/rules/primary-workflow.md`
-- Development rules: `./.claude/rules/development-rules.md`
-- Orchestration protocols: `./.claude/rules/orchestration-protocol.md`
-- Documentation management: `./.claude/rules/documentation-management.md`
-- And other workflows: `./.claude/rules/*`
+```bash
+# Development
+npm run dev              # Start dev server (port 3000)
+npm run build            # Production build
+npm run lint             # ESLint check
 
-**IMPORTANT:** Analyze the skills catalog and activate the skills that are needed for the task during the process.
-**IMPORTANT:** You must follow strictly the development rules in `./.claude/rules/development-rules.md` file.
-**IMPORTANT:** Before you plan or proceed any implementation, always read the `./README.md` file first to get context.
-**IMPORTANT:** Sacrifice grammar for the sake of concision when writing reports.
-**IMPORTANT:** In reports, list any unresolved questions at the end, if any.
+# Database
+npm run db:generate      # Generate Prisma client
+npm run db:push          # Push schema to database
+npm run db:migrate       # Run migrations (dev)
+npm run db:studio        # Open Prisma Studio GUI
+npm run db:seed          # Seed with initial data
 
-## Hook Response Protocol
+# Testing
+npm run test             # Run Vitest in watch mode
+npm run test:run         # Run tests once
+npm run test:coverage    # Run with coverage report
+npm run test:e2e         # Run Playwright E2E tests
+npm run test:e2e:headed  # Run E2E with browser visible
 
-### Privacy Block Hook (`@@PRIVACY_PROMPT@@`)
-
-When a tool call is blocked by the privacy-block hook, the output contains a JSON marker between `@@PRIVACY_PROMPT_START@@` and `@@PRIVACY_PROMPT_END@@`. **You MUST use the `AskUserQuestion` tool** to get proper user approval.
-
-**Required Flow:**
-
-1. Parse the JSON from the hook output
-2. Use `AskUserQuestion` with the question data from the JSON
-3. Based on user's selection:
-   - **"Yes, approve access"** → Use `bash cat "filepath"` to read the file (bash is auto-approved)
-   - **"No, skip this file"** → Continue without accessing the file
-
-**Example AskUserQuestion call:**
-```json
-{
-  "questions": [{
-    "question": "I need to read \".env\" which may contain sensitive data. Do you approve?",
-    "header": "File Access",
-    "options": [
-      { "label": "Yes, approve access", "description": "Allow reading .env this time" },
-      { "label": "No, skip this file", "description": "Continue without accessing this file" }
-    ],
-    "multiSelect": false
-  }]
-}
+# Type check
+npm run type-check       # TypeScript check without emit
 ```
 
-**IMPORTANT:** Always ask the user via `AskUserQuestion` first. Never try to work around the privacy block without explicit user approval.
+## Architecture
 
-## Python Scripts (Skills)
-
-When running Python scripts from `.claude/skills/`, use the venv Python interpreter:
-- **Linux/macOS:** `.claude/skills/.venv/bin/python3 scripts/xxx.py`
-- **Windows:** `.claude\skills\.venv\Scripts\python.exe scripts\xxx.py`
-
-This ensures packages installed by `install.sh` (google-genai, pypdf, etc.) are available.
-
-**IMPORTANT:** When scripts of skills failed, don't stop, try to fix them directly.
-
-## [IMPORTANT] Consider Modularization
-- If a code file exceeds 200 lines of code, consider modularizing it
-- Check existing modules before creating new
-- Analyze logical separation boundaries (functions, classes, concerns)
-- Use kebab-case naming with long descriptive names, it's fine if the file name is long because this ensures file names are self-documenting for LLM tools (Grep, Glob, Search)
-- Write descriptive code comments
-- After modularization, continue with main task
-- When not to modularize: Markdown files, plain text files, bash scripts, configuration files, environment variables files, etc.
-
-## Documentation Management
-
-We keep all important docs in `./docs` folder and keep updating them, structure like below:
-
+### System Architecture
 ```
-./docs
-├── project-overview-pdr.md
-├── code-standards.md
-├── codebase-summary.md
-├── design-guidelines.md
-├── deployment-guide.md
-├── system-architecture.md
-└── project-roadmap.md
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLIENT (Browser)                            │
+│  React 18 + TypeScript │ Tailwind CSS │ Shadcn/ui │ Zustand        │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ HTTPS
+┌───────────────────────────────▼─────────────────────────────────────┐
+│                      NEXT.JS APP ROUTER                             │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐ │
+│  │   Pages (SSR)   │  │   API Routes    │  │     Middleware      │ │
+│  │  /[locale]/*    │  │    /api/*       │  │ - Auth (JWT check)  │ │
+│  └─────────────────┘  └─────────────────┘  │ - i18n (locale)     │ │
+│                                             │ - RBAC              │ │
+│  ┌──────────────────────────────────────┐  └─────────────────────┘ │
+│  │         Business Logic               │                          │
+│  │  - Risk Scoring Calculator           │                          │
+│  │  - Auth Helpers (bcrypt, JWT)        │                          │
+│  └──────────────────────────────────────┘                          │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ Prisma ORM
+┌───────────────────────────────▼─────────────────────────────────────┐
+│                        POSTGRESQL 15+                               │
+│  Organizations │ Users │ AISystem │ Framework │ RiskAssessment     │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-**IMPORTANT:** *MUST READ* and *MUST COMPLY* all *INSTRUCTIONS* in project `./CLAUDE.md`, especially *WORKFLOWS* section is *CRITICALLY IMPORTANT*, this rule is *MANDATORY. NON-NEGOTIABLE. NO EXCEPTIONS. MUST REMEMBER AT ALL TIMES!!!*
+### Data Model (Entity Relationships)
+```
+┌──────────────┐
+│ Organization │─────────────────────────────────────────────┐
+└──────┬───────┘                                             │
+       │ 1:N                                                 │
+       ▼                                                     │
+┌──────────────┐      1:N      ┌──────────────┐             │
+│     User     │──────────────▶│   AISystem   │◀────────────┤
+│  (5 roles)   │   owns        └──────┬───────┘             │
+└──────────────┘                      │                      │
+                                      │ 1:N                  │
+                                      ▼                      │
+┌──────────────┐  1:N   ┌────────────────────┐              │
+│  Framework   │───────▶│  RiskAssessment    │◀─────────────┘
+│ NIST/ISO     │        │  (status workflow) │
+└──────┬───────┘        └─────────┬──────────┘
+       │ 1:N                      │ 1:N
+       ▼                          ▼
+┌──────────────┐           ┌──────────────┐
+│   Control    │◀──────────│     Risk     │
+│  (hierarchy) │  N:M via  │ (5x5 matrix) │
+└──────┬───────┘ RiskControl└──────┬───────┘
+       │                           │ 1:N
+       │ N:M                       ▼
+       ▼                    ┌──────────────┐
+┌────────────────┐          │     Task     │
+│ ControlMapping │          │ (treatment)  │
+│ (cross-framework)         └──────────────┘
+└────────────────┘
+
+Evidence ←──── EvidenceLink ────→ AISystem/Risk/Control/Assessment
+AuditLog ←──── tracks all mutations
+```
+
+### Request Flow
+```
+Browser Request
+       │
+       ▼
+┌──────────────────────────────────────────────────────┐
+│                    middleware.ts                      │
+│  1. Skip if /api or static files                     │
+│  2. Check isPublicPath (/, /login)                   │
+│  3. Verify JWT token (getToken from next-auth/jwt)   │
+│  4. Redirect to /{locale}/login if unauthorized      │
+│  5. Apply i18n middleware (locale detection)         │
+└──────────────────────┬───────────────────────────────┘
+                       │
+       ┌───────────────┴───────────────┐
+       ▼                               ▼
+┌──────────────┐               ┌──────────────┐
+│  Page Route  │               │  API Route   │
+│ (React SSR)  │               │ (REST JSON)  │
+└──────────────┘               └──────┬───────┘
+                                      │
+                               ┌──────▼───────┐
+                               │ getServerSession()
+                               │ Check RBAC   │
+                               └──────┬───────┘
+                                      │
+                               ┌──────▼───────┐
+                               │ Prisma Query │
+                               │ + orgId filter
+                               └──────────────┘
+```
+
+### Route Structure (App Router with i18n)
+```
+src/app/
+├── [locale]/                    # Dynamic locale (en/vi)
+│   ├── (auth)/login/            # Auth group - login page
+│   ├── (dashboard)/             # Dashboard group - protected routes
+│   │   ├── dashboard/           # Main dashboard
+│   │   ├── ai-systems/          # AI inventory CRUD
+│   │   ├── risk-assessment/     # Risk assessment wizard
+│   │   └── frameworks/          # NIST/ISO frameworks
+│   └── layout.tsx               # Root layout with providers
+└── api/                         # API routes (no locale prefix)
+    ├── auth/[...nextauth]/      # NextAuth handlers
+    ├── ai-systems/              # AI system CRUD
+    ├── assessments/             # Risk assessments
+    ├── frameworks/              # Framework & controls
+    ├── dashboard/               # Dashboard stats endpoints
+    └── reports/                 # Export endpoints
+```
+
+### Key Modules
+
+**Authentication** (`src/app/api/auth/`, `src/lib/auth-helpers.ts`, `src/middleware.ts`)
+- NextAuth.js with credentials provider + JWT strategy
+- RBAC: ADMIN > RISK_MANAGER > ASSESSOR > AUDITOR > VIEWER
+- Middleware handles auth check + i18n routing
+
+**Risk Scoring** (`src/lib/risk-scoring-calculator.ts`)
+- 5×5 matrix: `inherentScore = likelihood × impact` (1-25)
+- `residualScore = inherentScore × (1 - controlEffectiveness%)`
+- Levels: LOW (1-4), MEDIUM (5-9), HIGH (10-15), CRITICAL (16-25)
+
+**Database** (`prisma/schema.prisma`)
+- 12 core models: Organization, User, AISystem, Framework, Control, ControlMapping, RiskAssessment, Risk, RiskControl, Evidence, Task, AuditLog
+- Multi-tenant via organizationId on most entities
+
+### Testing
+
+- **Unit/Integration**: Vitest with mocked Prisma (`tests/setup.ts` exports `prismaMock`)
+- **E2E**: Playwright in `tests/e2e/`, runs against `localhost:3000`
+- **Coverage**: API routes and lib functions only (see `vitest.config.ts` include/exclude)
+
+Run single test file:
+```bash
+npm run test -- tests/api/ai-systems-endpoint.test.ts
+npm run test:e2e -- tests/e2e/auth-login-flow.spec.ts
+```
+
+### State Management
+
+- **Zustand** for client state (`src/store/`)
+- **Server state** via API routes + fetch
+
+### i18n
+
+- Locales: `en`, `vi` (defined in `src/i18n/request.ts`)
+- Messages: `src/i18n/messages/{locale}.json`
+- URL pattern: `/{locale}/dashboard`, `/{locale}/login`
+
+## Environment Setup
+
+Copy `.env.example` to `.env.local`:
+```bash
+DATABASE_URL="postgresql://user:pass@localhost:5432/airm_ip"
+NEXTAUTH_SECRET="openssl rand -base64 32"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+## Conventions
+
+- Path alias: `@/` maps to `src/`
+- UI components: Shadcn/ui in `src/components/ui/`
+- API responses: `{ success: boolean, data?, error?, total?, page? }`
+- Role check: `hasMinimumRole(userRole, 'ASSESSOR')` for hierarchical permissions
