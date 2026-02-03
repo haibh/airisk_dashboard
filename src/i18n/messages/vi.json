@@ -1,0 +1,172 @@
+{
+  "common": {
+    "appName": "Nền tảng Quản lý Rủi ro AI",
+    "appNameShort": "AIRM-IP",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Sửa",
+    "create": "Tạo mới",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "export": "Xuất",
+    "import": "Nhập",
+    "actions": "Hành động",
+    "status": "Trạng thái",
+    "yes": "Có",
+    "no": "Không",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "submit": "Gửi",
+    "reset": "Đặt lại"
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "aiSystems": "Hệ thống AI",
+    "riskAssessment": "Đánh giá rủi ro",
+    "frameworks": "Khung tuân thủ",
+    "evidence": "Bằng chứng",
+    "reports": "Báo cáo",
+    "settings": "Cài đặt",
+    "profile": "Hồ sơ",
+    "logout": "Đăng xuất"
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "subtitle": "Tổng quan Quản lý Rủi ro AI",
+    "riskHeatmap": "Bản đồ nhiệt rủi ro",
+    "complianceScore": "Điểm tuân thủ",
+    "totalSystems": "Tổng số hệ thống AI",
+    "highRisks": "Rủi ro cao",
+    "pendingActions": "Hành động chờ xử lý",
+    "recentActivity": "Hoạt động gần đây",
+    "frameworkCompliance": "Tuân thủ khung",
+    "riskTrends": "Xu hướng rủi ro"
+  },
+  "aiSystems": {
+    "title": "Sổ đăng ký Hệ thống AI",
+    "subtitle": "Quản lý hệ thống AI của tổ chức",
+    "addSystem": "Thêm Hệ thống AI",
+    "systemName": "Tên hệ thống",
+    "systemType": "Loại hệ thống",
+    "dataClassification": "Phân loại dữ liệu",
+    "lifecycleStatus": "Trạng thái vòng đời",
+    "riskTier": "Cấp độ rủi ro",
+    "owner": "Chủ sở hữu",
+    "lastAssessment": "Đánh giá gần nhất",
+    "types": {
+      "genai": "AI Sinh tạo",
+      "ml": "Học máy",
+      "rpa": "Tự động hóa quy trình",
+      "other": "Khác"
+    },
+    "classification": {
+      "public": "Công khai",
+      "internal": "Nội bộ",
+      "confidential": "Bảo mật",
+      "restricted": "Hạn chế"
+    },
+    "lifecycle": {
+      "development": "Phát triển",
+      "pilot": "Thử nghiệm",
+      "production": "Sản xuất",
+      "deprecated": "Không dùng nữa",
+      "retired": "Ngừng hoạt động"
+    }
+  },
+  "risk": {
+    "title": "Đánh giá Rủi ro",
+    "subtitle": "Đánh giá và quản lý rủi ro AI",
+    "newAssessment": "Đánh giá mới",
+    "inherentRisk": "Rủi ro vốn có",
+    "residualRisk": "Rủi ro còn lại",
+    "likelihood": "Khả năng xảy ra",
+    "impact": "Mức độ ảnh hưởng",
+    "controlEffectiveness": "Hiệu quả kiểm soát",
+    "riskScore": "Điểm rủi ro",
+    "categories": {
+      "bias": "Thiên kiến/Công bằng",
+      "privacy": "Quyền riêng tư",
+      "security": "Bảo mật",
+      "reliability": "Độ tin cậy",
+      "transparency": "Minh bạch",
+      "accountability": "Trách nhiệm giải trình",
+      "safety": "An toàn"
+    },
+    "levels": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao",
+      "critical": "Nghiêm trọng"
+    },
+    "treatment": {
+      "accept": "Chấp nhận",
+      "mitigate": "Giảm thiểu",
+      "transfer": "Chuyển giao",
+      "avoid": "Tránh"
+    }
+  },
+  "frameworks": {
+    "title": "Khung Tuân Thủ",
+    "subtitle": "Khám phá các khung quản lý rủi ro AI và tuân thủ",
+    "nistAiRmf": "NIST AI RMF",
+    "iso42001": "ISO/IEC 42001",
+    "csaAicm": "CSA AICM",
+    "nistCsf": "NIST CSF",
+    "cisControls": "CIS Controls",
+    "gapAnalysis": "Phân tích khoảng trống",
+    "controlMapping": "Ánh xạ kiểm soát",
+    "complianceStatus": "Trạng thái tuân thủ",
+    "noFrameworks": "Không có khung nào",
+    "runSeed": "Chạy seed cơ sở dữ liệu để tạo khung",
+    "controlsHierarchy": "Cấu trúc Kiểm soát",
+    "noControls": "Không tìm thấy kiểm soát",
+    "backToFrameworks": "Quay lại Khung",
+    "effectiveDate": "Có hiệu lực",
+    "totalControls": "tổng số kiểm soát",
+    "version": "Phiên bản",
+    "categories": {
+      "aiRisk": "Rủi ro AI",
+      "aiManagement": "Quản lý AI",
+      "aiControl": "Kiểm soát AI",
+      "security": "Bảo mật",
+      "compliance": "Tuân thủ"
+    }
+  },
+  "evidence": {
+    "title": "Quản lý Bằng chứng",
+    "subtitle": "Tải lên và quản lý bằng chứng tuân thủ",
+    "upload": "Tải lên bằng chứng",
+    "fileName": "Tên tệp",
+    "fileType": "Loại tệp",
+    "uploadedBy": "Người tải lên",
+    "uploadedAt": "Thời gian tải lên",
+    "linkedTo": "Liên kết với",
+    "hashVerified": "Đã xác minh hash",
+    "reviewStatus": "Trạng thái xem xét"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu?",
+    "rememberMe": "Ghi nhớ đăng nhập",
+    "loginError": "Email hoặc mật khẩu không đúng",
+    "welcomeBack": "Chào mừng trở lại",
+    "enterCredentials": "Nhập thông tin đăng nhập của bạn",
+    "signingIn": "Đang đăng nhập...",
+    "authRequired": "Yêu cầu xác thực",
+    "sessionExpired": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại."
+  },
+  "roles": {
+    "admin": "Quản trị viên",
+    "riskManager": "Quản lý rủi ro",
+    "assessor": "Người đánh giá",
+    "auditor": "Kiểm toán viên",
+    "viewer": "Người xem"
+  }
+}

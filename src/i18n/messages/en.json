@@ -1,0 +1,172 @@
+{
+  "common": {
+    "appName": "AI Risk Management Platform",
+    "appNameShort": "AIRM-IP",
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "actions": "Actions",
+    "status": "Status",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "reset": "Reset"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "aiSystems": "AI Systems",
+    "riskAssessment": "Risk Assessment",
+    "frameworks": "Frameworks",
+    "evidence": "Evidence",
+    "reports": "Reports",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Executive Dashboard",
+    "subtitle": "AI Risk Management Overview",
+    "riskHeatmap": "Risk Heatmap",
+    "complianceScore": "Compliance Score",
+    "totalSystems": "Total AI Systems",
+    "highRisks": "High Risks",
+    "pendingActions": "Pending Actions",
+    "recentActivity": "Recent Activity",
+    "frameworkCompliance": "Framework Compliance",
+    "riskTrends": "Risk Trends"
+  },
+  "aiSystems": {
+    "title": "AI System Registry",
+    "subtitle": "Manage your organization's AI systems",
+    "addSystem": "Add AI System",
+    "systemName": "System Name",
+    "systemType": "System Type",
+    "dataClassification": "Data Classification",
+    "lifecycleStatus": "Lifecycle Status",
+    "riskTier": "Risk Tier",
+    "owner": "Owner",
+    "lastAssessment": "Last Assessment",
+    "types": {
+      "genai": "Generative AI",
+      "ml": "Machine Learning",
+      "rpa": "Robotic Process Automation",
+      "other": "Other"
+    },
+    "classification": {
+      "public": "Public",
+      "internal": "Internal",
+      "confidential": "Confidential",
+      "restricted": "Restricted"
+    },
+    "lifecycle": {
+      "development": "Development",
+      "pilot": "Pilot",
+      "production": "Production",
+      "deprecated": "Deprecated",
+      "retired": "Retired"
+    }
+  },
+  "risk": {
+    "title": "Risk Assessment",
+    "subtitle": "Assess and manage AI risks",
+    "newAssessment": "New Assessment",
+    "inherentRisk": "Inherent Risk",
+    "residualRisk": "Residual Risk",
+    "likelihood": "Likelihood",
+    "impact": "Impact",
+    "controlEffectiveness": "Control Effectiveness",
+    "riskScore": "Risk Score",
+    "categories": {
+      "bias": "Bias/Fairness",
+      "privacy": "Privacy",
+      "security": "Security",
+      "reliability": "Reliability",
+      "transparency": "Transparency",
+      "accountability": "Accountability",
+      "safety": "Safety"
+    },
+    "levels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "treatment": {
+      "accept": "Accept",
+      "mitigate": "Mitigate",
+      "transfer": "Transfer",
+      "avoid": "Avoid"
+    }
+  },
+  "frameworks": {
+    "title": "Compliance Frameworks",
+    "subtitle": "Browse and explore AI risk management and compliance frameworks",
+    "nistAiRmf": "NIST AI RMF",
+    "iso42001": "ISO/IEC 42001",
+    "csaAicm": "CSA AICM",
+    "nistCsf": "NIST CSF",
+    "cisControls": "CIS Controls",
+    "gapAnalysis": "Gap Analysis",
+    "controlMapping": "Control Mapping",
+    "complianceStatus": "Compliance Status",
+    "noFrameworks": "No frameworks available",
+    "runSeed": "Run database seed to populate frameworks",
+    "controlsHierarchy": "Controls Hierarchy",
+    "noControls": "No controls found",
+    "backToFrameworks": "Back to Frameworks",
+    "effectiveDate": "Effective",
+    "totalControls": "total controls",
+    "version": "Version",
+    "categories": {
+      "aiRisk": "AI Risk",
+      "aiManagement": "AI Management",
+      "aiControl": "AI Control",
+      "security": "Security",
+      "compliance": "Compliance"
+    }
+  },
+  "evidence": {
+    "title": "Evidence Management",
+    "subtitle": "Upload and manage compliance evidence",
+    "upload": "Upload Evidence",
+    "fileName": "File Name",
+    "fileType": "File Type",
+    "uploadedBy": "Uploaded By",
+    "uploadedAt": "Uploaded At",
+    "linkedTo": "Linked To",
+    "hashVerified": "Hash Verified",
+    "reviewStatus": "Review Status"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginError": "Invalid email or password",
+    "welcomeBack": "Welcome back",
+    "enterCredentials": "Enter your credentials to access your account",
+    "signingIn": "Signing in...",
+    "authRequired": "Authentication required",
+    "sessionExpired": "Your session has expired. Please login again."
+  },
+  "roles": {
+    "admin": "Administrator",
+    "riskManager": "Risk Manager",
+    "assessor": "Assessor",
+    "auditor": "Auditor",
+    "viewer": "Viewer"
+  }
+}
