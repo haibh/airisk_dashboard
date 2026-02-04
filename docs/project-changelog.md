@@ -8,33 +8,48 @@
 
 ### MVP4.4 (Current) - 2026-02-04
 
-#### Dashboard Consolidation + Login Redesign
+#### Theme Unification + Dashboard Consolidation
 **Date:** 2026-02-04
-**Impact:** Navigation restructure + UI/UX refresh
+**Impact:** Unified adaptive theme system + consolidated dashboard navigation
 
-**Dashboard Consolidation:**
+**Theme Consolidation (Commit ea1905a):**
+- Unified 3 fragmented visual themes (landing dark-only, login dark-only, dashboard adaptive) into single coherent theme
+- All pages now use CSS variable tokens (`hsl(var(--xxx))`) with `next-themes` dark class toggle
+- **Removed old CSS classes:** `login-hero-gradient`, `glass-card`, `glass-card-glow`, `login-bg-*`, `landing-float-*`, `landing-node-*`
+- **New shared animation prefix:** `ai-scene-*` (float, pulse, dash-flow, logo-bob, shape-morph) for consistency
+- **Auth page adaptive styling:** `auth-adaptive-bg` (light pastels / dark gradient), `auth-card-adaptive` (solid / glassmorphism)
+- **Landing page adaptive:** `landing-gradient` (light gray / dark navy), new content sections (stats, frameworks grid, capabilities, methodology, architecture)
+- **SVG backgrounds:** migrated from hardcoded rgba to `currentColor` for true theme support
+- **Theme toggle:** added Sun/Moon button to auth layout header
+- Login uses standard shadcn Card/Input/Label without custom color overrides
+- Landing modularized: `landing-page.tsx` + `landing-page-content-sections.tsx`
+- i18n expanded: `landing.stats.*`, `landing.supportedFrameworks.*`, `landing.capabilities.*`, `landing.methodology.*`, `landing.architecture.*`
+
+**Dashboard Consolidation (Commit 200d3ac):**
 - Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
 - Created unified 4-tab dashboard: Executive Brief | Detailed Analytics | Operations | AI Risk
 - Deleted `/technical-view` route entirely
-- Sidebar: replaced "Technical View" nav item with single "Dashboard" entry
-- Component organization retained for reusability (ops-center/, ai-risk-view/ folders unchanged)
+- Sidebar: single "Dashboard" nav entry
+- Extracted sub-components: `operations-view.tsx`, `ai-risk-view-panel.tsx`
+- Added `useDashboardData` hook for parallel API fetching
+- Extracted dashboard types to `src/types/dashboard.ts`
 
-**Login Page Redesign:**
-- Full-page animated gradient background (blue/purple spectrum, CSS-only)
-- Glassmorphism card with backdrop-blur and glow effect (11px blur radius)
-- Shield icon branding, white text on dark glass, improved contrast
-- Mobile-responsive design maintained
+**Files Modified (ea1905a):**
+- `src/app/globals.css` — gradient-shift keyframes, glass-card utilities, adaptive color system
+- `src/app/[locale]/(auth)/layout.tsx` — auth-adaptive-bg, theme toggle button
+- `src/app/[locale]/(auth)/login/page.tsx` — removed custom color overrides, standard shadcn
+- `src/components/landing/landing-page.tsx` — modular structure, adaptive gradients
+- `src/components/landing/landing-page-content-sections.tsx` — new, content organization
+- `src/i18n/messages/en.json` — landing namespace expansion
+- `src/i18n/messages/vi.json` — landing namespace expansion
 
-**Files Modified:**
-- `src/app/[locale]/(dashboard)/dashboard/page.tsx` — refactored from 558 to ~85 LOC (4-tab layout)
-- `src/components/dashboard/operations-view.tsx` — new component (35 LOC)
-- `src/components/dashboard/ai-risk-view-panel.tsx` — new component (74 LOC)
-- `src/components/layout/sidebar.tsx` — single "Dashboard" nav entry
-- `src/app/globals.css` — login gradient, glassmorphism styles
-- `src/app/[locale]/(auth)/login/page.tsx` — redesigned layout
-- `src/i18n/messages/en.json` — simplified dashboard namespace
-- `src/i18n/messages/vi.json` — simplified dashboard namespace
-- Deleted: `src/app/[locale]/(dashboard)/technical-view/`
+**Files Modified (200d3ac):**
+- `src/app/[locale]/(dashboard)/dashboard/page.tsx` — 4-tab layout (~85 LOC)
+- `src/components/dashboard/operations-view.tsx` — extracted ops tab (35 LOC)
+- `src/components/dashboard/ai-risk-view-panel.tsx` — extracted AI risk tab (74 LOC)
+- `src/components/layout/sidebar.tsx` — single Dashboard entry
+- `src/types/dashboard.ts` — extracted types
+- `src/hooks/use-dashboard-data.ts` — parallel API fetching
 
 **Tests:** 262/262 passing (100%)
 **Build Status:** TypeScript 0 errors

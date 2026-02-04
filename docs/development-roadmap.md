@@ -123,14 +123,29 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 - UI refinements and consistency
 - Error handling improvements
 
-### Phase 14: Dashboard Consolidation & Login Redesign (COMPLETE)
+### Phase 14: Theme Unification & Dashboard Consolidation (COMPLETE)
 **Status:** ✅ Delivered | **Timeline:** Feb 04, 2026
-- Merged `/dashboard` and `/technical-view` into single 4-tab dashboard
+**Commits:** ea1905a (Theme), 200d3ac (Dashboard)
+
+**Theme Unification (ea1905a):**
+- Unified 3 fragmented themes → single adaptive CSS variable system
+- All pages now respect dark/light toggle via `next-themes`
+- Removed hardcoded gradient/glass classes, migrated to token-based design
+- Auth page: `auth-adaptive-bg`, `auth-card-adaptive` (light pastels / dark glass)
+- Landing page: expanded with stats, frameworks grid, capabilities, methodology sections
+- SVG backgrounds: hardcoded rgba → `currentColor` for theme support
+- Theme toggle button (Sun/Moon) added to auth layout
+- i18n expanded: `landing.stats.*`, `landing.supportedFrameworks.*`, `landing.capabilities.*`
+
+**Dashboard Consolidation (200d3ac):**
+- Merged `/dashboard` and `/technical-view` → 4-tab unified interface
 - Tab structure: Executive Brief | Detailed Analytics | Operations | AI Risk
-- Deleted `/technical-view` route, retained component directories
-- Login page redesign: glassmorphism UI, animated gradient background
-- Sidebar navigation simplified (single Dashboard entry)
-- 262/262 tests passing, TypeScript 0 errors
+- Deleted `/technical-view` route, retained component dirs for reuse
+- Extracted `useDashboardData` hook for parallel API fetching
+- Types extracted to `src/types/dashboard.ts`
+- Sidebar: single Dashboard nav entry
+
+**Metrics:** 262/262 tests passing, TypeScript 0 errors, production-ready
 
 ---
 

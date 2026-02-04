@@ -1,7 +1,7 @@
 # AIRisk Dashboard - Codebase Summary
 
 **Generated:** 2026-02-04
-**Codebase Status:** MVP4 Phase 14 (Dashboard Consolidation & Login Redesign) - Complete
+**Codebase Status:** MVP4 Phase 14 (Theme Unification & Dashboard Consolidation) - Complete
 **Total Files:** 195+ files (including tests, migrations, seeds)
 **Total Lines:** ~20,000+ lines of TypeScript/TSX/SQL
 
@@ -54,14 +54,14 @@ AIRisk_Dashboard/
 ├── src/
 │   ├── app/                    # Next.js app router structure
 │   │   ├── [locale]/
-│   │   │   ├── (auth)/         # Authentication pages
-│   │   │   │   └── login/      # Glassmorphism redesign (Feb 2026)
+│   │   │   ├── (auth)/         # Authentication pages (theme-adaptive)
+│   │   │   │   └── login/      # Unified adaptive UI with theme toggle (Feb 2026)
 │   │   │   ├── (dashboard)/    # Protected dashboard routes
-│   │   │   │   ├── dashboard/  # 4 tabs: Executive Brief | Detailed Analytics | Operations | AI Risk
+│   │   │   │   ├── dashboard/  # 4-tab unified: Executive Brief | Detailed Analytics | Operations | AI Risk
 │   │   │   │   ├── ai-systems/
 │   │   │   │   ├── risk-assessment/
 │   │   │   │   ├── frameworks/
-│   │   │   │   └── [DELETED] technical-view/
+│   │   │   │   └── [DELETED] technical-view/ (merged into dashboard tabs)
 │   │   │   └── layout.tsx
 │   │   └── api/                # REST API endpoints
 │   │       ├── auth/
@@ -133,21 +133,31 @@ AIRisk_Dashboard/
 ## Core Modules & Features
 
 ### 1. Authentication & Authorization (NFR-SEC-01)
-**Status:** ✅ Completed (Phase 2 + Feb 2026 Redesign)
+**Status:** ✅ Completed (Phase 2 + Feb 2026 Theme Unification)
 
 **Implementation:**
 - NextAuth.js with JWT strategy
 - Role-based access control (RBAC)
-- Login page with glassmorphism UI (animated gradient, backdrop-blur, glow effect)
+- Login page with unified adaptive UI (theme-aware, toggles light/dark)
+- Auth layout: theme toggle button (Sun/Moon), semantic HTML structure
 - Protected API routes via middleware
 - Seed script with 5 test users
+
+**Feb 2026 Theme Consolidation:**
+- Migrated from hardcoded dark theme to CSS variable tokens (`hsl(var(--xxx))`)
+- Adaptive styling: `auth-adaptive-bg` (light pastels / dark gradient)
+- Standard shadcn Card/Input/Label without custom color overrides
+- Full dark/light toggle support via `next-themes`
+- Mouse-glow spotlight effect on dark backgrounds
+- Particle animation background
 
 **Key Files:**
 - `src/app/api/auth/[...nextauth]/route.ts`
 - `src/lib/auth-helpers.ts`
 - `src/middleware.ts`
-- `src/app/[locale]/(auth)/login/page.tsx` (Feb 2026 redesign)
-- `src/app/globals.css` (login styling)
+- `src/app/[locale]/(auth)/layout.tsx` (theme toggle, adaptive styling)
+- `src/app/[locale]/(auth)/login/page.tsx` (unified adaptive UI)
+- `src/app/globals.css` (CSS variables, adaptive utilities, animations)
 - `prisma/seed.ts`
 
 **Roles & Permissions:**
@@ -158,6 +168,34 @@ AIRisk_Dashboard/
 | Assessor | View | View | Create/Edit | Create |
 | Auditor | View | View | View | View |
 | Viewer | View | View | View | View |
+
+---
+
+### 1.1 Landing Page & Theme System (Feb 2026)
+**Status:** ✅ Completed (Commit ea1905a - Theme Unification)
+
+**Theme System Implementation:**
+- Unified CSS variable token system across all pages (`hsl(var(--xxx))`)
+- Support for light/dark mode toggle via `next-themes`
+- Adaptive styling on all pages: auth, landing, dashboard
+- Removed hardcoded color classes, migrated to semantic tokens
+- Animation prefix standardization: `ai-scene-*` (float, pulse, dash-flow, logo-bob, shape-morph)
+- SVG backgrounds use `currentColor` for true theme support
+
+**Landing Page Features (Commit ea1905a):**
+- Full-screen adaptive gradient background (`landing-gradient`)
+- Content sections: hero + stats bar + frameworks grid + capabilities + methodology + architecture
+- Modularized components: `landing-page.tsx` + `landing-page-content-sections.tsx`
+- Interactive AI scene with parallax effects and shape-morphing logo
+- CTA buttons with adaptive styling, mouse-tracking parallax
+- i18n expanded: `landing.stats.*`, `landing.supportedFrameworks.*`, `landing.capabilities.*`, `landing.methodology.*`, `landing.architecture.*`
+
+**Key Files:**
+- `src/components/landing/landing-page.tsx` (main, modular structure)
+- `src/components/landing/landing-page-content-sections.tsx` (new, content organization)
+- `src/app/globals.css` (CSS variables, adaptive utilities, animation keyframes)
+- `src/i18n/messages/en.json` (landing namespace expansion)
+- `src/i18n/messages/vi.json` (landing namespace expansion)
 
 ---
 
@@ -353,11 +391,14 @@ model Risk {
 - ✅ FR-DASH-05: Operations center (Tab 3 - formerly separate page)
 - ✅ FR-DASH-06: AI Risk specialist view (Tab 4 - formerly separate page)
 
-**Dashboard Consolidation (Feb 2026):**
+**Dashboard Consolidation (Feb 2026, Commit 200d3ac):**
 - Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
-- Unified 4-tab interface in single `/dashboard` page
-- Removed dedicated `/technical-view` route
-- Component organization retained for reusability
+- Unified 4-tab interface in single `/dashboard` page (~85 LOC)
+- Removed `/technical-view` route entirely
+- Component organization retained for reusability (`ops-center/`, `ai-risk-view/` directories)
+- Extracted `useDashboardData` hook for parallel API fetching
+- Extracted dashboard types to `src/types/dashboard.ts`
+- Sidebar: single Dashboard nav entry
 
 **API Endpoints:**
 ```
@@ -373,9 +414,12 @@ GET    /api/reports/compliance       # Compliance report
 **Key Files:**
 - `src/app/api/dashboard/*.ts`
 - `src/app/api/reports/*.ts`
-- `src/app/[locale]/(dashboard)/dashboard/page.tsx` (Feb 2026: 4-tab layout, ~85 LOC)
-- `src/components/dashboard/operations-view.tsx` (new, 35 LOC)
-- `src/components/dashboard/ai-risk-view-panel.tsx` (new, 74 LOC)
+- `src/app/[locale]/(dashboard)/dashboard/page.tsx` (4-tab tabbed interface, ~85 LOC)
+- `src/components/dashboard/operations-view.tsx` (extracted, 35 LOC)
+- `src/components/dashboard/ai-risk-view-panel.tsx` (extracted, 74 LOC)
+- `src/components/layout/sidebar.tsx` (single Dashboard entry)
+- `src/hooks/use-dashboard-data.ts` (parallel API fetching)
+- `src/types/dashboard.ts` (extracted types)
 
 ---
 
@@ -667,58 +711,13 @@ npm run analyze             # Analyze bundle size
 
 ---
 
-## Known Limitations & Technical Debt
+## Feature Completeness Summary
 
-### MVP1-4 Completed Phases
-- ✅ Phase 1-7: Core features, testing, accessibility
-- ✅ Phase 8-10: Evidence, framework seeds, optimizations
-- ✅ Phase 11: Organization & user management
-- ✅ Phase 12: API keys & webhooks (HMAC-SHA256 signing)
-- ✅ Phase 13: Notifications, audit logs, UI polish
+**MVP4 Completed (Phases 1-14):**
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 8 compliance frameworks, evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system, dashboard consolidation.
 
-### Completed Features (MVP4)
-- ✅ 262+ integration/unit tests passing
-- ✅ E2E tests with Playwright (3+ test suites)
-- ✅ Performance benchmarking script
-- ✅ Multi-layer caching (LRU + Redis) with cache warming
-- ✅ Rate limiting (sliding window, role-based tiers)
-- ✅ API key authentication (SHA-256 hashing)
-- ✅ Webhook delivery with retry logic
-- ✅ Notification service (7 event types, polling)
-- ✅ Audit log viewer with filters & CSV export
-- ✅ Evidence management with linking
-- ✅ Gap analysis engine with CSV export
-- ✅ Global search across 5+ entity types
-- ✅ Import/export (CSV/Excel with streaming)
-- ✅ Keyboard accessibility & WCAG 2.1 AA
-- ✅ RBAC with 5 role hierarchy
-
-### Deferred Features (MVP5+)
-- S3/Blob file storage integration
-- Scheduled report generation (cron-based)
-- Advanced gap analysis visualization
-- Bundle size optimization (target: 400KB gzip)
-- Database connection pooling for scale
-- Real-time collaboration features
-- SSO/SAML integration
-- Mobile application
-
----
-
-## Next Phase: File Storage & Reporting (MVP5)
-
-**Planned Focus:**
-- S3/Blob storage integration for evidence upload
-- Scheduled report generation & email delivery
-- Advanced visualization for gap analysis
-- Bundle size optimization
-- Database connection pooling (PgBouncer)
-
-**Success Criteria:**
-- Evidence file upload fully functional
-- Reports scheduled and emailed
-- Bundle size < 400KB gzip
-- API response time < 200ms P95 (95th percentile)
+**MVP5+ Planned:**
+S3/Blob file storage, scheduled reports, advanced visualizations, connection pooling, SSO/SAML, mobile app.
 
 ---
 
