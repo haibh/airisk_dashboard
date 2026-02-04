@@ -1,7 +1,7 @@
 # Product Requirement Document (PRD)
 ## AI Risk Management Intelligence Platform (AIRM-IP)
 
-**Version:** 2.0 | **Date:** 2026-02-03 | **Status:** Approved
+**Version:** 3.0 | **Date:** 2026-02-04 | **Status:** MVP4 Complete
 
 ---
 
@@ -93,12 +93,14 @@
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 18 + TypeScript |
-| UI | Tailwind CSS + Shadcn/ui |
-| State | Zustand |
-| Backend | Next.js API Routes |
-| Database | PostgreSQL 15+ + Prisma |
+| Frontend | React 19 + TypeScript 5.9 |
+| UI | Tailwind CSS v4 + Shadcn/ui |
+| State | Zustand 5 |
+| Backend | Next.js 16 App Router |
+| Database | PostgreSQL 15+ + Prisma 5 |
 | Auth | NextAuth.js + JWT |
+| Validation | Zod v4 |
+| Testing | Vitest 4 + Playwright 1.58 |
 
 ---
 
@@ -107,27 +109,35 @@
 | Entity | Purpose |
 |--------|---------|
 | Organizations | Multi-tenant root |
-| Users | Auth + RBAC |
+| Users | Auth + RBAC (5 roles) |
 | AI_Systems | Asset inventory |
-| Frameworks | NIST, ISO metadata |
-| Controls | Framework requirements |
-| Mappings | Cross-framework links |
+| Frameworks | NIST, ISO, CSA, CIS, PCI metadata |
+| Controls | Framework requirements (hierarchical) |
+| ControlMappings | Cross-framework links |
 | Risk_Assessments | Assessment snapshots |
-| Risks | Individual risk records |
-| Evidence | File metadata + hashes |
+| Risks | Individual risk records (5×5 matrix) |
+| RiskControls | Risk ↔ Control junction |
+| Evidence + EvidenceLinks | File metadata + hashes + polymorphic links |
 | Tasks | Remediation tracking |
 | Audit_Logs | Immutable action logs |
+| ScheduledJobs | Cron-based report generation |
+| SavedFilters | Per-user saved search filters |
+| Invitations | Email invites with token acceptance |
+| APIKeys | API key management (SHA-256 hashed) |
+| Webhooks + WebhookDeliveries | Event-driven integrations |
+| Notifications | In-app notification system |
 
 ---
 
 ## 7. MVP Phases
 
-| Phase | Duration | Focus |
-|-------|----------|-------|
-| **MVP1** | M1-3 | Dashboard + NIST + ISO 42001 + Risk Assessment |
-| **MVP2** | M4-5 | CSA AICM + Evidence Management |
-| **MVP3** | M6-7 | Security frameworks (CSF, CIS, PCI) |
-| **MVP4** | M8-9 | Multi-tenant + Integrations |
+| Phase | Duration | Focus | Status |
+|-------|----------|-------|--------|
+| **MVP1** | M1-3 | Dashboard + NIST + ISO 42001 + Risk Assessment | ✅ Complete |
+| **MVP2** | M4-5 | CSA AICM + Evidence Management | ✅ Complete |
+| **MVP3** | M6-7 | Security frameworks (CSF, CIS, PCI) | ✅ Complete |
+| **MVP4** | M8-9 | Multi-tenant + Integrations | ✅ Complete |
+| **MVP5** | M10-11 | Advanced analytics + ML insights | 🔄 Next |
 
 ---
 
@@ -157,4 +167,4 @@
 
 ---
 
-*Document Control: v2.0 | 55 requirements (34 FR + 21 NFR) | Last updated: 2026-02-03*
+*Document Control: v3.0 | 70+ requirements (50+ FR + 20 NFR) | Last updated: 2026-02-04*

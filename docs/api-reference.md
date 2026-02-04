@@ -1,10 +1,12 @@
 # AIRisk Dashboard - API Reference
 
-**Version:** 1.0
+**Version:** 2.0
 **Base URL:** `/api`
 **Format:** JSON
-**Authentication:** JWT Bearer Token
-**Last Updated:** 2026-02-03
+**Authentication:** JWT Bearer Token (NextAuth.js)
+**Last Updated:** 2026-02-04
+**Tech Stack:** Next.js 16, React 19, Prisma 5, Zod v4
+**Note:** 53 API routes across 21 endpoint groups. See codebase for full route definitions in `src/app/api/`.
 
 ---
 

@@ -1,22 +1,23 @@
 # AIRisk Dashboard - Codebase Summary
 
-**Generated:** 2026-02-03
-**Codebase Status:** MVP 1 Phase 7 (Testing & Accessibility) - Complete
-**Total Files:** 90+ files (including tests/e2e and scripts)
-**Total Lines:** ~11,000+ lines of TypeScript/TSX
+**Generated:** 2026-02-04
+**Codebase Status:** MVP4 Phase 13 (Multi-Tenant & Polish) - Complete
+**Total Files:** 195+ files (including tests, migrations, seeds)
+**Total Lines:** ~20,000+ lines of TypeScript/TSX/SQL
 
 ---
 
 ## Executive Overview
 
 AIRisk Dashboard is a comprehensive AI Risk Management Intelligence Platform built with:
-- **Frontend:** React 18 + TypeScript + Tailwind CSS
-- **Backend:** Next.js 14 API Routes
-- **Database:** PostgreSQL with Prisma ORM
-- **Authentication:** NextAuth.js with JWT
+- **Frontend:** React 19 + TypeScript + Tailwind CSS v4
+- **Backend:** Next.js 16 App Router
+- **Database:** PostgreSQL 15+ with Prisma ORM (20 models)
+- **Authentication:** NextAuth.js with JWT (24h session, 30min idle)
 - **Internationalization:** next-intl (EN/VI)
-- **State Management:** Zustand
-- **UI Components:** Shadcn/ui + Radix UI
+- **State Management:** Zustand (4 stores)
+- **UI Components:** Shadcn/ui (23 wrappers) + Radix UI
+- **Testing:** Vitest 4.0+ (262 passing) + Playwright 1.58
 
 The platform enables organizations to manage AI system risks end-to-end through comprehensive dashboards, risk assessments, framework mapping, and compliance tracking.
 
@@ -41,9 +42,13 @@ AIRisk_Dashboard/
 │   ├── rules/                  # Development and workflow rules
 │   └── skills/                 # Custom Python scripts for AI assistance
 ├── prisma/                     # Database schema and seeding
-│   ├── schema.prisma           # Complete data model (12+ entities)
+│   ├── schema.prisma           # Complete data model (20 models, 11 enums)
 │   ├── seed.ts                 # User and organization seeding
-│   └── seed-frameworks.ts      # NIST/ISO framework data seeding
+│   ├── seed-frameworks.ts      # NIST AI RMF + ISO 42001 data
+│   ├── seed-cis-controls.ts    # CIS Controls v8.1
+│   ├── seed-csa-aicm.ts        # CSA AICM framework
+│   ├── seed-nist-csf.ts        # NIST Cybersecurity Framework
+│   └── seed-pci-dss.ts         # PCI DSS v4.0.1
 ├── src/
 │   ├── app/                    # Next.js app router structure
 │   │   ├── [locale]/
@@ -62,18 +67,41 @@ AIRisk_Dashboard/
 │   │       ├── frameworks/
 │   │       ├── dashboard/
 │   │       └── reports/
-│   ├── components/
-│   │   ├── layout/             # Header, Sidebar
-│   │   ├── ui/                 # Shadcn/ui wrapper components
-│   │   ├── forms/              # Form components (AI System, Assessment)
-│   │   ├── tables/             # Data table components
-│   │   ├── charts/             # Data visualization
-│   │   └── providers/          # Theme and session providers
-│   ├── lib/
-│   │   ├── auth-helpers.ts     # RBAC and auth utilities
+│   ├── components/             # 59 files, 8.3K LOC
+│   │   ├── layout/             # Header, Sidebar, notification dropdown
+│   │   ├── ui/                 # Shadcn/ui wrappers (23 components)
+│   │   ├── forms/              # Form components with Zod validation
+│   │   ├── tables/             # Data tables with pagination
+│   │   ├── charts/             # Risk heatmap, compliance scorecard
+│   │   ├── risk-assessment/    # 5-step wizard, matrix visualization
+│   │   ├── frameworks/         # Framework tree, controls table
+│   │   ├── settings/           # Organization, users, API keys, webhooks
+│   │   ├── evidence/           # Evidence upload, approval workflow
+│   │   ├── gap-analysis/       # Gap analysis engine and visualization
+│   │   ├── notifications/      # Notification dropdown, list
+│   │   ├── audit-log/          # Audit log viewer with filters
+│   │   ├── search/             # Global multi-entity search
+│   │   └── providers/          # NextAuth, Theme providers
+│   ├── lib/                    # 28 files, 6.2K LOC
+│   │   ├── auth-helpers.ts     # RBAC, role checking, hasMinimumRole()
 │   │   ├── db.ts               # Prisma client initialization
-│   │   ├── risk-scoring-calculator.ts
-│   │   └── utils.ts            # Utility functions
+│   │   ├── risk-scoring-calculator.ts # Inherent/residual risk math
+│   │   ├── cache-service.ts    # Multi-layer caching (LRU + Redis)
+│   │   ├── cache-invalidation.ts # Domain-specific cache invalidation
+│   │   ├── cache-advanced.ts   # Stale-while-revalidate, warming
+│   │   ├── webhooks/           # Webhook dispatch, signature, delivery worker
+│   │   ├── scheduled-job-*.ts  # Cron runner, handlers, queue
+│   │   ├── rate-limiter.ts     # Sliding window, role-based tiers
+│   │   ├── logger*.ts          # Structured logging
+│   │   ├── api-error-handler.ts # Error middleware
+│   │   ├── api-validation-schemas.ts # Zod schemas
+│   │   ├── api-key-*.ts        # API key generation, authentication
+│   │   ├── storage-service.ts  # S3/Blob integration
+│   │   ├── gap-analysis-engine.ts # Gap analysis logic
+│   │   ├── global-search-service.ts # Multi-entity search
+│   │   ├── import-parser.ts    # CSV/Excel import
+│   │   ├── export-generator.ts # CSV/Excel export with streaming
+│   │   └── utils.ts            # General utilities
 │   ├── store/                  # Zustand state management
 │   ├── types/                  # TypeScript type definitions
 │   ├── i18n/                   # Internationalization
@@ -411,20 +439,38 @@ All 5 roles tested and seeded with proper permissions:
 
 ---
 
+### 8. Evidence Management & Gap Analysis
+**Status:** ✅ Completed (Phase 8+)
+
+**Evidence Features:**
+- File upload with SHA-256 hashing
+- Multi-entity linking (risks, controls, assessments)
+- Approval workflow with status tracking
+- Evidence artifact metadata storage
+- Supports multiple evidence types
+
+**Gap Analysis:**
+- Framework-to-framework gap identification
+- Control coverage analysis
+- CSV export of gaps
+- Visualization with impact scoring
+
+---
+
 ### 9. Internationalization (NFR-I18N)
 **Status:** ✅ Completed (Phase 1)
 
 **Implementation:**
-- next-intl framework for i18n
+- next-intl v4 framework for i18n
 - English (EN) & Vietnamese (VI) support
 - Namespace-based translations
-- Locale routing middleware
+- Locale routing middleware with dynamic detection
 
 **Key Files:**
-- `src/i18n/messages/en.json`
-- `src/i18n/messages/vi.json`
-- `src/i18n/request.ts`
-- `src/middleware.ts`
+- `src/i18n/messages/en.json` (1000+ keys)
+- `src/i18n/messages/vi.json` (1000+ keys)
+- `src/i18n/request.ts` (locale detection)
+- `src/middleware.ts` (i18n routing)
 
 **Translation Namespaces:**
 - `common`: Global UI terms
@@ -432,6 +478,9 @@ All 5 roles tested and seeded with proper permissions:
 - `dashboard`: Dashboard module
 - `assessment`: Risk assessment module
 - `frameworks`: Framework browsing
+- `organizations`: Multi-tenant admin
+- `webhooks`: Integration setup
+- `audit`: Audit log viewer
 
 ---
 
@@ -475,20 +524,34 @@ All API endpoints follow this response format:
 
 ## Database Schema Overview
 
-### 12 Core Entities
+### 20 Core Models + 11 Enums
 
-1. **Organization** - Root tenant entity
-2. **User** - System users with roles
-3. **AISystem** - AI systems under assessment
-4. **Framework** - Compliance frameworks (NIST, ISO, etc.)
-5. **Control** - Specific controls within frameworks
-6. **Mapping** - Cross-framework control relationships
-7. **Assessment** - Risk assessment snapshots
-8. **Risk** - Individual risk records
-9. **Evidence** - Evidence artifact metadata
-10. **EvidenceLink** - Links evidence to risks/controls
-11. **Task** - Remediation tasks
-12. **AuditLog** - Immutable action logs
+**Models:**
+1. **Organization** - Root tenant
+2. **User** - System users (5 roles, active/inactive, lastLoginAt)
+3. **Account** - OAuth provider accounts
+4. **Session** - NextAuth sessions
+5. **AISystem** - AI systems under assessment
+6. **Framework** - Compliance frameworks
+7. **Control** - Framework controls with hierarchy
+8. **ControlMapping** - Cross-framework relationships
+9. **Assessment** - Risk assessment snapshots
+10. **Risk** - Individual risks (5×5 matrix)
+11. **RiskControl** - Risk-to-control relationships
+12. **Evidence** - Evidence artifacts (SHA-256 hash)
+13. **EvidenceLink** - Evidence to entity links (polymorphic)
+14. **Task** - Remediation tasks (treatment workflow)
+15. **AuditLog** - Immutable action logs (detailed change tracking)
+16. **Invitation** - User invitations (token-based, expiry)
+17. **APIKey** - API keys (SHA-256 hashed, permissions)
+18. **Webhook** - Webhook endpoints (SSRF protected)
+19. **WebhookDelivery** - Delivery logs with retry tracking
+20. **Notification** - User notifications (7 types)
+21. **SavedFilter** - Per-user dashboard filters
+22. **ScheduledJob** - Cron-based scheduled tasks
+
+**Enums (11):**
+UserRole, AISystemType, DataClassification, LifecycleStatus, AssessmentStatus, RiskCategory, TreatmentStatus, TaskPriority, TaskStatus, EvidenceStatus, NotificationType
 
 ### Key Features
 - ✅ Row-Level Security (RLS) support via Prisma
@@ -541,78 +604,99 @@ All API endpoints follow this response format:
 ### Build & Deploy
 ```bash
 # Development
-npm run dev                   # Start Next.js dev server
-npm run db:push              # Push schema to database
-npm run db:seed              # Seed initial data
+npm run dev                   # Start Next.js dev server (port 3000)
+npm run db:generate         # Generate Prisma client
+npm run db:push             # Push schema to database
+npm run db:migrate          # Run migrations (dev)
+npm run db:seed             # Seed initial data
+npm run db:studio           # Open Prisma Studio GUI
 
 # Testing
-npm run test                 # Run tests (not yet configured)
-npm run lint                 # Run ESLint
+npm run test                # Run tests in watch mode (Vitest)
+npm run test:run            # Run tests once
+npm run test:coverage       # Coverage report
+npm run test:e2e            # E2E tests (Playwright, headless)
+npm run test:e2e:headed     # E2E tests with visible browser
+
+# Code Quality
+npm run lint                # ESLint check
+npm run type-check          # TypeScript check without emit
 
 # Production
-npm run build                # Build Next.js application
-npm run start                # Start production server
+npm run build               # Build Next.js application
+npm run start               # Start production server
+npm run analyze             # Analyze bundle size
 ```
 
 ### Key Technologies Used
-- **React 18** - UI framework
-- **Next.js 14** - Full-stack framework
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **Shadcn/ui** - Component library
-- **Prisma** - ORM
-- **PostgreSQL** - Database
-- **NextAuth.js** - Authentication
-- **Zustand** - State management
-- **next-intl** - Internationalization
+- **React 19** - UI framework
+- **Next.js 16** - Full-stack framework (App Router)
+- **TypeScript 5.9** - Type safety
+- **Tailwind CSS v4** - Styling (PostCSS)
+- **Shadcn/ui** - Component library (23 wrappers)
+- **Prisma 5.22** - ORM
+- **PostgreSQL 15+** - Database
+- **NextAuth.js 4.24** - Authentication (JWT)
+- **Zustand 5.0** - State management (4 stores)
+- **next-intl 4.8** - Internationalization
+- **Zod 4.3** - Schema validation
+- **Vitest 4.0** - Unit/integration testing
+- **Playwright 1.58** - E2E testing
 
 ---
 
 ## Known Limitations & Technical Debt
 
-### Phase 7 Completed
-- ✅ Unit & integration tests implemented
-- ✅ E2E tests with Playwright (3 test suites)
+### MVP1-4 Completed Phases
+- ✅ Phase 1-7: Core features, testing, accessibility
+- ✅ Phase 8-10: Evidence, framework seeds, optimizations
+- ✅ Phase 11: Organization & user management
+- ✅ Phase 12: API keys & webhooks (HMAC-SHA256 signing)
+- ✅ Phase 13: Notifications, audit logs, UI polish
+
+### Completed Features (MVP4)
+- ✅ 262+ integration/unit tests passing
+- ✅ E2E tests with Playwright (3+ test suites)
 - ✅ Performance benchmarking script
-- ✅ Keyboard accessibility & skip links
-- ✅ RBAC roles verified in seed
+- ✅ Multi-layer caching (LRU + Redis) with cache warming
+- ✅ Rate limiting (sliding window, role-based tiers)
+- ✅ API key authentication (SHA-256 hashing)
+- ✅ Webhook delivery with retry logic
+- ✅ Notification service (7 event types, polling)
+- ✅ Audit log viewer with filters & CSV export
+- ✅ Evidence management with linking
+- ✅ Gap analysis engine with CSV export
+- ✅ Global search across 5+ entity types
+- ✅ Import/export (CSV/Excel with streaming)
+- ✅ Keyboard accessibility & WCAG 2.1 AA
+- ✅ RBAC with 5 role hierarchy
 
-### Phase 8 Deferred Features (MVP 2)
-- User management UI (requires admin interface)
-- Gap analysis visualization (deferred pending advanced dashboard)
-- Evidence management with file versioning
-- Scheduled report generation
-- API response caching with Redis
-- Database query optimization for complex queries
-
-### Optimization Gaps
-- Bundle size optimization (next phase)
-- Image optimization for dashboard charts
-- Advanced caching strategies
-- Query performance tuning for large datasets
-
-### Documentation Gaps
-- API reference documentation (auto-generated from code)
-- Deployment guide (cloud provider specific)
-- User guide & video tutorials
-- Admin guide for system management
+### Deferred Features (MVP5+)
+- S3/Blob file storage integration
+- Scheduled report generation (cron-based)
+- Advanced gap analysis visualization
+- Bundle size optimization (target: 400KB gzip)
+- Database connection pooling for scale
+- Real-time collaboration features
+- SSO/SAML integration
+- Mobile application
 
 ---
 
-## Next Phase: Evidence Management & Optimization (Phase 8)
+## Next Phase: File Storage & Reporting (MVP5)
 
 **Planned Focus:**
-- Evidence file upload and versioning
-- Redis caching layer
-- API rate limiting
+- S3/Blob storage integration for evidence upload
+- Scheduled report generation & email delivery
+- Advanced visualization for gap analysis
 - Bundle size optimization
-- Database connection pooling
+- Database connection pooling (PgBouncer)
 
 **Success Criteria:**
-- Evidence management fully functional
-- Cache hit rate > 70%
-- Bundle size < 500KB gzip
-- API response time < 200ms P95
+- Evidence file upload fully functional
+- Reports scheduled and emailed
+- Bundle size < 400KB gzip
+- API response time < 200ms P95 (95th percentile)
 
 ---
 
@@ -638,6 +722,6 @@ npm run start                # Start production server
 
 ---
 
-**Codebase Summary Generated:** 2026-02-03
-**Last Updated:** 2026-02-03 17:03 UTC (Phase 7 - Testing & Accessibility)
+**Codebase Summary Generated:** 2026-02-04
+**Last Updated:** 2026-02-04 09:23 UTC (Phase 13 - Multi-Tenant & Polish)
 **Maintained By:** docs-manager agent
