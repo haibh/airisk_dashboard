@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Shield } from 'lucide-react';
 
 export default function LoginPage() {
   const t = useTranslations();
@@ -45,7 +45,6 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
-        // Redirect to dashboard
         router.push(`/${locale}/dashboard`);
         router.refresh();
       }
@@ -57,19 +56,22 @@ export default function LoginPage() {
   };
 
   return (
-    <Card>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
+    <Card className="auth-card-adaptive">
+      <CardHeader className="space-y-1 text-center">
+        <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
+          <Shield className="h-7 w-7 text-primary" />
+        </div>
+        <CardTitle className="text-2xl font-bold text-foreground">
           {t('common.appNameShort')}
         </CardTitle>
-        <CardDescription className="text-center">
+        <CardDescription className="text-muted-foreground">
           {t('auth.login')}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
           {error && (
-            <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md">
+            <div className="flex items-center gap-2 p-3 text-sm text-destructive bg-destructive/10 rounded-md" role="alert">
               <AlertCircle className="h-4 w-4" />
               <span>{error}</span>
             </div>
@@ -121,7 +123,7 @@ export default function LoginPage() {
           <Button
             type="button"
             variant="link"
-            className="text-sm text-muted-foreground"
+            className="text-sm text-muted-foreground hover:text-foreground"
             disabled={isLoading}
           >
             {t('auth.forgotPassword')}

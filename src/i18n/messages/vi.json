@@ -48,7 +48,13 @@
     "pendingActions": "Hành động chờ xử lý",
     "recentActivity": "Hoạt động gần đây",
     "frameworkCompliance": "Tuân thủ khung",
-    "riskTrends": "Xu hướng rủi ro"
+    "riskTrends": "Xu hướng rủi ro",
+    "tabs": {
+      "executiveBrief": "Tóm tắt Điều hành",
+      "detailedAnalytics": "Phân tích Chi tiết",
+      "operations": "Vận hành",
+      "aiRisk": "Rủi ro AI"
+    }
   },
   "aiSystems": {
     "title": "Sổ đăng ký Hệ thống AI",
@@ -474,5 +480,97 @@
     "passwordChanged": "Mật khẩu đã thay đổi",
     "roleChanged": "Vai trò đã thay đổi",
     "systemAlert": "Cảnh báo hệ thống"
+  },
+  "opsCenter": {
+    "title": "Trung tâm Vận hành",
+    "subtitle": "Giám sát rủi ro thời gian thực và quản lý vận hành",
+    "riskAlerts": "Cảnh báo Rủi ro",
+    "systemHealth": "Sức khỏe Hệ thống",
+    "complianceRadar": "Radar Tuân thủ",
+    "actionQueue": "Hàng đợi Hành động",
+    "assessmentProgress": "Tiến độ Đánh giá",
+    "monitoringHeatmap": "Bản đồ nhiệt Giám sát"
+  },
+  "aiRiskView": {
+    "title": "Chuyên gia Rủi ro AI",
+    "subtitle": "Phân tích sâu rủi ro mô hình AI, vòng đời và phạm vi khung tuân thủ",
+    "modelRegistry": "Sổ đăng ký Mô hình AI",
+    "modelDetail": "Chi tiết Mô hình",
+    "frameworkCoverage": "Phạm vi Khung",
+    "crossMapping": "Ánh xạ Xuyên khung",
+    "lifecycle": "Vòng đời Mô hình",
+    "biasMetrics": "Chỉ số Thiên kiến",
+    "modelDrift": "Trôi dạt Mô hình",
+    "comingSoon": "Sắp ra mắt — Cần tích hợp MLOps"
+  },
+  "landing": {
+    "title": "AIRM-IP",
+    "subtitle": "Nền tảng Quản lý Rủi ro AI Thông minh",
+    "description": "Nền tảng doanh nghiệp để quản lý rủi ro AI, khung tuân thủ và quản trị trên toàn tổ chức.",
+    "loginButton": "Đăng nhập",
+    "getStarted": "Bắt đầu",
+    "featuresHeading": "Mọi thứ bạn cần để quản lý rủi ro AI",
+    "features": {
+      "riskTitle": "Quản lý Rủi ro",
+      "riskDesc": "Đánh giá rủi ro AI toàn diện với ma trận 5x5 và giám sát rủi ro dư thời gian thực.",
+      "complianceTitle": "Theo dõi Tuân thủ",
+      "complianceDesc": "Theo dõi đa khung trên NIST AI RMF, ISO 42001, CSA AICM và 5 tiêu chuẩn khác.",
+      "governanceTitle": "Quản trị AI",
+      "governanceDesc": "Nhật ký kiểm toán đầy đủ, phân quyền theo vai trò và thực thi chính sách tự động.",
+      "monitoringTitle": "Giám sát Thời gian thực",
+      "monitoringDesc": "Bảng điều khiển trực tiếp với bản đồ nhiệt rủi ro, phân tích xu hướng và chỉ số sức khỏe.",
+      "frameworksTitle": "Ánh xạ Khung",
+      "frameworksDesc": "Ánh xạ kiểm soát xuyên khung với phân tích khoảng trống để xác định điểm mù.",
+      "securityTitle": "Bảo mật Doanh nghiệp",
+      "securityDesc": "Cách ly đa thuê bao, xác thực JWT, giới hạn tốc độ và tích hợp webhook."
+    },
+    "stats": {
+      "heading": "Xây dựng cho Doanh nghiệp",
+      "tests": "262+ Bài kiểm tra Đạt",
+      "models": "20+ Mô hình Dữ liệu",
+      "frameworks": "8 Khung tuân thủ",
+      "roles": "5 Vai trò Người dùng",
+      "wcag": "Tuân thủ WCAG AA"
+    },
+    "supportedFrameworks": {
+      "heading": "Khung Tuân thủ được Hỗ trợ",
+      "nistAiRmf": "NIST AI RMF 1.0",
+      "iso42001": "ISO/IEC 42001:2023",
+      "csaAicm": "CSA AICM 1.0",
+      "nistCsf": "NIST CSF 2.0",
+      "iso27001": "ISO 27001",
+      "cisControls": "CIS Controls 8.1",
+      "pciDss": "PCI DSS 4.0.1",
+      "scf": "SCF v2025.4"
+    },
+    "capabilities": {
+      "heading": "Quản lý Rủi ro AI Toàn diện",
+      "inventoryTitle": "Kho AI Hệ thống",
+      "inventoryDesc": "Quản lý vòng đời CRUD đầy đủ với phân loại, theo dõi quyền sở hữu và phân cấp rủi ro.",
+      "assessmentTitle": "Công cụ Đánh giá Rủi ro",
+      "assessmentDesc": "Ma trận tác động/khả năng 5x5 trên 8 danh mục rủi ro với điểm số vốn có và dư.",
+      "mappingTitle": "Ánh xạ Khung",
+      "mappingDesc": "Ánh xạ kiểm soát xuyên khung với mức độ tin cậy và phân tích khoảng trống tự động.",
+      "evidenceTitle": "Quản lý Bằng chứng",
+      "evidenceDesc": "Xác minh SHA-256, quy trình phê duyệt và liên kết thực thể để sẵn sàng kiểm toán.",
+      "auditTitle": "Kiểm toán & Tuân thủ",
+      "auditDesc": "Nhật ký kiểm toán bất biến, xuất CSV, trình xem diff và truy xuất tổ chức hoàn chỉnh.",
+      "integrationTitle": "API & Tích hợp",
+      "integrationDesc": "Hệ thống sự kiện webhook, quản lý khóa API, thông báo thời gian thực và điểm cuối mở rộng."
+    },
+    "methodology": {
+      "heading": "Phương pháp Chấm điểm Rủi ro",
+      "formula": "Rủi ro Vốn có = Khả năng x Tác động (Ma trận 5x5)",
+      "residual": "Rủi ro Dư = Vốn có x (1 - Hiệu quả Kiểm soát)",
+      "levels": {
+        "low": "Thấp (1-4)",
+        "medium": "Trung bình (5-9)",
+        "high": "Cao (10-16)",
+        "critical": "Nghiêm trọng (17-25)"
+      }
+    },
+    "architecture": {
+      "heading": "Nền tảng Công nghệ Hiện đại"
+    }
   }
 }

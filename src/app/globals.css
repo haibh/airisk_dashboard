@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 220 20% 97%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -10,16 +10,16 @@
     --popover-foreground: 222.2 84% 4.9%;
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 215 25% 93%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 215 25% 93%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 215 25% 93%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
+    --border: 216 20% 85%;
+    --input: 216 20% 85%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
 
@@ -127,5 +127,372 @@
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background-color: hsl(var(--muted));
     border-radius: 4px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     Shared keyframes — used by both landing and auth pages
+     GPU-accelerated: transform + opacity only
+     ═══════════════════════════════════════════════════════════════════ */
+
+  @keyframes ai-scene-float-slow {
+    0%, 100% { transform: translateY(0) translateZ(0); }
+    50% { transform: translateY(-14px) translateZ(0); }
+  }
+  @keyframes ai-scene-float-medium {
+    0%, 100% { transform: translate(0, 0) translateZ(0); }
+    33% { transform: translate(5px, -8px) translateZ(0); }
+    66% { transform: translate(-4px, 4px) translateZ(0); }
+  }
+  @keyframes ai-scene-float-fast {
+    0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
+    50% { transform: translateY(-6px) scale(1.08) translateZ(0); }
+  }
+  @keyframes ai-scene-node-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.45; }
+  }
+  @keyframes ai-scene-node-pulse-alt {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.35; }
+  }
+  @keyframes ai-scene-dash-flow {
+    0% { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: -60; }
+  }
+  @keyframes ai-scene-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  @keyframes ai-scene-logo-bob {
+    0%, 100% { transform: translateY(0) translateZ(0); }
+    50% { transform: translateY(-8px) translateZ(0); }
+  }
+  @keyframes ai-scene-shape-morph {
+    0%, 100% { border-radius: 28%; }
+    25% { border-radius: 42% 28% 38% 32%; }
+    50% { border-radius: 38% 44% 28% 40%; }
+    75% { border-radius: 30% 38% 44% 28%; }
+  }
+
+  /* Shared animation classes */
+  .ai-scene-float-slow { animation: ai-scene-float-slow 9s ease-in-out infinite; will-change: transform; }
+  .ai-scene-float-medium { animation: ai-scene-float-medium 7s ease-in-out infinite; will-change: transform; }
+  .ai-scene-float-fast { animation: ai-scene-float-fast 4.5s ease-in-out infinite; will-change: transform; }
+  .ai-scene-node-pulse { animation: ai-scene-node-pulse 4s ease-in-out infinite; will-change: opacity; }
+  .ai-scene-node-pulse-alt { animation: ai-scene-node-pulse-alt 5s ease-in-out infinite 1s; will-change: opacity; }
+  .ai-scene-dash-flow { animation: ai-scene-dash-flow 9s linear infinite; }
+  .ai-scene-dash-flow-rev { animation: ai-scene-dash-flow 11s linear infinite reverse; }
+  .ai-scene-logo-float { animation: ai-scene-logo-bob 6s ease-in-out infinite; will-change: transform; }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     Auth page — adaptive background + glassmorphism card
+     ═══════════════════════════════════════════════════════════════════ */
+
+  .auth-adaptive-bg {
+    background: linear-gradient(
+      -45deg,
+      hsl(221 60% 95%),
+      hsl(250 40% 95%),
+      hsl(200 50% 94%),
+      hsl(221 50% 96%)
+    );
+    background-size: 400% 400%;
+    animation: ai-scene-gradient-shift 15s ease infinite;
+  }
+  .dark .auth-adaptive-bg {
+    background: linear-gradient(
+      -45deg,
+      hsl(221 83% 53% / 0.8),
+      hsl(250 70% 50% / 0.8),
+      hsl(221 83% 40% / 0.8),
+      hsl(200 80% 45% / 0.8)
+    );
+    background-size: 400% 400%;
+  }
+
+  /* Adaptive glassmorphism card — solid in light, glass in dark */
+  .auth-card-adaptive {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .dark .auth-card-adaptive {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 60px rgba(100, 140, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Auth background particle — theme-adaptive */
+  .auth-bg-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: hsl(var(--primary) / 0.12);
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.1);
+  }
+  .dark .auth-bg-particle {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 8px rgba(180, 210, 255, 0.2);
+  }
+
+  /* Mouse glow — fades in when cursor moves */
+  .auth-mouse-glow {
+    opacity: 0;
+  }
+  .auth-adaptive-bg:hover .auth-mouse-glow {
+    opacity: 1;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     Landing page — adaptive design system
+     Responsive: 375 → 768 → 1024 → 1440px
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Adaptive gradient background */
+  .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(220 25% 96%) 0%,
+      hsl(215 30% 92%) 25%,
+      hsl(225 28% 94%) 50%,
+      hsl(220 25% 95%) 75%,
+      hsl(215 22% 97%) 100%
+    );
+  }
+  .dark .landing-gradient {
+    background: linear-gradient(
+      135deg,
+      #050a18 0%,
+      #0a1628 25%,
+      #0f1f3d 50%,
+      #0a1a35 75%,
+      #060e20 100%
+    );
+  }
+
+  /* Gradient text for hero title — adaptive */
+  .landing-gradient-text {
+    background: linear-gradient(135deg, hsl(221 80% 40%) 0%, hsl(221 83% 35%) 40%, hsl(215 70% 30%) 70%, hsl(250 60% 45%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dark .landing-gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 40%, #06b6d4 70%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Floating nav bar — adaptive glass effect */
+  .landing-nav {
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--border));
+  }
+  .dark .landing-nav {
+    background: rgba(10, 22, 40, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Nav logo — subtle branded pill */
+  .landing-nav-logo {
+    border-radius: 10px;
+    background: hsl(var(--primary) / 0.1);
+    border: 1px solid hsl(var(--primary) / 0.2);
+  }
+
+  /* Shape-morphing hover — blob ↔ circle */
+  .landing-shape-morph {
+    border-radius: 28%;
+    background: hsl(var(--primary) / 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--primary) / 0.25);
+    transition: border-radius 0.3s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    animation: ai-scene-shape-morph 8s ease-in-out infinite;
+  }
+  .landing-shape-morph:hover {
+    animation-play-state: paused;
+    border-radius: 50%;
+    box-shadow: 0 0 30px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.1);
+    transform: scale(1.08);
+  }
+
+  /* Feature cards — adaptive glass surface */
+  .landing-feature-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .dark .landing-feature-card {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+  @media (min-width: 640px) {
+    .landing-feature-card { padding: 1.5rem; }
+  }
+  .landing-feature-card:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 8px 30px hsl(var(--primary) / 0.1);
+  }
+
+  /* CTA button — soft glow */
+  .landing-cta-btn {
+    box-shadow: 0 0 16px hsl(var(--primary) / 0.25);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .landing-cta-btn:hover {
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.45), 0 0 48px hsl(var(--primary) / 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Floating particles — adaptive */
+  .landing-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: hsl(var(--primary) / 0.15);
+    box-shadow: 0 0 8px hsl(var(--primary) / 0.15);
+  }
+  .dark .landing-particle {
+    background: rgba(59, 130, 246, 0.25);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  }
+
+  /* Landing section card — for stats, frameworks, etc. */
+  .landing-section-card {
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    backdrop-filter: blur(8px);
+  }
+  .dark .landing-section-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Accessibility: respect prefers-reduced-motion ──────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .ai-scene-float-slow,
+    .ai-scene-float-medium,
+    .ai-scene-float-fast,
+    .ai-scene-node-pulse,
+    .ai-scene-node-pulse-alt,
+    .ai-scene-dash-flow,
+    .ai-scene-dash-flow-rev,
+    .ai-scene-logo-float,
+    .landing-shape-morph,
+    .auth-adaptive-bg {
+      animation: none !important;
+    }
+    .landing-feature-card,
+    .landing-cta-btn,
+    .landing-shape-morph {
+      transition: none !important;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     Internal pages — dashboard-enhanced design system
+     Scoped via .dashboard-enhanced wrapper on layout
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Card enhancement — refined shadows + subtle hover lift */
+  .dashboard-enhanced [data-slot="card"] {
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.04),
+      0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .dashboard-enhanced [data-slot="card"]:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.06),
+      0 8px 24px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+  }
+  .dark .dashboard-enhanced [data-slot="card"] {
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .dark .dashboard-enhanced [data-slot="card"]:hover {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.25),
+      0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Sidebar — subtle gradient + active accent bar */
+  .internal-sidebar {
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
+    border-right: 1px solid hsl(var(--border));
+  }
+  .dark .internal-sidebar {
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(222 84% 3%) 100%);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  }
+  .internal-sidebar-item {
+    position: relative;
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  .internal-sidebar-item:hover {
+    box-shadow: inset 3px 0 0 hsl(var(--primary) / 0.3);
+  }
+  .internal-sidebar-item-active {
+    background-color: hsl(var(--primary) / 0.1);
+    color: hsl(var(--primary));
+    box-shadow: inset 3px 0 0 hsl(var(--primary));
+  }
+  .internal-sidebar-item-active:hover {
+    box-shadow: inset 3px 0 0 hsl(var(--primary));
+  }
+
+  /* Header — frosted glass effect */
+  .internal-header {
+    background-color: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  }
+  .dark .internal-header {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Tabs — inset background + active shadow */
+  .internal-tabs-list {
+    background-color: hsl(var(--muted) / 0.5);
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) + 2px);
+    padding: 2px;
+  }
+  .internal-tabs-list [data-state="active"] {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius);
+    transition: box-shadow 200ms ease;
+  }
+
+  /* Reduced motion — internal pages */
+  @media (prefers-reduced-motion: reduce) {
+    .dashboard-enhanced [data-slot="card"],
+    .internal-sidebar-item,
+    .internal-header {
+      transition: none !important;
+    }
+    .dashboard-enhanced [data-slot="card"]:hover {
+      transform: none !important;
+    }
   }
 }

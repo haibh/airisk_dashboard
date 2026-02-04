@@ -48,7 +48,13 @@
     "pendingActions": "Pending Actions",
     "recentActivity": "Recent Activity",
     "frameworkCompliance": "Framework Compliance",
-    "riskTrends": "Risk Trends"
+    "riskTrends": "Risk Trends",
+    "tabs": {
+      "executiveBrief": "Executive Brief",
+      "detailedAnalytics": "Detailed Analytics",
+      "operations": "Operations",
+      "aiRisk": "AI Risk"
+    }
   },
   "aiSystems": {
     "title": "AI System Registry",
@@ -474,5 +480,97 @@
     "passwordChanged": "Password Changed",
     "roleChanged": "Role Changed",
     "systemAlert": "System Alert"
+  },
+  "opsCenter": {
+    "title": "Operations Center",
+    "subtitle": "Real-time risk monitoring and operational oversight",
+    "riskAlerts": "Risk Alerts",
+    "systemHealth": "System Health",
+    "complianceRadar": "Compliance Radar",
+    "actionQueue": "Action Queue",
+    "assessmentProgress": "Assessment Progress",
+    "monitoringHeatmap": "Monitoring Heatmap"
+  },
+  "aiRiskView": {
+    "title": "AI Risk Specialist",
+    "subtitle": "Deep-dive into AI model risks, lifecycle, and framework coverage",
+    "modelRegistry": "AI Model Registry",
+    "modelDetail": "Model Detail",
+    "frameworkCoverage": "Framework Coverage",
+    "crossMapping": "Cross-Framework Mapping",
+    "lifecycle": "Model Lifecycle",
+    "biasMetrics": "Bias Metrics",
+    "modelDrift": "Model Drift",
+    "comingSoon": "Coming Soon — Requires MLOps Integration"
+  },
+  "landing": {
+    "title": "AIRM-IP",
+    "subtitle": "AI Risk Management Intelligence Platform",
+    "description": "Enterprise-grade platform for managing AI risks, compliance frameworks, and governance across your organization.",
+    "loginButton": "Sign In",
+    "getStarted": "Get Started",
+    "featuresHeading": "Everything you need to manage AI risk",
+    "features": {
+      "riskTitle": "Risk Management",
+      "riskDesc": "Comprehensive AI risk assessment with 5x5 scoring matrix and real-time residual risk monitoring.",
+      "complianceTitle": "Compliance Tracking",
+      "complianceDesc": "Multi-framework tracking across NIST AI RMF, ISO 42001, CSA AICM, and 5 more standards.",
+      "governanceTitle": "AI Governance",
+      "governanceDesc": "Full audit trails, role-based access control, and automated policy enforcement.",
+      "monitoringTitle": "Real-time Monitoring",
+      "monitoringDesc": "Live dashboards with risk heatmaps, trend analytics, and operational health indicators.",
+      "frameworksTitle": "Framework Mapping",
+      "frameworksDesc": "Cross-framework control mapping with gap analysis to identify coverage blind spots.",
+      "securityTitle": "Enterprise Security",
+      "securityDesc": "Multi-tenant isolation, JWT authentication, rate limiting, and webhook integrations."
+    },
+    "stats": {
+      "heading": "Built for Enterprise",
+      "tests": "262+ Tests Passing",
+      "models": "20+ Data Models",
+      "frameworks": "8 Frameworks",
+      "roles": "5 User Roles",
+      "wcag": "WCAG AA Compliant"
+    },
+    "supportedFrameworks": {
+      "heading": "Supported Compliance Frameworks",
+      "nistAiRmf": "NIST AI RMF 1.0",
+      "iso42001": "ISO/IEC 42001:2023",
+      "csaAicm": "CSA AICM 1.0",
+      "nistCsf": "NIST CSF 2.0",
+      "iso27001": "ISO 27001",
+      "cisControls": "CIS Controls 8.1",
+      "pciDss": "PCI DSS 4.0.1",
+      "scf": "SCF v2025.4"
+    },
+    "capabilities": {
+      "heading": "Complete AI Risk Management",
+      "inventoryTitle": "AI System Inventory",
+      "inventoryDesc": "Full CRUD lifecycle management with classification, ownership tracking, and risk tier assignment.",
+      "assessmentTitle": "Risk Assessment Engine",
+      "assessmentDesc": "5x5 impact/likelihood matrix across 8 risk categories with inherent and residual scoring.",
+      "mappingTitle": "Framework Mapping",
+      "mappingDesc": "Cross-framework control mapping with confidence levels and automated gap analysis.",
+      "evidenceTitle": "Evidence Management",
+      "evidenceDesc": "SHA-256 hash verification, approval workflows, and entity linking for audit readiness.",
+      "auditTitle": "Audit & Compliance",
+      "auditDesc": "Immutable audit logs, CSV export, diff viewer, and complete organizational traceability.",
+      "integrationTitle": "API & Integrations",
+      "integrationDesc": "Webhook event system, API key management, real-time notifications, and extensible endpoints."
+    },
+    "methodology": {
+      "heading": "Risk Scoring Methodology",
+      "formula": "Inherent Risk = Likelihood x Impact (5x5 Matrix)",
+      "residual": "Residual Risk = Inherent x (1 - Control Effectiveness)",
+      "levels": {
+        "low": "Low (1-4)",
+        "medium": "Medium (5-9)",
+        "high": "High (10-16)",
+        "critical": "Critical (17-25)"
+      }
+    },
+    "architecture": {
+      "heading": "Modern Enterprise Stack"
+    }
   }
 }
