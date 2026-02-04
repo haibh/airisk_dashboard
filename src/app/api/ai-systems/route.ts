@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { AISystemType, DataClassification, LifecycleStatus, RiskTier } from '@prisma/client';
+import { handleApiError, unauthorizedError, forbiddenError, validationError } from '@/lib/api-error-handler';
+import {
+  createAISystemSchema,
+  aiSystemFilterSchema,
+  validateBody,
+  formatZodErrors,
+} from '@/lib/api-validation-schemas';
+import { invalidateOnAISystemChange } from '@/lib/cache-invalidation';
+import { emitWebhookEvent } from '@/lib/webhook-event-dispatcher';
 
 /**
  * GET /api/ai-systems - List AI systems with filtering and pagination
@@ -10,21 +19,23 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search') || undefined;
-    const systemType = searchParams.get('systemType') as AISystemType | null;
-    const lifecycleStatus = searchParams.get('lifecycleStatus') as LifecycleStatus | null;
-    const riskTier = searchParams.get('riskTier') as RiskTier | null;
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '10');
+    const params = Object.fromEntries(searchParams.entries());
 
+    // Validate query parameters
+    const validation = validateBody(aiSystemFilterSchema, params);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
+    }
+
+    const { page, pageSize, search, systemType, lifecycleStatus, riskTier } = validation.data;
     const skip = (page - 1) * pageSize;
 
-    // Build where clause
-    const where: any = {
+    // Build where clause with proper typing
+    const where: Prisma.AISystemWhereInput = {
       organizationId: session.user.organizationId,
     };
 
@@ -75,11 +86,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / pageSize),
     });
   } catch (error) {
-    console.error('Error fetching AI systems:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch AI systems' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching AI systems');
   }
 }
 
@@ -91,43 +98,40 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     // Check role - only RISK_MANAGER and ADMIN can create systems
     const allowedRoles = ['RISK_MANAGER', 'ADMIN'];
     if (!allowedRoles.includes(session.user.role)) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Only Risk Managers and Admins can create AI systems');
     }
 
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name || !body.systemType || !body.dataClassification) {
-      return NextResponse.json(
-        { error: 'Missing required fields: name, systemType, dataClassification' },
-        { status: 400 }
-      );
+    // Validate request body
+    const validation = validateBody(createAISystemSchema, body);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
     }
+
+    const data = validation.data;
 
     // Create AI system
     const aiSystem = await prisma.aISystem.create({
       data: {
-        name: body.name,
-        description: body.description || null,
-        systemType: body.systemType,
-        dataClassification: body.dataClassification,
-        lifecycleStatus: body.lifecycleStatus || 'DEVELOPMENT',
-        riskTier: body.riskTier || null,
-        purpose: body.purpose || null,
-        dataInputs: body.dataInputs || null,
-        dataOutputs: body.dataOutputs || null,
-        thirdPartyAPIs: body.thirdPartyAPIs || [],
-        baseModels: body.baseModels || [],
-        trainingDataSources: body.trainingDataSources || [],
+        name: data.name,
+        description: data.description ?? null,
+        systemType: data.systemType,
+        dataClassification: data.dataClassification,
+        lifecycleStatus: data.lifecycleStatus,
+        riskTier: data.riskTier ?? null,
+        purpose: data.purpose ?? null,
+        dataInputs: data.dataInputs ?? null,
+        dataOutputs: data.dataOutputs ?? null,
+        thirdPartyAPIs: data.thirdPartyAPIs,
+        baseModels: data.baseModels,
+        trainingDataSources: data.trainingDataSources,
         organizationId: session.user.organizationId,
         ownerId: session.user.id,
       },
@@ -142,12 +146,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Invalidate caches after creating AI system
+    await invalidateOnAISystemChange(session.user.organizationId, aiSystem.id);
+
+    // Emit webhook event
+    emitWebhookEvent(session.user.organizationId, 'ai_system.created', {
+      id: aiSystem.id,
+      name: aiSystem.name,
+      systemType: aiSystem.systemType,
+    });
+
     return NextResponse.json(aiSystem, { status: 201 });
   } catch (error) {
-    console.error('Error creating AI system:', error);
-    return NextResponse.json(
-      { error: 'Failed to create AI system' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'creating AI system');
   }
 }

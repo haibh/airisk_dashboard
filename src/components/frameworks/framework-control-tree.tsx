@@ -36,10 +36,10 @@ function ControlNode({ control, level, onControlClick }: ControlNodeProps) {
     <div className="select-none">
       <div
         className={cn(
-          'flex items-center gap-2 py-2 px-3 rounded-md hover:bg-gray-100 cursor-pointer transition-colors',
-          level === 0 && 'font-semibold',
-          level === 1 && 'text-sm',
-          level >= 2 && 'text-sm text-gray-600'
+          'flex items-center gap-2 py-2 px-3 rounded-md hover:bg-muted cursor-pointer transition-colors',
+          level === 0 && 'font-semibold text-foreground',
+          level === 1 && 'text-sm text-foreground',
+          level >= 2 && 'text-sm text-muted-foreground'
         )}
         style={{ paddingLeft: `${level * 1.5 + 0.75}rem` }}
         onClick={() => {
@@ -53,14 +53,14 @@ function ControlNode({ control, level, onControlClick }: ControlNodeProps) {
       >
         {hasChildren ? (
           isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           )
         ) : (
-          <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <FileText className="w-4 h-4 text-muted-foreground/70 flex-shrink-0" />
         )}
-        <span className="font-mono text-xs text-gray-500 flex-shrink-0">
+        <span className="font-mono text-xs text-muted-foreground flex-shrink-0">
           {control.code}
         </span>
         <span className="flex-1">{control.title}</span>
@@ -85,7 +85,7 @@ function ControlNode({ control, level, onControlClick }: ControlNodeProps) {
 export function FrameworkControlTree({ controls, onControlClick }: ControlTreeProps) {
   if (!controls || controls.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         No controls found
       </div>
     );

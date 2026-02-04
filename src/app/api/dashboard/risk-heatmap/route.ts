@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { handleApiError, unauthorizedError, notFoundError } from '@/lib/api-error-handler';
+
+// Type for risk data
+interface RiskData {
+  likelihood: number;
+  impact: number;
+}
 
 /**
  * GET /api/dashboard/risk-heatmap
@@ -11,10 +18,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return unauthorizedError();
     }
 
     // Get user with organization
@@ -24,10 +28,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user || !user.organizationId) {
-      return NextResponse.json(
-        { error: 'User or organization not found' },
-        { status: 404 }
-      );
+      return notFoundError('User or organization');
     }
 
     const organizationId = user.organizationId;
@@ -47,7 +48,7 @@ export async function GET(request: NextRequest) {
     const heatmap: number[][] = Array(5).fill(0).map(() => Array(5).fill(0));
 
     // Count risks at each intersection
-    risks.forEach((risk: any) => {
+    risks.forEach((risk: RiskData) => {
       const likelihoodIndex = risk.likelihood - 1; // Convert 1-5 to 0-4
       const impactIndex = risk.impact - 1; // Convert 1-5 to 0-4
 
@@ -71,10 +72,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching risk heatmap:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching risk heatmap');
   }
 }

@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { locales, type Locale } from '@/i18n/request';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { SessionProvider } from '@/components/providers/session-provider';
+import { Toaster } from '@/components/ui/sonner';
 import '../globals.css';
 
 const inter = Inter({
@@ -62,6 +63,7 @@ export default async function LocaleLayout({
           >
             <NextIntlClientProvider messages={messages}>
               {children}
+              <Toaster />
             </NextIntlClientProvider>
           </ThemeProvider>
         </SessionProvider>

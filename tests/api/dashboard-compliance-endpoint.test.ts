@@ -69,7 +69,11 @@ describe('GET /api/dashboard/compliance', () => {
       const frameworks = [{ ...mockFramework }];
       vi.mocked(prisma.framework.findMany).mockResolvedValue(frameworks as any);
       vi.mocked(prisma.control.count).mockResolvedValue(50);
-      vi.mocked(prisma.riskControl.count).mockResolvedValue(40);
+      // Mock groupBy to return array of distinct controlIds
+      vi.mocked(prisma.riskControl.groupBy).mockResolvedValue([
+        { controlId: 'ctrl-1' },
+        { controlId: 'ctrl-2' },
+      ] as any);
       vi.mocked(prisma.riskControl.aggregate).mockResolvedValue({
         _avg: { effectiveness: 80 },
       } as any);
@@ -89,7 +93,11 @@ describe('GET /api/dashboard/compliance', () => {
       const frameworks = [{ ...mockFramework }];
       vi.mocked(prisma.framework.findMany).mockResolvedValue(frameworks as any);
       vi.mocked(prisma.control.count).mockResolvedValue(50);
-      vi.mocked(prisma.riskControl.count).mockResolvedValue(40);
+      // Mock groupBy to return array of distinct controlIds
+      vi.mocked(prisma.riskControl.groupBy).mockResolvedValue([
+        { controlId: 'ctrl-1' },
+        { controlId: 'ctrl-2' },
+      ] as any);
       vi.mocked(prisma.riskControl.aggregate).mockResolvedValue({
         _avg: { effectiveness: 80 },
       } as any);
@@ -139,7 +147,7 @@ describe('GET /api/dashboard/compliance', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Internal server error');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });

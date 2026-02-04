@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { handleApiError, unauthorizedError, notFoundError } from '@/lib/api-error-handler';
+
+// Type for framework from Prisma query
+interface FrameworkData {
+  id: string;
+  name: string;
+  shortName: string;
+  version: string;
+}
 
 /**
  * GET /api/dashboard/compliance
@@ -11,10 +20,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return unauthorizedError();
     }
 
     // Get user with organization
@@ -24,10 +30,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user || !user.organizationId) {
-      return NextResponse.json(
-        { error: 'User or organization not found' },
-        { status: 404 }
-      );
+      return notFoundError('User or organization');
     }
 
     const organizationId = user.organizationId;
@@ -45,22 +48,24 @@ export async function GET(request: NextRequest) {
 
     // For each framework, calculate compliance metrics
     const complianceData = await Promise.all(
-      frameworks.map(async (framework: any) => {
+      frameworks.map(async (framework: FrameworkData) => {
         // Get total controls for this framework
         const totalControls = await prisma.control.count({
           where: { frameworkId: framework.id },
         });
 
-        // Get mapped controls (controls that are linked to risks in this organization)
-        const mappedControls = await prisma.riskControl.count({
+        // Get mapped controls count - use groupBy to get distinct controlId
+        const mappedControlsData = await prisma.riskControl.groupBy({
+          by: ['controlId'],
           where: {
             control: { frameworkId: framework.id },
             risk: {
               assessment: { organizationId },
             },
           },
-          distinct: ['controlId'],
         });
+
+        const mappedControls = mappedControlsData.length;
 
         // Calculate compliance percentage
         const percentage = totalControls > 0
@@ -108,10 +113,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching compliance data:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching compliance data');
   }
 }

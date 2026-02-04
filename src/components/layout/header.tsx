@@ -14,9 +14,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+import { NotificationDropdownMenu } from '@/components/layout/notification-dropdown-menu';
 import {
-  Bell,
   Sun,
   Moon,
   Monitor,
@@ -64,61 +63,29 @@ export function Header() {
       {/* Right side - Actions */}
       <div className="flex items-center gap-2">
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <Badge
-            variant="destructive"
-            className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-          >
-            3
-          </Badge>
+        <NotificationDropdownMenu />
+
+        {/* Theme Toggle - Click to switch */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+        >
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
         </Button>
 
-        {/* Theme Switcher */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme('light')}>
-              <Sun className="mr-2 h-4 w-4" />
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
-              <Moon className="mr-2 h-4 w-4" />
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
-              <Monitor className="mr-2 h-4 w-4" />
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        {/* Language Switcher */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Globe className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => switchLocale('en')}>
-              <span className={locale === 'en' ? 'font-bold' : ''}>
-                🇺🇸 English
-              </span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => switchLocale('vi')}>
-              <span className={locale === 'vi' ? 'font-bold' : ''}>
-                🇻🇳 Tiếng Việt
-              </span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Language Toggle - Click to switch */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => switchLocale(locale === 'en' ? 'vi' : 'en')}
+          title={locale === 'en' ? 'Switch to Vietnamese' : 'Switch to English'}
+        >
+          <span className="text-sm font-medium">{locale.toUpperCase()}</span>
+        </Button>
 
         {/* User Menu */}
         <DropdownMenu>

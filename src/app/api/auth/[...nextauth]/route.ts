@@ -1,9 +1,7 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/db';
 import { verifyPassword } from '@/lib/auth-helpers';
-
-const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -35,6 +33,11 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Invalid credentials');
           }
 
+          // Check if account is active
+          if (!user.isActive) {
+            throw new Error('Account is deactivated');
+          }
+
           const isValid = await verifyPassword(
             credentials.password,
             user.passwordHash
@@ -43,6 +46,12 @@ export const authOptions: NextAuthOptions = {
           if (!isValid) {
             throw new Error('Invalid credentials');
           }
+
+          // Update last login timestamp
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() },
+          });
 
           return {
             id: user.id,
@@ -62,7 +71,8 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 hours
+    updateAge: 30 * 60, // Refresh token every 30 minutes of activity
   },
   pages: {
     signIn: '/login',

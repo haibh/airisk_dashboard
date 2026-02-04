@@ -8,7 +8,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Calendar, Shield } from 'lucide-react';
 import { prisma } from '@/lib/db';
-import { FrameworkControlTree } from '@/components/frameworks/framework-control-tree';
+import { FrameworkControlsTable } from '@/components/frameworks/framework-controls-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PageProps {
   params: Promise<{
@@ -76,61 +77,67 @@ export default async function FrameworkDetailPage({ params }: PageProps) {
       {/* Back button */}
       <Link
         href="/frameworks"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4 mr-1" />
         Back to Frameworks
       </Link>
 
       {/* Framework header */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Shield className="w-6 h-6 text-blue-600" />
-              <h1 className="text-2xl font-bold">{framework.shortName}</h1>
-              <span className="text-sm font-mono text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                v{framework.version}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <Shield className="w-6 h-6 text-primary" />
+                <h1 className="text-2xl font-bold text-foreground">{framework.shortName}</h1>
+                <span className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
+                  v{framework.version}
+                </span>
+              </div>
+              <p className="text-muted-foreground mb-4">{framework.description}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            {framework.effectiveDate && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  Effective: {new Date(framework.effectiveDate).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            <div>
+              <span className="font-medium text-foreground">
+                {framework._count.controls}
+              </span>{' '}
+              total controls
+            </div>
+            <div>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  framework.category === 'AI_RISK'
+                    ? 'bg-red-500/20 text-red-400 dark:bg-red-500/30 dark:text-red-300'
+                    : 'bg-blue-500/20 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300'
+                }`}
+              >
+                {framework.category.replace('_', ' ')}
               </span>
             </div>
-            <p className="text-gray-600 mb-4">{framework.description}</p>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="flex items-center gap-6 text-sm text-gray-500">
-          {framework.effectiveDate && (
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>
-                Effective: {new Date(framework.effectiveDate).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-          <div>
-            <span className="font-medium text-gray-700">
-              {framework._count.controls}
-            </span>{' '}
-            total controls
-          </div>
-          <div>
-            <span
-              className={`px-2 py-1 rounded text-xs ${
-                framework.category === 'AI_RISK'
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-blue-100 text-blue-700'
-              }`}
-            >
-              {framework.category.replace('_', ' ')}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Controls tree */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Controls Hierarchy</h2>
-        <FrameworkControlTree controls={controlTree} />
-      </div>
+      {/* Controls table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Controls & Compliance Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FrameworkControlsTable controls={controlTree} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

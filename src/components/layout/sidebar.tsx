@@ -14,6 +14,7 @@ import {
   Settings,
   Shield,
   ChevronLeft,
+  GitCompare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +25,7 @@ const navItems = [
   { href: '/ai-systems', icon: Cpu, labelKey: 'nav.aiSystems' },
   { href: '/risk-assessment', icon: AlertTriangle, labelKey: 'nav.riskAssessment' },
   { href: '/frameworks', icon: FileCheck, labelKey: 'nav.frameworks' },
+  { href: '/gap-analysis', icon: GitCompare, labelKey: 'nav.gapAnalysis' },
   { href: '/evidence', icon: Folder, labelKey: 'nav.evidence' },
   { href: '/reports', icon: BarChart3, labelKey: 'nav.reports' },
 ];

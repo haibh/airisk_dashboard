@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 import {
   Select,
   SelectContent,
@@ -29,7 +30,8 @@ export function AssessmentCreationWizard({
   aiSystems,
   frameworks,
 }: AssessmentCreationWizardProps) {
-  const t = useTranslations();
+  const t = useTranslations('risk');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<WizardStep>(1);
   const [loading, setLoading] = useState(false);
@@ -40,18 +42,18 @@ export function AssessmentCreationWizard({
     aiSystemId: '',
     frameworkId: '',
     assessmentDate: new Date(),
-    nextReviewDate: undefined,
+    nextReviewDate: new Date(),
   });
 
   const [risks, setRisks] = useState<RiskFormData[]>([]);
   const [showRiskForm, setShowRiskForm] = useState(false);
 
   const steps = [
-    { number: 1, title: 'Basic Information' },
-    { number: 2, title: 'Select AI System' },
-    { number: 3, title: 'Select Framework' },
-    { number: 4, title: 'Add Risks' },
-    { number: 5, title: 'Review & Submit' },
+    { number: 1, title: t('steps.basicInfo') },
+    { number: 2, title: t('steps.selectAiSystem') },
+    { number: 3, title: t('steps.selectFramework') },
+    { number: 4, title: t('steps.addRisks') },
+    { number: 5, title: t('steps.reviewSubmit') },
   ];
 
   const handleNext = () => {
@@ -78,30 +80,52 @@ export function AssessmentCreationWizard({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Create assessment
+      // Serialize dates to ISO strings for API validation
+      const payload = {
+        title: assessmentData.title,
+        description: assessmentData.description || null,
+        aiSystemId: assessmentData.aiSystemId,
+        frameworkId: assessmentData.frameworkId,
+        assessmentDate: assessmentData.assessmentDate
+          ? new Date(assessmentData.assessmentDate).toISOString()
+          : new Date().toISOString(),
+        nextReviewDate: assessmentData.nextReviewDate
+          ? new Date(assessmentData.nextReviewDate).toISOString()
+          : null,
+      };
+
       const response = await fetch('/api/assessments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(assessmentData),
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) throw new Error('Failed to create assessment');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create assessment');
+      }
 
       const assessment = await response.json();
 
-      // Add risks
+      // Add risks if any
       for (const risk of risks) {
+        const riskPayload = {
+          ...risk,
+          treatmentDueDate: risk.treatmentDueDate
+            ? new Date(risk.treatmentDueDate).toISOString()
+            : null,
+        };
         await fetch(`/api/assessments/${assessment.id}/risks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(risk),
+          body: JSON.stringify(riskPayload),
         });
       }
 
       router.push(`/risk-assessment/${assessment.id}`);
     } catch (error) {
       console.error('Error creating assessment:', error);
-      alert('Failed to create assessment');
+      toast.error(error instanceof Error ? error.message : 'Failed to create assessment');
     } finally {
       setLoading(false);
     }
@@ -110,34 +134,64 @@ export function AssessmentCreationWizard({
   return (
     <div className="max-w-4xl mx-auto">
       {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex justify-between">
-          {steps.map(step => (
-            <div
-              key={step.number}
-              className={`flex-1 ${step.number !== steps.length ? 'pr-4' : ''}`}
-            >
-              <div className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    currentStep >= step.number
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {step.number}
+      <div className="mb-8 pb-6">
+        <div className="flex items-start">
+          {steps.map(step => {
+            const isCompleted = currentStep > step.number;
+            const isCurrent = currentStep === step.number;
+
+            return (
+              <div
+                key={step.number}
+                className={`flex flex-col items-center ${step.number !== steps.length ? 'flex-1' : ''}`}
+              >
+                <div className="flex items-center w-full">
+                  {step.number !== 1 && (
+                    <div
+                      className={`flex-1 h-1 ${
+                        currentStep >= step.number ? 'bg-green-500' : 'bg-muted'
+                      }`}
+                    />
+                  )}
+                  <div className="relative">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 transition-all ${
+                        isCompleted
+                          ? 'bg-green-500 text-white'
+                          : isCurrent
+                          ? 'bg-primary text-primary-foreground ring-4 ring-primary/30 scale-110'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        step.number
+                      )}
+                    </div>
+                    <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 text-xs text-center whitespace-nowrap ${
+                      isCurrent
+                        ? 'text-primary font-semibold'
+                        : isCompleted
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-muted-foreground'
+                    }`}>
+                      {step.title}
+                    </div>
+                  </div>
+                  {step.number !== steps.length && (
+                    <div
+                      className={`flex-1 h-1 ${
+                        isCompleted ? 'bg-green-500' : 'bg-muted'
+                      }`}
+                    />
+                  )}
                 </div>
-                {step.number !== steps.length && (
-                  <div
-                    className={`flex-1 h-1 mx-2 ${
-                      currentStep > step.number ? 'bg-blue-600' : 'bg-gray-200'
-                    }`}
-                  />
-                )}
               </div>
-              <div className="mt-2 text-xs text-center">{step.title}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -151,7 +205,7 @@ export function AssessmentCreationWizard({
           {currentStep === 1 && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Assessment Title *</Label>
+                <Label htmlFor="title">{t('form.assessmentTitle')} *</Label>
                 <Input
                   id="title"
                   value={assessmentData.title}
@@ -161,12 +215,12 @@ export function AssessmentCreationWizard({
                       title: e.target.value,
                     })
                   }
-                  placeholder="e.g., Q1 2026 AI Risk Assessment"
+                  placeholder={t('form.assessmentTitlePlaceholder')}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('form.description')}</Label>
                 <textarea
                   id="description"
                   value={assessmentData.description}
@@ -176,12 +230,12 @@ export function AssessmentCreationWizard({
                       description: e.target.value,
                     })
                   }
-                  placeholder="Purpose and scope of this assessment..."
-                  className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder={t('form.descriptionPlaceholder')}
+                  className="flex w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
               </div>
               <div>
-                <Label htmlFor="nextReviewDate">Next Review Date</Label>
+                <Label htmlFor="nextReviewDate">{t('form.nextReviewDate')}</Label>
                 <Input
                   type="date"
                   id="nextReviewDate"
@@ -232,18 +286,18 @@ export function AssessmentCreationWizard({
                 </Select>
               </div>
               {assessmentData.aiSystemId && (
-                <div className="p-4 bg-gray-50 rounded-md">
+                <div className="p-4 bg-muted rounded-md">
                   {(() => {
                     const selected = aiSystems.find(
                       s => s.id === assessmentData.aiSystemId
                     );
                     return selected ? (
                       <>
-                        <h4 className="font-medium mb-2">{selected.name}</h4>
-                        <p className="text-sm text-gray-600">
+                        <h4 className="font-medium mb-2 text-foreground">{selected.name}</h4>
+                        <p className="text-sm text-muted-foreground">
                           {selected.description || 'No description'}
                         </p>
-                        <div className="mt-2 text-sm">
+                        <div className="mt-2 text-sm text-foreground">
                           <span className="font-medium">Type:</span>{' '}
                           {selected.systemType}
                         </div>
@@ -282,15 +336,15 @@ export function AssessmentCreationWizard({
                 </Select>
               </div>
               {assessmentData.frameworkId && (
-                <div className="p-4 bg-gray-50 rounded-md">
+                <div className="p-4 bg-muted rounded-md">
                   {(() => {
                     const selected = frameworks.find(
                       f => f.id === assessmentData.frameworkId
                     );
                     return selected ? (
                       <>
-                        <h4 className="font-medium mb-2">{selected.name}</h4>
-                        <p className="text-sm text-gray-600">
+                        <h4 className="font-medium mb-2 text-foreground">{selected.name}</h4>
+                        <p className="text-sm text-muted-foreground">
                           {selected.description || 'No description'}
                         </p>
                       </>
@@ -320,11 +374,11 @@ export function AssessmentCreationWizard({
                       {risks.map((risk, index) => (
                         <div
                           key={index}
-                          className="p-3 border rounded-md flex justify-between items-start"
+                          className="p-3 border border-border rounded-md flex justify-between items-start"
                         >
                           <div>
-                            <h4 className="font-medium">{risk.title}</h4>
-                            <p className="text-sm text-gray-600">
+                            <h4 className="font-medium text-foreground">{risk.title}</h4>
+                            <p className="text-sm text-muted-foreground">
                               Category: {risk.category} | L: {risk.likelihood} |
                               I: {risk.impact}
                             </p>
@@ -334,7 +388,7 @@ export function AssessmentCreationWizard({
                             size="sm"
                             onClick={() => handleRemoveRisk(index)}
                           >
-                            Remove
+                            {tCommon('delete')}
                           </Button>
                         </div>
                       ))}
@@ -342,7 +396,7 @@ export function AssessmentCreationWizard({
                   )}
 
                   {risks.length === 0 && (
-                    <p className="text-gray-500 text-center py-8">
+                    <p className="text-muted-foreground text-center py-8">
                       No risks added yet. Click "Add Risk" to begin.
                     </p>
                   )}
@@ -360,27 +414,27 @@ export function AssessmentCreationWizard({
           {currentStep === 5 && (
             <div className="space-y-6">
               <div>
-                <h3 className="font-semibold mb-2">Assessment Details</h3>
-                <div className="p-4 bg-gray-50 rounded-md space-y-2">
-                  <div>
+                <h3 className="font-semibold mb-2 text-foreground">Assessment Details</h3>
+                <div className="p-4 bg-muted rounded-md space-y-2">
+                  <div className="text-foreground">
                     <span className="font-medium">Title:</span>{' '}
                     {assessmentData.title}
                   </div>
-                  <div>
+                  <div className="text-foreground">
                     <span className="font-medium">AI System:</span>{' '}
                     {
                       aiSystems.find(s => s.id === assessmentData.aiSystemId)
                         ?.name
                     }
                   </div>
-                  <div>
+                  <div className="text-foreground">
                     <span className="font-medium">Framework:</span>{' '}
                     {
                       frameworks.find(f => f.id === assessmentData.frameworkId)
                         ?.name
                     }
                   </div>
-                  <div>
+                  <div className="text-foreground">
                     <span className="font-medium">Total Risks:</span>{' '}
                     {risks.length}
                   </div>
@@ -388,12 +442,12 @@ export function AssessmentCreationWizard({
               </div>
 
               <div>
-                <h3 className="font-semibold mb-2">Risks Summary</h3>
+                <h3 className="font-semibold mb-2 text-foreground">Risks Summary</h3>
                 <div className="space-y-2">
                   {risks.map((risk, index) => (
-                    <div key={index} className="p-3 border rounded-md">
-                      <div className="font-medium">{risk.title}</div>
-                      <div className="text-sm text-gray-600 mt-1">
+                    <div key={index} className="p-3 border border-border rounded-md">
+                      <div className="font-medium text-foreground">{risk.title}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
                         {risk.category} | Likelihood: {risk.likelihood} | Impact:{' '}
                         {risk.impact}
                       </div>
@@ -412,7 +466,7 @@ export function AssessmentCreationWizard({
                 onClick={handleBack}
                 disabled={currentStep === 1}
               >
-                Back
+                {tCommon('back')}
               </Button>
 
               {currentStep < 5 ? (
@@ -424,11 +478,11 @@ export function AssessmentCreationWizard({
                     (currentStep === 3 && !assessmentData.frameworkId)
                   }
                 >
-                  Next
+                  {tCommon('next')}
                 </Button>
               ) : (
                 <Button onClick={handleSubmit} disabled={loading}>
-                  {loading ? 'Creating...' : 'Create Assessment'}
+                  {loading ? tCommon('loading') : tCommon('submit')}
                 </Button>
               )}
             </div>

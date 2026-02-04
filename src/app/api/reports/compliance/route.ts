@@ -1,12 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { handleApiError, unauthorizedError, validationError } from '@/lib/api-error-handler';
+import { Prisma } from '@prisma/client';
+
+// Type definitions
+interface ControlData {
+  id: string;
+  code: string;
+  title: string;
+  description: string | null;
+  assessmentStatus: string;
+  linkedRisks: number;
+  evidenceCount: number;
+}
+
+interface FrameworkComplianceData {
+  id: string;
+  name: string;
+  shortName: string;
+  version: string;
+  category: string;
+  totalControls: number;
+  assessedControls: number;
+  compliancePercentage: number;
+  status: string;
+  totalAssessments: number;
+  controls: ControlData[];
+}
 
 /**
  * Convert compliance data to CSV format
  */
-function convertToCSV(complianceData: any[]): string {
-  const escapeCSV = (value: any): string => {
+function convertToCSV(complianceData: FrameworkComplianceData[]): string {
+  const escapeCSV = (value: unknown): string => {
     if (value === null || value === undefined) return '';
     const str = String(value);
     if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -71,7 +98,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { searchParams } = new URL(request.url);
@@ -80,14 +107,13 @@ export async function GET(request: NextRequest) {
 
     // Validate format
     if (!['json', 'csv'].includes(format)) {
-      return NextResponse.json(
-        { error: 'Invalid format. Must be json or csv' },
-        { status: 400 }
-      );
+      return validationError('Invalid format. Must be json or csv');
     }
 
+    const organizationId = session.user.organizationId;
+
     // Build where clause for frameworks
-    const frameworkWhere: any = {
+    const frameworkWhere: Prisma.FrameworkWhereInput = {
       isActive: true,
     };
 
@@ -95,7 +121,7 @@ export async function GET(request: NextRequest) {
       frameworkWhere.id = frameworkId;
     }
 
-    // Fetch frameworks with controls and related data
+    // Fetch frameworks with controls
     const frameworks = await prisma.framework.findMany({
       where: frameworkWhere,
       include: {
@@ -104,42 +130,14 @@ export async function GET(request: NextRequest) {
             riskControls: {
               include: {
                 risk: {
-                  include: {
-                    assessment: {
-                      where: {
-                        organizationId: session.user.organizationId,
-                      },
-                      select: {
-                        id: true,
-                        status: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            evidenceLinks: {
-              include: {
-                evidence: {
-                  where: {
-                    organizationId: session.user.organizationId,
-                  },
                   select: {
                     id: true,
-                    reviewStatus: true,
+                    assessmentId: true,
                   },
                 },
               },
             },
-          },
-        },
-        riskAssessments: {
-          where: {
-            organizationId: session.user.organizationId,
-          },
-          select: {
-            id: true,
-            status: true,
+            evidenceLinks: true,
           },
         },
       },
@@ -148,13 +146,35 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Get assessments for this organization separately
+    const orgAssessments = await prisma.riskAssessment.findMany({
+      where: { organizationId },
+      select: { id: true, frameworkId: true, status: true },
+    });
+
+    const orgAssessmentIds = new Set(orgAssessments.map(a => a.id));
+
+    // Get evidence for this organization separately
+    const orgEvidence = await prisma.evidence.findMany({
+      where: { organizationId },
+      select: { id: true },
+    });
+
+    const orgEvidenceIds = new Set(orgEvidence.map(e => e.id));
+
     // Process compliance data for each framework
-    const complianceData = frameworks.map((framework: any) => {
+    const complianceData: FrameworkComplianceData[] = frameworks.map((framework) => {
       const totalControls = framework.controls.length;
 
-      // Count controls that have been assessed (linked to risks in assessments)
-      const assessedControls = framework.controls.filter((control: any) => {
-        return control.riskControls.some((rc: any) => rc.risk.assessment !== null);
+      // Count assessments for this framework
+      const frameworkAssessments = orgAssessments.filter(a => a.frameworkId === framework.id);
+
+      // Count controls that have been assessed (linked to risks in org assessments)
+      const assessedControls = framework.controls.filter((control) => {
+        return control.riskControls.some((rc) => {
+          // Check if the risk's assessment belongs to our organization
+          return orgAssessmentIds.has(rc.risk.assessmentId);
+        });
       }).length;
 
       const compliancePercentage = totalControls > 0
@@ -172,12 +192,13 @@ export async function GET(request: NextRequest) {
       }
 
       // Process control details
-      const controls = framework.controls.map((control: any) => {
+      const controls: ControlData[] = framework.controls.map((control) => {
         const linkedRisks = control.riskControls.filter(
-          (rc: any) => rc.risk.assessment !== null
+          (rc) => orgAssessmentIds.has(rc.risk.assessmentId)
         ).length;
+
         const evidenceCount = control.evidenceLinks.filter(
-          (el: any) => el.evidence !== null
+          (el) => orgEvidenceIds.has(el.evidenceId)
         ).length;
 
         let assessmentStatus = 'NOT_ASSESSED';
@@ -208,7 +229,7 @@ export async function GET(request: NextRequest) {
         assessedControls,
         compliancePercentage,
         status,
-        totalAssessments: framework.riskAssessments.length,
+        totalAssessments: frameworkAssessments.length,
         controls,
       };
     });
@@ -217,9 +238,9 @@ export async function GET(request: NextRequest) {
       frameworks: complianceData,
       overallStatistics: {
         totalFrameworks: complianceData.length,
-        compliantFrameworks: complianceData.filter((f: any) => f.status === 'COMPLIANT').length,
-        inProgressFrameworks: complianceData.filter((f: any) => f.status === 'IN_PROGRESS' || f.status === 'MOSTLY_COMPLIANT').length,
-        notStartedFrameworks: complianceData.filter((f: any) => f.status === 'NOT_STARTED').length,
+        compliantFrameworks: complianceData.filter((f) => f.status === 'COMPLIANT').length,
+        inProgressFrameworks: complianceData.filter((f) => f.status === 'IN_PROGRESS' || f.status === 'MOSTLY_COMPLIANT').length,
+        notStartedFrameworks: complianceData.filter((f) => f.status === 'NOT_STARTED').length,
       },
       generatedAt: new Date().toISOString(),
     };
@@ -240,10 +261,6 @@ export async function GET(request: NextRequest) {
     // Return JSON format
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('Error generating compliance report:', error);
-    return NextResponse.json(
-      { error: 'Failed to generate compliance report' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'generating compliance report');
   }
 }

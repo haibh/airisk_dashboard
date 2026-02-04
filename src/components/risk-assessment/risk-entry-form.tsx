@@ -38,7 +38,7 @@ export function RiskEntryForm({
     likelihood: initialData?.likelihood || 3,
     impact: initialData?.impact || 3,
     treatmentPlan: initialData?.treatmentPlan || '',
-    treatmentDueDate: initialData?.treatmentDueDate || undefined,
+    treatmentDueDate: initialData?.treatmentDueDate || new Date(),
   });
 
   const inherentScore = calculateInherentScore(
@@ -81,7 +81,7 @@ export function RiskEntryForm({
             setFormData({ ...formData, description: e.target.value })
           }
           placeholder="Detailed description of the risk..."
-          className="w-full min-h-[100px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
@@ -128,12 +128,12 @@ export function RiskEntryForm({
               likelihood: parseInt(e.target.value),
             })
           }
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>1 - Rare</span>
-          <span>3 - Possible</span>
-          <span>5 - Almost Certain</span>
+        <div className="grid grid-cols-3 text-xs text-muted-foreground mt-1">
+          <span className="text-left">1 - Rare</span>
+          <span className="text-center">3 - Possible</span>
+          <span className="text-right">5 - Almost Certain</span>
         </div>
       </div>
 
@@ -155,17 +155,17 @@ export function RiskEntryForm({
               impact: parseInt(e.target.value),
             })
           }
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
         />
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>1 - Insignificant</span>
-          <span>3 - Moderate</span>
-          <span>5 - Catastrophic</span>
+        <div className="grid grid-cols-3 text-xs text-muted-foreground mt-1">
+          <span className="text-left">1 - Insignificant</span>
+          <span className="text-center">3 - Moderate</span>
+          <span className="text-right">5 - Catastrophic</span>
         </div>
       </div>
 
       {/* Calculated Score */}
-      <div className="p-4 bg-gray-50 rounded-md">
+      <div className="p-4 bg-muted rounded-md">
         <div className="flex justify-between items-center">
           <span className="font-medium">Inherent Risk Score:</span>
           <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export function RiskEntryForm({
             setFormData({ ...formData, treatmentPlan: e.target.value })
           }
           placeholder="Mitigation strategy and action plan..."
-          className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full min-h-[80px] px-3 py-2 border border-input bg-background rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 

@@ -190,7 +190,7 @@ describe('GET /api/frameworks', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to fetch frameworks');
+      expect(data.error).toBe('An unexpected error occurred');
     });
 
     it('should handle timeout error gracefully', async () => {
@@ -203,7 +203,7 @@ describe('GET /api/frameworks', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Failed to fetch frameworks');
+      expect(data.error).toBe('An unexpected error occurred');
     });
 
     it('should handle prisma validation error', async () => {
@@ -215,9 +215,10 @@ describe('GET /api/frameworks', () => {
       const { GET } = await importRoute();
       const response = await GET(createRequest());
 
-      expect(response.status).toBe(500);
+      // Validation errors correctly return 400 Bad Request
+      expect(response.status).toBe(400);
       const data = await response.json();
-      expect(data.error).toBe('Failed to fetch frameworks');
+      expect(data.error).toBe('Invalid request data');
     });
   });
 

@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Card,
   CardContent,
@@ -19,6 +20,19 @@ import {
   TrendingDown,
   AlertCircle,
 } from 'lucide-react';
+
+// Dynamic import for heavy chart component (Recharts)
+const ComplianceSpiderChart = dynamic(
+  () => import('@/components/dashboard/compliance-spider-chart').then(mod => ({ default: mod.ComplianceSpiderChart })),
+  {
+    loading: () => (
+      <div className="h-[300px] flex items-center justify-center">
+        <Skeleton className="h-[250px] w-[250px] rounded-full" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 // Types for API responses
 interface DashboardStats {
@@ -211,7 +225,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Framework Compliance */}
+        {/* Framework Compliance - Bar Chart */}
         <Card>
           <CardHeader>
             <CardTitle>{t('frameworkCompliance')}</CardTitle>
@@ -241,6 +255,23 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Compliance Spider Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('complianceScore')}</CardTitle>
+          <CardDescription>Compliance overview across all frameworks</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="h-[300px] flex items-center justify-center">
+              <Skeleton className="h-[250px] w-[250px] rounded-full" />
+            </div>
+          ) : (
+            <ComplianceSpiderChart data={frameworks} />
+          )}
+        </CardContent>
+      </Card>
 
       {/* Recent Activity */}
       <Card>

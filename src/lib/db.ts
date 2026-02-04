@@ -1,27 +1,22 @@
-// Prisma client singleton
-// Note: Run `npx prisma generate` after setting up DATABASE_URL in .env
+import { PrismaClient } from '@prisma/client';
 
-let prisma: any;
-
-try {
-  const { PrismaClient } = require('@prisma/client');
-
-  const globalForPrisma = globalThis as unknown as {
-    prisma: typeof PrismaClient | undefined;
-  };
-
-  prisma =
-    globalForPrisma.prisma ??
-    new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    });
-
-  if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-} catch {
-  // Prisma client not generated yet - this is expected before running `prisma generate`
-  console.warn('Prisma client not available. Run `npx prisma generate` to generate it.');
-  prisma = null;
+// Declare global type for Prisma client singleton pattern
+declare global {
+  var prisma: PrismaClient | undefined;
 }
 
-export { prisma };
+// Create Prisma client with proper configuration
+const createPrismaClient = (): PrismaClient => {
+  return new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
+};
+
+// Use singleton pattern to prevent multiple instances in development
+export const prisma: PrismaClient = globalThis.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalThis.prisma = prisma;
+}
+
 export default prisma;

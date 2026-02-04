@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { handleApiError, unauthorizedError, notFoundError } from '@/lib/api-error-handler';
+
+// Type for activity with user
+interface ActivityWithUser {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  userId: string;
+  oldValues: unknown;
+  newValues: unknown;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: Date;
+  user: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
+}
 
 /**
  * GET /api/dashboard/activity
@@ -11,10 +31,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return unauthorizedError();
     }
 
     // Get user with organization
@@ -24,10 +41,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user || !user.organizationId) {
-      return NextResponse.json(
-        { error: 'User or organization not found' },
-        { status: 404 }
-      );
+      return notFoundError('User or organization');
     }
 
     const organizationId = user.organizationId;
@@ -49,7 +63,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Format activities for frontend
-    const formattedActivities = activities.map((activity: any) => {
+    const formattedActivities = activities.map((activity: ActivityWithUser) => {
       // Create human-readable description
       let description = '';
       const userName = activity.user.name || activity.user.email;
@@ -99,10 +113,6 @@ export async function GET(request: NextRequest) {
       total: formattedActivities.length,
     });
   } catch (error) {
-    console.error('Error fetching activity feed:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching activity feed');
   }
 }

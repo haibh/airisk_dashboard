@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+playwright-report/
+test-results/
 
 # next.js
 /.next/
@@ -150,6 +152,7 @@ gcloud/
 # ===========================================
 # Local Development
 # ===========================================
+storage/
 .local/
 local/
 tmp/

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma, AssessmentStatus } from '@prisma/client';
 import { getServerSession, hasMinimumRole } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { AssessmentStatus } from '@prisma/client';
+import { handleApiError, unauthorizedError, forbiddenError, notFoundError, validationError } from '@/lib/api-error-handler';
+import { updateAssessmentSchema, validateBody, formatZodErrors } from '@/lib/api-validation-schemas';
+import { invalidateOnAssessmentChange } from '@/lib/cache-invalidation';
+import { emitWebhookEvent } from '@/lib/webhook-event-dispatcher';
+import { createNotification } from '@/lib/notification-service';
 
 /**
  * GET /api/assessments/[id] - Get single assessment with details
@@ -13,7 +18,7 @@ export async function GET(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { id } = await params;
@@ -65,19 +70,12 @@ export async function GET(
     });
 
     if (!assessment) {
-      return NextResponse.json(
-        { error: 'Assessment not found' },
-        { status: 404 }
-      );
+      return notFoundError('Assessment');
     }
 
     return NextResponse.json(assessment);
   } catch (error) {
-    console.error('Error fetching assessment:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch assessment' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching assessment');
   }
 }
 
@@ -92,14 +90,11 @@ export async function PUT(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     if (!hasMinimumRole(session.user.role, 'ASSESSOR')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Assessor role or higher required');
     }
 
     const { id } = await params;
@@ -113,28 +108,34 @@ export async function PUT(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Assessment not found' },
-        { status: 404 }
-      );
+      return notFoundError('Assessment');
     }
 
     const body = await request.json();
-    const updateData: any = {};
 
-    if (body.title !== undefined) updateData.title = body.title;
-    if (body.description !== undefined) updateData.description = body.description;
-    if (body.status !== undefined) {
-      updateData.status = body.status;
+    // Validate request body
+    const validation = validateBody(updateAssessmentSchema, body);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
+    }
+
+    const data = validation.data;
+
+    // Build update data with proper typing
+    const updateData: Prisma.RiskAssessmentUpdateInput = {};
+    const statusChanged = data.status !== undefined && data.status !== existing.status;
+
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.status !== undefined) {
+      updateData.status = data.status;
       // Set completedAt when approved
-      if (body.status === 'APPROVED' && !existing.completedAt) {
+      if (data.status === 'APPROVED' && !existing.completedAt) {
         updateData.completedAt = new Date();
       }
     }
-    if (body.nextReviewDate !== undefined) {
-      updateData.nextReviewDate = body.nextReviewDate
-        ? new Date(body.nextReviewDate)
-        : null;
+    if (data.nextReviewDate !== undefined) {
+      updateData.nextReviewDate = data.nextReviewDate ? new Date(data.nextReviewDate) : null;
     }
 
     const assessment = await prisma.riskAssessment.update({
@@ -165,13 +166,38 @@ export async function PUT(
       },
     });
 
+    // Invalidate caches after updating assessment
+    await invalidateOnAssessmentChange(session.user.organizationId, id);
+
+    // Emit webhook events
+    emitWebhookEvent(session.user.organizationId, 'assessment.updated', {
+      id: assessment.id,
+      title: assessment.title,
+      status: assessment.status,
+    });
+
+    if (statusChanged) {
+      emitWebhookEvent(session.user.organizationId, 'assessment.status_changed', {
+        id: assessment.id,
+        title: assessment.title,
+        oldStatus: existing.status,
+        newStatus: assessment.status,
+      });
+
+      // Create notification for assessment creator
+      createNotification({
+        userId: existing.createdById,
+        orgId: session.user.organizationId,
+        type: 'ASSESSMENT_STATUS',
+        title: 'Assessment Status Changed',
+        body: `Assessment "${assessment.title}" status changed from ${existing.status} to ${assessment.status}`,
+        link: `/${session.user.organizationId}/risk-assessment/${assessment.id}`,
+      }).catch((err) => console.error('Failed to create notification:', err));
+    }
+
     return NextResponse.json(assessment);
   } catch (error) {
-    console.error('Error updating assessment:', error);
-    return NextResponse.json(
-      { error: 'Failed to update assessment' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'updating assessment');
   }
 }
 
@@ -186,14 +212,11 @@ export async function DELETE(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     if (!hasMinimumRole(session.user.role, 'RISK_MANAGER')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Risk Manager role or higher required');
     }
 
     const { id } = await params;
@@ -207,10 +230,7 @@ export async function DELETE(
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: 'Assessment not found' },
-        { status: 404 }
-      );
+      return notFoundError('Assessment');
     }
 
     // Archive instead of delete
@@ -219,12 +239,11 @@ export async function DELETE(
       data: { status: AssessmentStatus.ARCHIVED },
     });
 
+    // Invalidate caches after archiving assessment
+    await invalidateOnAssessmentChange(session.user.organizationId, id);
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error archiving assessment:', error);
-    return NextResponse.json(
-      { error: 'Failed to archive assessment' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'archiving assessment');
   }
 }

@@ -29,6 +29,11 @@ model Organization {
   riskAssessments RiskAssessment[]
   evidence        Evidence[]
   auditLogs       AuditLog[]
+  scheduledJobs   ScheduledJob[]
+  invitations     Invitation[]
+  apiKeys         APIKey[]
+  webhooks        Webhook[]
+  notifications   Notification[]
 
   @@map("organizations")
 }
@@ -42,6 +47,8 @@ model User {
   languagePref   String   @default("en")
   emailVerified  DateTime?
   image          String?
+  isActive       Boolean  @default(true)
+  lastLoginAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -55,6 +62,12 @@ model User {
   assignedTasks    Task[]           @relation("TaskAssignee")
   uploadedEvidence Evidence[]       @relation("EvidenceUploader")
   auditLogs        AuditLog[]
+  createdJobs      ScheduledJob[]   @relation("JobCreator")
+  savedFilters     SavedFilter[]    @relation("UserSavedFilters")
+  sentInvitations  Invitation[]     @relation("InvitedByUser")
+  apiKeys          APIKey[]         @relation("APIKeyCreator")
+  webhooks         Webhook[]        @relation("WebhookCreator")
+  notifications    Notification[]   @relation("UserNotifications")
 
   // NextAuth relations
   accounts Account[]
@@ -534,4 +547,216 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// SCHEDULED JOBS
+// ============================================================================
+
+model ScheduledJob {
+  id            String       @id @default(cuid())
+  name          String
+  jobType       JobType
+  schedule      String       // Cron expression
+  config        Json         // Report parameters
+  lastRunAt     DateTime?
+  nextRunAt     DateTime?
+  status        JobStatus    @default(ACTIVE)
+  lastResult    Json?
+  errorCount    Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById   String?
+  createdBy     User?   @relation("JobCreator", fields: [createdById], references: [id])
+
+  @@map("scheduled_jobs")
+}
+
+enum JobType {
+  COMPLIANCE_REPORT
+  RISK_REGISTER
+  ACTIVITY_LOG
+  GAP_ANALYSIS
+}
+
+enum JobStatus {
+  ACTIVE
+  PAUSED
+  RUNNING
+  FAILED
+}
+
+// ============================================================================
+// SAVED FILTERS
+// ============================================================================
+
+model SavedFilter {
+  id         String   @id @default(cuid())
+  name       String
+  entityType String   // 'ai_system', 'assessment', 'risk', 'evidence'
+  filters    Json     // Filter configuration
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId String
+  user   User   @relation("UserSavedFilters", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_filters")
+}
+
+// ============================================================================
+// INVITATION MANAGEMENT
+// ============================================================================
+
+model Invitation {
+  id         String           @id @default(cuid())
+  email      String
+  role       UserRole         @default(VIEWER)
+  token      String           @unique
+  status     InvitationStatus @default(PENDING)
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  invitedById String
+  invitedBy   User   @relation("InvitedByUser", fields: [invitedById], references: [id])
+
+  @@index([token])
+  @@index([organizationId])
+  @@map("invitations")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+// ============================================================================
+// API KEY MANAGEMENT
+// ============================================================================
+
+model APIKey {
+  id          String        @id @default(cuid())
+  name        String
+  keyPrefix   String        // First 8 chars for identification
+  keyHash     String        @unique // SHA-256 hash of full key
+  permissions KeyPermission @default(READ_ONLY)
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  lastUsedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("APIKeyCreator", fields: [createdById], references: [id])
+
+  @@index([keyHash])
+  @@index([organizationId])
+  @@map("api_keys")
+}
+
+enum KeyPermission {
+  READ_ONLY
+  READ_WRITE
+}
+
+// ============================================================================
+// WEBHOOK MANAGEMENT
+// ============================================================================
+
+model Webhook {
+  id          String   @id @default(cuid())
+  url         String
+  secret      String   // HMAC signing secret
+  events      String[] // Array of event type strings
+  isActive    Boolean  @default(true)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("WebhookCreator", fields: [createdById], references: [id])
+
+  deliveries WebhookDelivery[]
+
+  @@index([organizationId])
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id             String         @id @default(cuid())
+  eventType      String
+  payload        Json
+  responseStatus Int?
+  responseBody   String?        @db.Text
+  duration       Int?           // milliseconds
+  attempt        Int            @default(1)
+  status         DeliveryStatus @default(PENDING)
+  nextRetryAt    DateTime?
+  createdAt      DateTime       @default(now())
+
+  webhookId String
+  webhook   Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_deliveries")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+// ============================================================================
+// NOTIFICATION SYSTEM
+// ============================================================================
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  body      String?
+  link      String?          // Relative URL to navigate to
+  isRead    Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  userId String
+  user   User   @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@index([organizationId])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  INVITE_ACCEPTED
+  ASSESSMENT_STATUS
+  RISK_CRITICAL
+  WEBHOOK_FAILED
+  PASSWORD_CHANGED
+  ROLE_CHANGED
+  SYSTEM_ALERT
 }

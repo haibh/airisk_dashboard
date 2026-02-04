@@ -168,7 +168,7 @@ describe('GET /api/dashboard/risk-heatmap', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toBe('Internal server error');
+      expect(data.error).toBe('An unexpected error occurred');
     });
   });
 });

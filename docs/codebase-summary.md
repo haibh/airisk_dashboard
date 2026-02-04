@@ -48,7 +48,9 @@ AIRisk_Dashboard/
 │   ├── seed-cis-controls.ts    # CIS Controls v8.1
 │   ├── seed-csa-aicm.ts        # CSA AICM framework
 │   ├── seed-nist-csf.ts        # NIST Cybersecurity Framework
-│   └── seed-pci-dss.ts         # PCI DSS v4.0.1
+│   ├── seed-pci-dss.ts         # PCI DSS v4.0.1
+│   ├── seed-iso-27001.ts       # ISO 27001:2022
+│   └── seed-scf.ts             # Secure Controls Framework v2025.4
 ├── src/
 │   ├── app/                    # Next.js app router structure
 │   │   ├── [locale]/
@@ -198,17 +200,21 @@ model AISystem {
 ---
 
 ### 3. Framework Knowledge Base (FR-MAP)
-**Status:** ✅ Completed (Phase 4)
+**Status:** ✅ Completed (Phase 4, expanded Phase 10+)
 
-**Frameworks Integrated:**
-1. **NIST AI RMF 1.0 (2023)**
-   - 4 Functions: Govern, Map, Measure, Manage
-   - 19 Categories
-   - 85+ Specific Controls
+**Frameworks grouped into two sections in UI:**
 
-2. **ISO/IEC 42001:2023**
-   - 9 Control Areas (A.2 - A.10)
-   - 38 Specific Controls
+**AI Risk Frameworks** (with per-framework icons):
+1. **NIST AI RMF 1.0** — BrainCircuit icon — 4 Functions, 19 Categories, 72+ Subcategories
+2. **ISO/IEC 42001:2023** — Settings2 icon — 9 Domains, 38 Controls
+3. **CSA AI Controls Matrix 1.0** — ShieldCheck icon — 18 Domains, 51 Controls
+
+**Non-AI-Specific Frameworks**:
+4. **NIST CSF 2.0** — ShieldAlert icon — 6 Functions, 22 Categories
+5. **ISO 27001:2022** — Lock icon — 4 Themes, 93 Controls
+6. **CIS Controls v8.1** — Target icon — 18 Controls, 153 Safeguards
+7. **PCI DSS v4.0.1** — CreditCard icon — 12 Requirements, 58 Sub-requirements
+8. **SCF v2025.4** — Layers icon — 21 Domains, ~90 Controls
 
 **API Endpoints:**
 ```
@@ -709,6 +715,39 @@ npm run analyze             # Analyze bundle size
 
 ---
 
+## Code Review Findings (2026-02-04)
+
+### Test & Build Status
+- **Tests:** 262/262 passing (100%)
+- **TypeScript:** 0 errors (strict mode)
+- **Build:** Production build successful
+- **Type Coverage:** 100% (no `any` abuse)
+
+### Critical Issues Identified (Fix Before Production)
+1. **Console.error in auth route** - Uses console.error instead of logger (info leakage risk)
+2. **Missing auth on framework controls endpoint** - No session check, should have defense-in-depth
+3. **Rate limit header bug** - Header shows `remaining+1` instead of total limit
+4. **Middleware path matching too broad** - Uses `.includes('.')` instead of regex, bypasses API routes
+
+### High Priority Issues
+5. **No XSS input sanitization** - Risk if dangerouslySetInnerHTML found (requires codebase scan)
+6. **Weak login rate limiting** - Only 100 req/min, should be 10 req/min for login attempts
+7. **Session token exposure in errors** - Token verification not wrapped in try-catch
+8. **Potential N+1 queries** - Some nested includes could be optimized with Promise.all
+
+### Medium Priority Issues
+9. **Weak password requirements** - Only checks length, no complexity requirements
+10. **Missing CORS headers** - No explicit CORS configuration in next.config.ts
+11. **Database connection pool not configured** - Defaults to 10, needs tuning for >100 systems
+12. **Notification links expose org ID** - Uses internal org CUID in URL (should use slug)
+13. **CUID vs UUID validation mismatch** - Zod schemas expect UUID but DB uses CUID
+14. **Redis key collision risk** - Simple colon delimiters in cache keys, should hash org IDs
+15. **Fire-and-forget notifications** - No retry mechanism if delivery fails
+
+**Full Review Report:** `plans/reports/code-review-260204-0935-codebase-review.md`
+
+---
+
 ## Important Notes for Developers
 
 1. **Database Setup Required:** PostgreSQL must be running before `npm run db:push`
@@ -723,5 +762,5 @@ npm run analyze             # Analyze bundle size
 ---
 
 **Codebase Summary Generated:** 2026-02-04
-**Last Updated:** 2026-02-04 09:23 UTC (Phase 13 - Multi-Tenant & Polish)
+**Last Updated:** 2026-02-04 12:08 UTC (Framework UI grouping, icons, SCF v2025.4)
 **Maintained By:** docs-manager agent

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
+import { handleApiError, unauthorizedError, forbiddenError, notFoundError, validationError } from '@/lib/api-error-handler';
+import { updateAISystemSchema, validateBody, formatZodErrors } from '@/lib/api-validation-schemas';
+import { invalidateOnAISystemChange } from '@/lib/cache-invalidation';
+import { emitWebhookEvent } from '@/lib/webhook-event-dispatcher';
 
 /**
  * GET /api/ai-systems/[id] - Get single AI system by ID
@@ -12,7 +16,7 @@ export async function GET(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { id } = await params;
@@ -34,19 +38,12 @@ export async function GET(
     });
 
     if (!aiSystem) {
-      return NextResponse.json(
-        { error: 'AI system not found' },
-        { status: 404 }
-      );
+      return notFoundError('AI system');
     }
 
     return NextResponse.json(aiSystem);
   } catch (error) {
-    console.error('Error fetching AI system:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch AI system' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching AI system');
   }
 }
 
@@ -61,7 +58,7 @@ export async function PUT(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { id } = await params;
@@ -75,10 +72,7 @@ export async function PUT(
     });
 
     if (!existingSystem) {
-      return NextResponse.json(
-        { error: 'AI system not found' },
-        { status: 404 }
-      );
+      return notFoundError('AI system');
     }
 
     // Check permissions - only owner or ADMIN can update
@@ -86,30 +80,35 @@ export async function PUT(
     const isAdmin = session.user.role === 'ADMIN';
 
     if (!isOwner && !isAdmin) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Only the owner or Admin can update this AI system');
     }
 
     const body = await request.json();
+
+    // Validate request body
+    const validation = validateBody(updateAISystemSchema, body);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
+    }
+
+    const data = validation.data;
 
     // Update AI system
     const updatedSystem = await prisma.aISystem.update({
       where: { id },
       data: {
-        name: body.name,
-        description: body.description || null,
-        systemType: body.systemType,
-        dataClassification: body.dataClassification,
-        lifecycleStatus: body.lifecycleStatus,
-        riskTier: body.riskTier || null,
-        purpose: body.purpose || null,
-        dataInputs: body.dataInputs || null,
-        dataOutputs: body.dataOutputs || null,
-        thirdPartyAPIs: body.thirdPartyAPIs || [],
-        baseModels: body.baseModels || [],
-        trainingDataSources: body.trainingDataSources || [],
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.description !== undefined && { description: data.description ?? null }),
+        ...(data.systemType !== undefined && { systemType: data.systemType }),
+        ...(data.dataClassification !== undefined && { dataClassification: data.dataClassification }),
+        ...(data.lifecycleStatus !== undefined && { lifecycleStatus: data.lifecycleStatus }),
+        ...(data.riskTier !== undefined && { riskTier: data.riskTier ?? null }),
+        ...(data.purpose !== undefined && { purpose: data.purpose ?? null }),
+        ...(data.dataInputs !== undefined && { dataInputs: data.dataInputs ?? null }),
+        ...(data.dataOutputs !== undefined && { dataOutputs: data.dataOutputs ?? null }),
+        ...(data.thirdPartyAPIs !== undefined && { thirdPartyAPIs: data.thirdPartyAPIs }),
+        ...(data.baseModels !== undefined && { baseModels: data.baseModels }),
+        ...(data.trainingDataSources !== undefined && { trainingDataSources: data.trainingDataSources }),
       },
       include: {
         owner: {
@@ -122,13 +121,19 @@ export async function PUT(
       },
     });
 
+    // Invalidate caches after updating AI system
+    await invalidateOnAISystemChange(session.user.organizationId, id);
+
+    // Emit webhook event
+    emitWebhookEvent(session.user.organizationId, 'ai_system.updated', {
+      id: updatedSystem.id,
+      name: updatedSystem.name,
+      systemType: updatedSystem.systemType,
+    });
+
     return NextResponse.json(updatedSystem);
   } catch (error) {
-    console.error('Error updating AI system:', error);
-    return NextResponse.json(
-      { error: 'Failed to update AI system' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'updating AI system');
   }
 }
 
@@ -143,7 +148,7 @@ export async function DELETE(
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { id } = await params;
@@ -157,10 +162,7 @@ export async function DELETE(
     });
 
     if (!existingSystem) {
-      return NextResponse.json(
-        { error: 'AI system not found' },
-        { status: 404 }
-      );
+      return notFoundError('AI system');
     }
 
     // Check permissions - only owner or ADMIN can delete
@@ -168,10 +170,7 @@ export async function DELETE(
     const isAdmin = session.user.role === 'ADMIN';
 
     if (!isOwner && !isAdmin) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Only the owner or Admin can delete this AI system');
     }
 
     // Soft delete by setting status to RETIRED
@@ -182,12 +181,17 @@ export async function DELETE(
       },
     });
 
+    // Invalidate caches after deleting AI system
+    await invalidateOnAISystemChange(session.user.organizationId, id);
+
+    // Emit webhook event
+    emitWebhookEvent(session.user.organizationId, 'ai_system.deleted', {
+      id: existingSystem.id,
+      name: existingSystem.name,
+    });
+
     return NextResponse.json({ message: 'AI system retired successfully' });
   } catch (error) {
-    console.error('Error deleting AI system:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete AI system' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'deleting AI system');
   }
 }

@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { getServerSession, hasMinimumRole } from '@/lib/auth-helpers';
 import { prisma } from '@/lib/db';
-import { AssessmentStatus } from '@prisma/client';
+import { handleApiError, unauthorizedError, forbiddenError, validationError, notFoundError } from '@/lib/api-error-handler';
+import {
+  createAssessmentSchema,
+  assessmentFilterSchema,
+  validateBody,
+  formatZodErrors,
+} from '@/lib/api-validation-schemas';
+import { invalidateOnAssessmentChange } from '@/lib/cache-invalidation';
+import { emitWebhookEvent } from '@/lib/webhook-event-dispatcher';
 
 /**
  * GET /api/assessments - List risk assessments with filtering
@@ -10,21 +19,23 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get('search') || undefined;
-    const status = searchParams.get('status') as AssessmentStatus | null;
-    const aiSystemId = searchParams.get('aiSystemId') || undefined;
-    const frameworkId = searchParams.get('frameworkId') || undefined;
-    const page = parseInt(searchParams.get('page') || '1');
-    const pageSize = parseInt(searchParams.get('pageSize') || '10');
+    const params = Object.fromEntries(searchParams.entries());
 
+    // Validate query parameters
+    const validation = validateBody(assessmentFilterSchema, params);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
+    }
+
+    const { page, pageSize, search, status, aiSystemId, frameworkId } = validation.data;
     const skip = (page - 1) * pageSize;
 
-    // Build where clause
-    const where: any = {
+    // Build where clause with proper typing
+    const where: Prisma.RiskAssessmentWhereInput = {
       organizationId: session.user.organizationId,
     };
 
@@ -92,11 +103,7 @@ export async function GET(request: NextRequest) {
       totalPages: Math.ceil(total / pageSize),
     });
   } catch (error) {
-    console.error('Error fetching assessments:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch assessments' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching assessments');
   }
 }
 
@@ -108,68 +115,55 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return unauthorizedError();
     }
 
     // Check role - ASSESSOR or higher
     if (!hasMinimumRole(session.user.role, 'ASSESSOR')) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      );
+      return forbiddenError('Assessor role or higher required');
     }
 
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.title || !body.aiSystemId || !body.frameworkId) {
-      return NextResponse.json(
-        { error: 'Missing required fields: title, aiSystemId, frameworkId' },
-        { status: 400 }
-      );
+    // Validate request body
+    const validation = validateBody(createAssessmentSchema, body);
+    if (!validation.success) {
+      return validationError(formatZodErrors(validation.error));
     }
+
+    const data = validation.data;
 
     // Verify AI system exists and belongs to organization
     const aiSystem = await prisma.aISystem.findFirst({
       where: {
-        id: body.aiSystemId,
+        id: data.aiSystemId,
         organizationId: session.user.organizationId,
       },
     });
 
     if (!aiSystem) {
-      return NextResponse.json(
-        { error: 'AI system not found' },
-        { status: 404 }
-      );
+      return notFoundError('AI system');
     }
 
     // Verify framework exists
     const framework = await prisma.framework.findUnique({
-      where: { id: body.frameworkId },
+      where: { id: data.frameworkId },
     });
 
     if (!framework) {
-      return NextResponse.json(
-        { error: 'Framework not found' },
-        { status: 404 }
-      );
+      return notFoundError('Framework');
     }
 
     // Create assessment
     const assessment = await prisma.riskAssessment.create({
       data: {
-        title: body.title,
-        description: body.description || null,
-        assessmentDate: body.assessmentDate
-          ? new Date(body.assessmentDate)
-          : new Date(),
-        nextReviewDate: body.nextReviewDate
-          ? new Date(body.nextReviewDate)
-          : null,
+        title: data.title,
+        description: data.description ?? null,
+        assessmentDate: data.assessmentDate ? new Date(data.assessmentDate) : new Date(),
+        nextReviewDate: data.nextReviewDate ? new Date(data.nextReviewDate) : null,
         organizationId: session.user.organizationId,
-        aiSystemId: body.aiSystemId,
-        frameworkId: body.frameworkId,
+        aiSystemId: data.aiSystemId,
+        frameworkId: data.frameworkId,
         createdById: session.user.id,
       },
       include: {
@@ -197,12 +191,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Invalidate caches after creating assessment
+    await invalidateOnAssessmentChange(session.user.organizationId, assessment.id);
+
+    // Emit webhook event
+    emitWebhookEvent(session.user.organizationId, 'assessment.created', {
+      id: assessment.id,
+      title: assessment.title,
+      status: assessment.status,
+    });
+
     return NextResponse.json(assessment, { status: 201 });
   } catch (error) {
-    console.error('Error creating assessment:', error);
-    return NextResponse.json(
-      { error: 'Failed to create assessment' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'creating assessment');
   }
 }

@@ -15,27 +15,46 @@ const publicPaths = ['/', '/login', '/forgot-password'];
 
 // Check if path is public
 function isPublicPath(pathname: string): boolean {
-  // Remove locale prefix to check base path
   const pathWithoutLocale = pathname.replace(/^\/(en|vi)/, '');
   return publicPaths.some((path) => pathWithoutLocale === path || pathWithoutLocale === '');
+}
+
+// Generate unique correlation ID for request tracking (Edge-compatible)
+function generateCorrelationId(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `req-${Date.now().toString(36)}-${hex}`;
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip auth check for API routes and static files
+  // Generate correlation ID for request tracking
+  const correlationId = request.headers.get('x-correlation-id') || generateCorrelationId();
+
+  // Skip auth check for static files and internal Next.js routes
   if (
-    pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/_vercel') ||
     pathname.includes('.')
   ) {
-    return intlMiddleware(request);
+    const response = intlMiddleware(request);
+    response.headers.set('x-correlation-id', correlationId);
+    return response;
+  }
+
+  // Skip auth check for API routes (handled by individual API route handlers)
+  if (pathname.startsWith('/api')) {
+    const response = NextResponse.next();
+    response.headers.set('x-correlation-id', correlationId);
+    return response;
   }
 
   // Check if path is public
   if (isPublicPath(pathname)) {
-    return intlMiddleware(request);
+    const response = intlMiddleware(request);
+    response.headers.set('x-correlation-id', correlationId);
+    return response;
   }
 
   // Check authentication for protected routes
@@ -52,14 +71,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // User is authenticated, continue with i18n middleware
-  return intlMiddleware(request);
+  // Authenticated — continue with i18n
+  const response = intlMiddleware(request);
+  response.headers.set('x-correlation-id', correlationId);
+  return response;
 }
 
 export const config = {
-  // Match all pathnames except for
-  // - API routes
-  // - Static files
-  // - Internal Next.js paths
   matcher: ['/((?!api|_next|_vercel|.*\\..*).*)'],
 };

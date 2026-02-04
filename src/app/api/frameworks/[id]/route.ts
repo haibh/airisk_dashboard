@@ -5,6 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { handleApiError, notFoundError } from '@/lib/api-error-handler';
 
 export async function GET(
   request: Request,
@@ -25,18 +26,11 @@ export async function GET(
     });
 
     if (!framework) {
-      return NextResponse.json(
-        { error: 'Framework not found' },
-        { status: 404 }
-      );
+      return notFoundError('Framework');
     }
 
     return NextResponse.json(framework);
   } catch (error) {
-    console.error('Error fetching framework:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch framework' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching framework');
   }
 }
