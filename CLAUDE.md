@@ -73,6 +73,7 @@ src/app/
 │   │   ├── ai-systems/          # AI inventory CRUD (not yet implemented)
 │   │   ├── risk-assessment/     # Risk assessment wizard
 │   │   ├── frameworks/          # Framework browser + control tree
+│   │   ├── technical-view/      # Operations + AI risk (tabbed)
 │   │   ├── evidence/            # Evidence management
 │   │   ├── gap-analysis/        # Gap analysis views
 │   │   └── settings/            # User/org settings

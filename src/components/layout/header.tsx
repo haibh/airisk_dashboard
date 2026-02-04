@@ -54,7 +54,7 @@ export function Header() {
     : session?.user?.email?.[0]?.toUpperCase() || 'U';
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-6">
+    <header className="flex h-16 items-center justify-between internal-header px-6">
       {/* Left side - Breadcrumb or Title */}
       <div className="flex items-center gap-4">
         <h1 className="text-lg font-semibold">{t('dashboard.title')}</h1>

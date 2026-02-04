@@ -7,7 +7,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden dashboard-enhanced">
       {/* Skip link for keyboard accessibility */}
       <a href="#main-content" className="skip-link">
         Skip to main content

@@ -1,7 +1,7 @@
 # AIRisk Dashboard - Codebase Summary
 
 **Generated:** 2026-02-04
-**Codebase Status:** MVP4 Phase 13 (Multi-Tenant & Polish) - Complete
+**Codebase Status:** MVP4 Phase 14 (Dashboard Consolidation & Login Redesign) - Complete
 **Total Files:** 195+ files (including tests, migrations, seeds)
 **Total Lines:** ~20,000+ lines of TypeScript/TSX/SQL
 
@@ -55,12 +55,13 @@ AIRisk_Dashboard/
 │   ├── app/                    # Next.js app router structure
 │   │   ├── [locale]/
 │   │   │   ├── (auth)/         # Authentication pages
-│   │   │   │   └── login/
+│   │   │   │   └── login/      # Glassmorphism redesign (Feb 2026)
 │   │   │   ├── (dashboard)/    # Protected dashboard routes
-│   │   │   │   ├── dashboard/
+│   │   │   │   ├── dashboard/  # 4 tabs: Executive Brief | Detailed Analytics | Operations | AI Risk
 │   │   │   │   ├── ai-systems/
 │   │   │   │   ├── risk-assessment/
-│   │   │   │   └── frameworks/
+│   │   │   │   ├── frameworks/
+│   │   │   │   └── [DELETED] technical-view/
 │   │   │   └── layout.tsx
 │   │   └── api/                # REST API endpoints
 │   │       ├── auth/
@@ -79,6 +80,9 @@ AIRisk_Dashboard/
 │   │   ├── frameworks/         # Framework tree, controls table
 │   │   ├── settings/           # Organization, users, API keys, webhooks
 │   │   ├── evidence/           # Evidence upload, approval workflow
+│   │   ├── dashboard/          # Dashboard sub-components (operations-view, ai-risk-view-panel, stat-cards, etc.)
+│   │   ├── ops-center/         # [RETAINED] Operations panel components (used by dashboard)
+│   │   ├── ai-risk-view/      # [RETAINED] AI risk specialist components (used by dashboard)
 │   │   ├── gap-analysis/       # Gap analysis engine and visualization
 │   │   ├── notifications/      # Notification dropdown, list
 │   │   ├── audit-log/          # Audit log viewer with filters
@@ -129,12 +133,12 @@ AIRisk_Dashboard/
 ## Core Modules & Features
 
 ### 1. Authentication & Authorization (NFR-SEC-01)
-**Status:** ✅ Completed (Phase 2)
+**Status:** ✅ Completed (Phase 2 + Feb 2026 Redesign)
 
 **Implementation:**
 - NextAuth.js with JWT strategy
 - Role-based access control (RBAC)
-- Login page with i18n support
+- Login page with glassmorphism UI (animated gradient, backdrop-blur, glow effect)
 - Protected API routes via middleware
 - Seed script with 5 test users
 
@@ -142,6 +146,8 @@ AIRisk_Dashboard/
 - `src/app/api/auth/[...nextauth]/route.ts`
 - `src/lib/auth-helpers.ts`
 - `src/middleware.ts`
+- `src/app/[locale]/(auth)/login/page.tsx` (Feb 2026 redesign)
+- `src/app/globals.css` (login styling)
 - `prisma/seed.ts`
 
 **Roles & Permissions:**
@@ -337,13 +343,21 @@ model Risk {
 ---
 
 ### 5. Dashboard & Reporting (FR-DASH)
-**Status:** ✅ Completed (Phase 6)
+**Status:** ✅ Completed (Phase 6 + Feb 2026 Consolidation)
 
 **Features Implemented:**
-- ✅ FR-DASH-01: Executive summary dashboard
-- ✅ FR-DASH-02: Framework compliance scorecard
+- ✅ FR-DASH-01: Executive summary dashboard (Tab 1)
+- ✅ FR-DASH-02: Framework compliance scorecard (Tab 2)
 - ✅ FR-DASH-03: Drill-down navigation
 - ✅ FR-DASH-04: Report export (PDF/CSV)
+- ✅ FR-DASH-05: Operations center (Tab 3 - formerly separate page)
+- ✅ FR-DASH-06: AI Risk specialist view (Tab 4 - formerly separate page)
+
+**Dashboard Consolidation (Feb 2026):**
+- Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
+- Unified 4-tab interface in single `/dashboard` page
+- Removed dedicated `/technical-view` route
+- Component organization retained for reusability
 
 **API Endpoints:**
 ```
@@ -359,7 +373,9 @@ GET    /api/reports/compliance       # Compliance report
 **Key Files:**
 - `src/app/api/dashboard/*.ts`
 - `src/app/api/reports/*.ts`
-- `src/app/[locale]/(dashboard)/dashboard/page.tsx`
+- `src/app/[locale]/(dashboard)/dashboard/page.tsx` (Feb 2026: 4-tab layout, ~85 LOC)
+- `src/components/dashboard/operations-view.tsx` (new, 35 LOC)
+- `src/components/dashboard/ai-risk-view-panel.tsx` (new, 74 LOC)
 
 ---
 
@@ -762,5 +778,5 @@ npm run analyze             # Analyze bundle size
 ---
 
 **Codebase Summary Generated:** 2026-02-04
-**Last Updated:** 2026-02-04 12:08 UTC (Framework UI grouping, icons, SCF v2025.4)
+**Last Updated:** 2026-02-04 16:05 UTC (Dashboard consolidation + Login redesign)
 **Maintained By:** docs-manager agent

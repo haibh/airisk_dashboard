@@ -1,0 +1,96 @@
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { RiskHeatmapData } from '@/types/dashboard';
+
+const BG_COLORS = [
+  ['bg-yellow-500/80', 'bg-orange-500/80', 'bg-red-500/80', 'bg-red-600/90', 'bg-red-700/90'],
+  ['bg-green-500/80', 'bg-yellow-500/80', 'bg-orange-500/80', 'bg-red-500/80', 'bg-red-600/90'],
+  ['bg-green-400/80', 'bg-green-500/80', 'bg-yellow-500/80', 'bg-orange-500/80', 'bg-red-500/80'],
+  ['bg-green-300/80', 'bg-green-400/80', 'bg-green-500/80', 'bg-yellow-500/80', 'bg-orange-500/80'],
+  ['bg-green-200/80', 'bg-green-300/80', 'bg-green-400/80', 'bg-green-500/80', 'bg-yellow-500/80'],
+];
+
+interface RiskHeatmapEnhancedProps {
+  data: RiskHeatmapData | null;
+  isLoading?: boolean;
+}
+
+export function RiskHeatmapEnhanced({ data, isLoading }: RiskHeatmapEnhancedProps) {
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <Skeleton className="h-5 w-32" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-1.5">
+            {Array(5).fill(0).map((_, i) => (
+              <div key={i} className="flex gap-1.5">
+                {Array(5).fill(0).map((_, j) => (
+                  <Skeleton key={j} className="h-10 flex-1 rounded-lg" />
+                ))}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Risk Heatmap</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">No risk data</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const reversed = [...data.heatmap].reverse();
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm font-medium">Risk Heatmap</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-1.5">
+          <div className="flex items-end gap-1.5">
+            <div className="w-8 text-[10px] text-muted-foreground leading-tight">Likely</div>
+            <div className="flex-1 text-center text-[10px] text-muted-foreground">
+              Impact &rarr;
+            </div>
+          </div>
+          {reversed.map((row, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <div className="w-8 text-[10px] text-muted-foreground text-right">{5 - i}</div>
+              {row.map((count, j) => (
+                <div
+                  key={j}
+                  className={`flex-1 aspect-square ${BG_COLORS[i][j]} rounded-lg flex items-center justify-center text-white text-xs font-semibold shadow-sm transition-transform hover:scale-105`}
+                  title={`Likelihood: ${5 - i}, Impact: ${j + 1} — ${count} risk(s)`}
+                >
+                  {count > 0 && count}
+                </div>
+              ))}
+            </div>
+          ))}
+          <div className="flex items-center gap-1.5">
+            <div className="w-8" />
+            {[1, 2, 3, 4, 5].map((n) => (
+              <div key={n} className="flex-1 text-center text-[10px] text-muted-foreground">
+                {n}
+              </div>
+            ))}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

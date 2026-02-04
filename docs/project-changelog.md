@@ -1,12 +1,70 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-04 | **Current Version:** MVP4.2
+**Last Updated:** 2026-02-04 | **Current Version:** MVP4.4
 
 ---
 
 ## Version History
 
-### MVP4.2 (Current) - 2026-02-04
+### MVP4.4 (Current) - 2026-02-04
+
+#### Dashboard Consolidation + Login Redesign
+**Date:** 2026-02-04
+**Impact:** Navigation restructure + UI/UX refresh
+
+**Dashboard Consolidation:**
+- Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
+- Created unified 4-tab dashboard: Executive Brief | Detailed Analytics | Operations | AI Risk
+- Deleted `/technical-view` route entirely
+- Sidebar: replaced "Technical View" nav item with single "Dashboard" entry
+- Component organization retained for reusability (ops-center/, ai-risk-view/ folders unchanged)
+
+**Login Page Redesign:**
+- Full-page animated gradient background (blue/purple spectrum, CSS-only)
+- Glassmorphism card with backdrop-blur and glow effect (11px blur radius)
+- Shield icon branding, white text on dark glass, improved contrast
+- Mobile-responsive design maintained
+
+**Files Modified:**
+- `src/app/[locale]/(dashboard)/dashboard/page.tsx` — refactored from 558 to ~85 LOC (4-tab layout)
+- `src/components/dashboard/operations-view.tsx` — new component (35 LOC)
+- `src/components/dashboard/ai-risk-view-panel.tsx` — new component (74 LOC)
+- `src/components/layout/sidebar.tsx` — single "Dashboard" nav entry
+- `src/app/globals.css` — login gradient, glassmorphism styles
+- `src/app/[locale]/(auth)/login/page.tsx` — redesigned layout
+- `src/i18n/messages/en.json` — simplified dashboard namespace
+- `src/i18n/messages/vi.json` — simplified dashboard namespace
+- Deleted: `src/app/[locale]/(dashboard)/technical-view/`
+
+**Tests:** 262/262 passing (100%)
+**Build Status:** TypeScript 0 errors
+
+---
+
+### MVP4.3 - 2026-02-04
+
+#### Framework UI Grouping, Icons & SCF Update
+**Date:** 2026-02-04 (pre-consolidation)
+**Impact:** UI improvement, data update
+
+**Changes:**
+- Frameworks page divided into: AI Risk Frameworks + Non-AI-Specific Frameworks
+- Per-framework icons (BrainCircuit, Settings2, ShieldCheck, ShieldAlert, Lock, Target, CreditCard, Layers)
+- SCF updated to v2025.4 (effective April 2025)
+- i18n updated with section headers (EN/VI)
+
+**Files Modified:**
+- `src/app/[locale]/(dashboard)/frameworks/page.tsx`
+- `prisma/seed-scf.ts`
+- `src/i18n/messages/en.json`
+- `src/i18n/messages/vi.json`
+
+**Tests:** 262/262 passing (100%)
+**Build Status:** ✅ TypeScript clean compile
+
+---
+
+### MVP4.2 - 2026-02-04
 
 #### Framework UI Grouping, Icons & SCF Update
 **Date:** 2026-02-04
