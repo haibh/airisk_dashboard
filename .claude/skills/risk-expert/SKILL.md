@@ -1,7 +1,7 @@
 ---
 name: risk-expert
-description: GRC (Governance, Risk, Compliance) expert for AI/IT/Security/Ops risks. Provides risk assessments, framework control mappings (8+ frameworks), scoring (5x5 matrix), gating decisions, and compliance guidance.
-version: 2.1.0
+description: GRC (Governance, Risk, Compliance) expert for AI/IT/Security/Ops risks. Provides risk assessments, framework control mappings (25+ frameworks), scoring (5x5 matrix), gating decisions, and compliance guidance.
+version: 2.2.0
 license: MIT
 ---
 
@@ -15,7 +15,7 @@ Principal GRC (Governance, Risk & Compliance) Advisor for AI Risk, IT Risk, Secu
 - Evaluating new features/systems for risk exposure
 - Creating risk registers and control mappings
 - Planning releases with go/no-go gating conditions
-- Mapping controls across frameworks (8+ supported)
+- Mapping controls across frameworks (25+ supported)
 - Conducting vendor/third-party risk assessments
 - Advising on GRC program maturity
 - OWASP LLM Top 10 vulnerability assessment
@@ -47,11 +47,12 @@ Principal GRC (Governance, Risk & Compliance) Advisor for AI Risk, IT Risk, Secu
 
 | Domain | Focus | Key Standards |
 |--------|-------|---------------|
-| **AI Risk** | Safety, bias, hallucinations, prompt injection | NIST AI RMF 1.0, ISO 42001, CSA AICM, EU AI Act |
-| **Security** | Auth, encryption, vulnerabilities, supply chain | NIST CSF 2.0, ISO 27001, CIS v8.1, OWASP LLM Top 10 |
-| **IT Risk** | Tech debt, dependencies, config drift | ISO 27001, CIS Controls, MITRE ATLAS |
-| **Ops Risk** | Reliability, DR/BCP, SLOs, vendor risk | COSO ERM, ISO 31000 |
-| **Compliance** | Regulatory, contractual, internal standards | PCI DSS, SCF, GDPR, EU AI Act |
+| **AI Risk** | Safety, bias, hallucinations, prompt injection | NIST AI RMF, ISO 42001, CSA AICM, EU AI Act, Google SAIF, MS RAI |
+| **Security** | Auth, encryption, vulnerabilities, supply chain | NIST CSF 2.0, ISO 27001, CIS v8.1, NIST 800-53, OWASP LLM Top 10 |
+| **IT Governance** | Tech debt, dependencies, service mgmt | SOC 2, COBIT 2019, ITIL v4/v5, MITRE ATLAS |
+| **Ops Risk** | Reliability, DR/BCP, SLOs, vendor risk | COSO ERM, ISO 31000, ISO 22301, DORA |
+| **Privacy** | Data protection, consent, rights | ISO 27701, NIST Privacy, HIPAA, GDPR |
+| **Compliance** | Regulatory, contractual, internal standards | PCI DSS, SCF, NIS2, CRA, CMMC 2.0, SEC Rules |
 
 ## Scoring Model (5x5 Matrix)
 
@@ -149,6 +150,7 @@ Immediately flag and recommend blocking:
 
 ## Framework Quick Reference
 
+### AI & ML Frameworks
 | Framework | Scope | Key Use |
 |-----------|-------|---------|
 | NIST AI RMF | AI trustworthiness | AI governance, bias, safety |
@@ -157,10 +159,37 @@ Immediately flag and recommend blocking:
 | OWASP LLM Top 10 | LLM security | Vulnerability assessment |
 | MITRE ATLAS | AI threat landscape | Threat modeling, TTPs |
 | CSA AICM | Cloud AI security | ML security controls |
+| Google SAIF | AI system security | Enterprise AI security |
+| Microsoft RAI | Responsible AI | AI ethics, fairness |
+
+### Security & IT Governance
+| Framework | Scope | Key Use |
+|-----------|-------|---------|
 | NIST CSF 2.0 | Cybersecurity | Security program foundation |
+| NIST 800-53 | Federal security | Detailed security controls |
 | ISO 27001 | Info security mgmt | ISMS certification |
 | CIS v8.1 | Prioritized actions | Quick security wins |
+| SOC 2 | Service organization | Trust services, SaaS compliance |
+| COBIT 2019 | IT governance | IT audit, management |
+| ITIL v4/v5 | Service management | ITSM best practices |
+
+### Privacy Frameworks
+| Framework | Scope | Key Use |
+|-----------|-------|---------|
+| ISO 27701 | Privacy mgmt system | PIMS certification |
+| NIST Privacy | Privacy risk mgmt | Privacy program foundation |
+| HIPAA | Healthcare privacy | PHI protection |
+
+### Regulatory & Compliance
+| Framework | Scope | Key Use |
+|-----------|-------|---------|
 | PCI DSS 4.0 | Payment security | Cardholder data |
+| NIS2 | EU critical infrastructure | 18 sectors, incident reporting |
+| DORA | EU financial resilience | ICT risk, testing |
+| CRA | EU product security | Products with digital elements |
+| CMMC 2.0 | DoD contractors | CUI protection |
+| SEC Rules | Public companies | Cyber incident disclosure |
+| CISA CPGs | Critical infrastructure | Baseline cybersecurity |
 | SCF v2025.4 | Meta-framework | Cross-framework mapping |
 
 ## Quantitative Methods

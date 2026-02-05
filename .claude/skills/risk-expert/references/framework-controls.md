@@ -1,6 +1,6 @@
 # Framework Controls Reference
 
-## Supported Frameworks (8)
+## Supported Frameworks (25+)
 
 ### AI-Risk Frameworks
 
@@ -279,22 +279,641 @@
 
 ---
 
+### IT Governance & Service Management Frameworks
+
+#### 9. SOC 2 Type II (AICPA)
+**Scope:** Service organization controls for trust services
+**Structure:** 5 Trust Services Criteria (TSC)
+
+| TSC | Focus | Key Requirements |
+|-----|-------|------------------|
+| **Security** (CC) | Protection against unauthorized access | Access controls, encryption, monitoring, incident response |
+| **Availability** | System uptime and performance | SLAs, redundancy, capacity planning, DR/BCP |
+| **Processing Integrity** | Accurate, complete, timely processing | Data validation, QA, error handling |
+| **Confidentiality** | Protection of confidential info | Classification, encryption, access limits, disposal |
+| **Privacy** | Personal data handling | Notice, consent, collection, retention, disposal |
+
+**Common Criteria (Security):**
+| ID | Control | Description |
+|----|---------|-------------|
+| CC1 | Control environment | Governance, ethics, accountability |
+| CC2 | Communication & info | Internal/external communication |
+| CC3 | Risk assessment | Risk identification and analysis |
+| CC4 | Monitoring | Ongoing evaluation of controls |
+| CC5 | Control activities | Policies and procedures |
+| CC6 | Logical/physical access | Access control implementation |
+| CC7 | System operations | Change management, incident response |
+| CC8 | Change management | System changes, testing |
+| CC9 | Risk mitigation | Vendor management, business disruption |
+
+**Type I vs Type II:**
+- Type I: Point-in-time design assessment
+- Type II: 6-12 month operating effectiveness (preferred)
+
+---
+
+#### 10. COBIT 2019 (ISACA)
+**Scope:** IT governance and management
+**Structure:** 6 Principles → 40 Governance/Management Objectives → 5 Domains
+
+| Domain | Code | Focus | Objectives |
+|--------|------|-------|------------|
+| **Evaluate, Direct, Monitor** | EDM | Governance | EDM01-05 |
+| **Align, Plan, Organize** | APO | Strategy, architecture | APO01-14 |
+| **Build, Acquire, Implement** | BAI | Solutions, changes | BAI01-11 |
+| **Deliver, Service, Support** | DSS | Operations, security | DSS01-06 |
+| **Monitor, Evaluate, Assess** | MEA | Performance, compliance | MEA01-04 |
+
+**Key Governance Objectives:**
+| ID | Objective | Description |
+|----|-----------|-------------|
+| EDM01 | Ensured governance framework | Governance structure and principles |
+| EDM02 | Ensured benefits delivery | Value realization from IT |
+| EDM03 | Ensured risk optimization | Risk appetite and tolerance |
+| EDM04 | Ensured resource optimization | Resource allocation |
+| EDM05 | Ensured stakeholder engagement | Transparency and reporting |
+
+**Key Management Objectives:**
+| ID | Objective | Description |
+|----|-----------|-------------|
+| APO12 | Managed risk | Enterprise IT risk management |
+| APO13 | Managed security | Information security program |
+| BAI06 | Managed IT changes | Change control process |
+| DSS05 | Managed security services | Security operations |
+| MEA03 | Managed compliance | Regulatory compliance |
+
+**Design Factors:** Enterprise strategy, goals, risk profile, IT issues, threat landscape, compliance requirements, IT role, sourcing model, implementation methods, technology adoption, enterprise size.
+
+---
+
+#### 11. NIST SP 800-53 Rev 5 (2020)
+**Scope:** Federal information system security and privacy controls
+**Structure:** 20 Control Families → 1,189 Controls → 3 Baselines (Low/Mod/High)
+
+| Family | Code | # Controls | Focus |
+|--------|------|------------|-------|
+| Access Control | AC | 25 | Identity, authentication, authorization |
+| Awareness & Training | AT | 6 | Security training, awareness |
+| Audit & Accountability | AU | 16 | Logging, monitoring, retention |
+| Assessment & Authorization | CA | 9 | Security assessment, authorization |
+| Configuration Management | CM | 14 | Baselines, change control |
+| Contingency Planning | CP | 13 | Backup, recovery, DR |
+| Identification & Auth | IA | 12 | MFA, credential management |
+| Incident Response | IR | 10 | Detection, handling, reporting |
+| Maintenance | MA | 7 | System maintenance, tools |
+| Media Protection | MP | 8 | Media handling, sanitization |
+| Physical & Environmental | PE | 23 | Physical security, environmental |
+| Planning | PL | 11 | Security planning, rules of behavior |
+| Program Management | PM | 32 | Program-level controls |
+| Personnel Security | PS | 9 | Screening, termination, transfer |
+| PII Processing | PT | 8 | Privacy-specific controls |
+| Risk Assessment | RA | 10 | Vulnerability scanning, risk analysis |
+| System & Services Acquisition | SA | 23 | SDLC, supply chain |
+| System & Comms Protection | SC | 51 | Encryption, network segmentation |
+| System & Info Integrity | SI | 23 | Malware, patching, monitoring |
+| Supply Chain Risk Mgmt | SR | 12 | SCRM program |
+
+**Control Baselines:**
+| Baseline | Use Case | # Controls |
+|----------|----------|------------|
+| Low | Low-impact systems | ~156 |
+| Moderate | Most federal systems | ~325 |
+| High | High-value assets | ~421 |
+
+**Key Controls for AI Systems:**
+| ID | Control | AI Relevance |
+|----|---------|--------------|
+| AC-6 | Least privilege | AI agent permissions |
+| AU-6 | Audit review | AI decision logging |
+| CA-7 | Continuous monitoring | Model drift detection |
+| CM-3 | Config change control | Model versioning |
+| IR-4 | Incident handling | AI failure response |
+| RA-5 | Vulnerability scanning | AI-specific vuln assessment |
+| SA-11 | Developer testing | AI testing requirements |
+| SI-4 | System monitoring | AI behavior monitoring |
+
+---
+
+#### 12. ITIL v4 (2019)
+**Scope:** IT service management best practices
+**Structure:** Service Value System (SVS) → 34 Practices
+
+**Service Value Chain:**
+| Activity | Purpose |
+|----------|---------|
+| Plan | Shared understanding of vision, status, direction |
+| Improve | Continual improvement of products, services, practices |
+| Engage | Stakeholder needs understanding |
+| Design & Transition | Meet stakeholder expectations |
+| Obtain/Build | Ensure service components available |
+| Deliver & Support | Meet agreed specifications and expectations |
+
+**Key Practices:**
+| Practice | Category | Focus |
+|----------|----------|-------|
+| Information security mgmt | General | Security policies, controls |
+| Risk management | General | Risk identification, assessment |
+| Incident management | Service | Restore normal service |
+| Problem management | Service | Root cause analysis |
+| Change enablement | Service | Manage changes safely |
+| Service continuity mgmt | Service | DR/BCP capabilities |
+| Monitoring & event mgmt | Technical | Real-time monitoring |
+| Deployment management | Technical | Release deployment |
+
+**Guiding Principles:**
+1. Focus on value
+2. Start where you are
+3. Progress iteratively with feedback
+4. Collaborate and promote visibility
+5. Think and work holistically
+6. Keep it simple and practical
+7. Optimize and automate
+
+---
+
+#### 13. ITIL v5 (2025 Preview)
+**Scope:** Digital-first IT service management
+**Structure:** Enhanced SVS + AI/Cloud integration
+
+**Key Enhancements over v4:**
+| Area | Enhancement |
+|------|-------------|
+| AI Integration | AI-assisted service management, AIOps |
+| Cloud-native | Multi-cloud, containerization, serverless |
+| DevOps alignment | Deeper CI/CD integration |
+| Sustainability | Green IT, carbon footprint |
+| Value streams | Enhanced value stream mapping |
+| Automation | Hyperautomation practices |
+
+**New/Enhanced Practices:**
+- AI Operations (AIOps) management
+- Platform engineering
+- Site reliability engineering (SRE)
+- FinOps (cloud financial management)
+- Sustainability management
+
+---
+
+### AI Governance Frameworks (Industry)
+
+#### 14. Google SAIF (Secure AI Framework)
+**Scope:** Enterprise AI system security
+**Structure:** 6 Core Elements
+
+| Element | Focus | Key Actions |
+|---------|-------|-------------|
+| **Expand security foundations** | Extend security to AI | Apply existing controls to ML pipelines |
+| **Extend detection & response** | AI-specific threats | ML-aware SOC, AI incident response |
+| **Automate defenses** | Scale protection | Automated model validation, drift detection |
+| **Harmonize platform controls** | Consistent security | Unified AI security across platforms |
+| **Adapt controls for AI** | AI-specific risks | Prompt injection, data poisoning defenses |
+| **Contextualize AI risks** | Business alignment | Risk assessment in business context |
+
+**Implementation Guidance:**
+| Phase | Activities |
+|-------|------------|
+| Foundation | Inventory AI systems, baseline security assessment |
+| Detection | Deploy AI-specific monitoring, threat intelligence |
+| Response | AI incident playbooks, model rollback procedures |
+| Automation | Automated testing, continuous validation |
+| Governance | Policies, roles, accountability for AI security |
+
+**SAIF to NIST AI RMF Mapping:**
+| SAIF Element | NIST AI RMF Function |
+|--------------|---------------------|
+| Expand foundations | GOVERN, MAP |
+| Detection & response | MANAGE |
+| Automate defenses | MEASURE |
+| Platform controls | GOVERN |
+| Adapt controls | MANAGE |
+| Contextualize risks | MAP |
+
+---
+
+#### 15. Microsoft Responsible AI Standard v2 (2022)
+**Scope:** Responsible AI development and deployment
+**Structure:** 6 Principles → Goals → Requirements
+
+| Principle | Goals | Key Requirements |
+|-----------|-------|------------------|
+| **Fairness** | Allocation, quality of service | Assess/mitigate unfair impacts, demographic analysis |
+| **Reliability & Safety** | Reliable operation | Testing, monitoring, human oversight |
+| **Privacy & Security** | Data protection | Privacy by design, security controls |
+| **Inclusiveness** | Accessible to all | Accessibility, diverse representation |
+| **Transparency** | Understandable AI | Documentation, explainability |
+| **Accountability** | Human oversight | Governance, impact assessments |
+
+**Sensitive Use Cases (Additional Scrutiny):**
+- Criminal justice
+- Employment decisions
+- Healthcare diagnosis
+- Financial services
+- Child safety
+- Government services
+
+**Implementation Requirements:**
+| Phase | Requirements |
+|-------|--------------|
+| Impact Assessment | Identify stakeholders, potential harms, benefits |
+| Data | Data quality, provenance, bias assessment |
+| Development | Fairness testing, red teaming, documentation |
+| Deployment | Human oversight, monitoring, feedback loops |
+| Operations | Incident response, continuous monitoring |
+
+---
+
+### Privacy Frameworks
+
+#### 16. NIST Privacy Framework 1.0 (2020)
+**Scope:** Privacy risk management
+**Structure:** 5 Functions → 18 Categories → 100 Subcategories
+
+| Function | Purpose | Key Categories |
+|----------|---------|----------------|
+| **Identify-P** | Understanding | Inventory, data processing ecosystem, risk assessment |
+| **Govern-P** | Governance | Policies, roles, monitoring, review |
+| **Control-P** | Management | Data processing policies, consent, access |
+| **Communicate-P** | Transparency | Communication policies, data processing awareness |
+| **Protect-P** | Safeguards | Data protection, identity management, security |
+
+**Key Categories:**
+| ID | Category | Description |
+|----|----------|-------------|
+| ID.IM | Inventory & mapping | Data inventory, processing activities |
+| ID.BE | Business environment | Data processing role, third parties |
+| ID.RA | Risk assessment | Privacy risk analysis |
+| GV.PO | Governance policies | Privacy policies and procedures |
+| CT.DP | Data processing management | Purpose limitation, consent |
+| CT.DM | Data minimization | Collection, retention limits |
+| CM.AW | Communication awareness | Privacy notices, transparency |
+| PR.DS | Data security | Encryption, access controls |
+| PR.AC | Identity management | Authentication, authorization |
+
+**Relationship to NIST CSF:**
+- Designed to complement NIST CSF
+- Shared functions: Identify, Protect
+- Privacy-specific: Govern-P, Control-P, Communicate-P
+- Integration point: PR (Protect) function
+
+---
+
+#### 17. ISO/IEC 27701:2025
+**Scope:** Privacy Information Management System (PIMS)
+**Structure:** Extension to ISO 27001 + Privacy-specific controls
+
+**Key Changes in 2025 Edition:**
+| Change | Description |
+|--------|-------------|
+| Standalone option | Can be certified independently |
+| AI/Analytics | Privacy considerations for AI systems |
+| Global transfers | Enhanced cross-border data flow guidance |
+| Third-party | Stronger processor/sub-processor requirements |
+
+**Structure:**
+| Clause | Focus |
+|--------|-------|
+| 5 | PIMS-specific requirements |
+| 6 | PIMS guidance for ISO 27001 |
+| 7 | Additional guidance for controllers |
+| 8 | Additional guidance for processors |
+| Annex A | Controller controls (31) |
+| Annex B | Processor controls (18) |
+
+**Key Controller Controls (Annex A):**
+| ID | Control | Description |
+|----|---------|-------------|
+| A.7.2.1 | Purpose identification | Document processing purposes |
+| A.7.2.2 | Lawful basis | Identify legal basis |
+| A.7.3.1 | Consent | Obtain and record consent |
+| A.7.3.6 | Data subject rights | Rights fulfillment process |
+| A.7.4.1 | Collection limitation | Minimize data collection |
+| A.7.4.5 | Retention | Retention and disposal policies |
+| A.7.5.1 | Third-party transfers | Transfer safeguards |
+
+**Regulatory Mapping:**
+| ISO 27701 | GDPR | CCPA/CPRA |
+|-----------|------|-----------|
+| A.7.2.2 | Art. 6 (Lawful basis) | §1798.100 (Purpose) |
+| A.7.3.1 | Art. 7 (Consent) | §1798.120 (Opt-out) |
+| A.7.3.6 | Art. 15-22 (Rights) | §1798.105-125 (Rights) |
+| A.7.4.5 | Art. 5(1)(e) (Retention) | §1798.105 (Deletion) |
+
+---
+
+#### 18. HIPAA Security Rule (45 CFR 164)
+**Scope:** Protected Health Information (PHI) in US healthcare
+**Structure:** 3 Safeguard Categories → 54 Implementation Specifications
+
+| Category | Focus | Specifications |
+|----------|-------|----------------|
+| **Administrative** | Policies, procedures, workforce | 12 standards, 22 specifications |
+| **Physical** | Facility, workstation, device | 4 standards, 10 specifications |
+| **Technical** | Access, audit, integrity, transmission | 5 standards, 9 specifications |
+
+**Administrative Safeguards (§164.308):**
+| Standard | Key Requirements |
+|----------|-----------------|
+| Security management process | Risk analysis, risk management, sanctions, review |
+| Workforce security | Authorization, clearance, termination |
+| Information access management | Access authorization, establishment, modification |
+| Security awareness training | Reminders, malware protection, login monitoring, password mgmt |
+| Security incident procedures | Response and reporting |
+| Contingency plan | Data backup, DR, emergency operations, testing |
+| Evaluation | Periodic assessment |
+| Business associate contracts | BAA requirements |
+
+**Technical Safeguards (§164.312):**
+| Standard | Key Requirements |
+|----------|-----------------|
+| Access control | Unique user ID, emergency access, auto logoff, encryption |
+| Audit controls | Logging of PHI access |
+| Integrity | ePHI alteration/destruction detection |
+| Authentication | Person/entity verification |
+| Transmission security | Integrity controls, encryption |
+
+**Required vs Addressable:**
+- **Required (R):** Must be implemented
+- **Addressable (A):** Assess and implement if reasonable; document alternatives
+
+**HIPAA for AI Systems:**
+| Consideration | Requirement |
+|---------------|-------------|
+| PHI in training data | Must comply with minimum necessary |
+| AI vendor as BA | Business Associate Agreement required |
+| De-identification | Follow Safe Harbor or Expert Determination |
+| Audit logging | Log AI access to PHI |
+| Access controls | Role-based access for AI systems |
+
+---
+
+### Emerging Regulations (2024-2026)
+
+#### 19. NIS2 Directive (EU 2022/2555)
+**Scope:** Cybersecurity for essential and important entities
+**Effective:** October 17, 2024 (member state transposition)
+**Sectors:** 18 critical sectors
+
+| Category | Sectors |
+|----------|---------|
+| **Essential** | Energy, transport, banking, health, water, digital infrastructure, ICT service management, public admin, space |
+| **Important** | Postal, waste, chemicals, food, manufacturing, digital providers, research |
+
+**10 Minimum Measures (Article 21):**
+| # | Measure | Description |
+|---|---------|-------------|
+| 1 | Risk analysis & security policies | Document risk management approach |
+| 2 | Incident handling | Detection, response, recovery |
+| 3 | Business continuity | Crisis management, backup, DR |
+| 4 | Supply chain security | Third-party risk management |
+| 5 | Secure acquisition & development | Security in procurement and SDLC |
+| 6 | Effectiveness assessment | Testing and measuring controls |
+| 7 | Cyber hygiene & training | Basic security practices, awareness |
+| 8 | Cryptography | Encryption policies |
+| 9 | HR security & access control | Personnel security, IAM |
+| 10 | MFA & secure communications | Authentication, emergency comms |
+
+**Incident Reporting:**
+| Timeline | Requirement |
+|----------|-------------|
+| 24 hours | Early warning to CSIRT |
+| 72 hours | Incident notification with assessment |
+| 1 month | Final report with root cause |
+
+**Penalties:**
+| Entity Type | Maximum Fine |
+|-------------|--------------|
+| Essential | €10M or 2% global turnover |
+| Important | €7M or 1.4% global turnover |
+
+**Management Liability:** Personal liability for management bodies.
+
+---
+
+#### 20. Cyber Resilience Act (CRA) - EU
+**Scope:** Products with digital elements
+**Effective:** December 10, 2024 (obligations from December 11, 2027)
+
+**Product Categories:**
+| Category | Examples | Assessment |
+|----------|----------|------------|
+| Default | Most software, IoT devices | Self-assessment |
+| Important Class I | Password managers, VPNs, firewalls | Harmonized standard or third-party |
+| Important Class II | Hypervisors, PKI, SIEM | Third-party assessment |
+| Critical | Smart meters, HSMs, smart cards | EU certification |
+
+**Essential Requirements:**
+| Area | Requirements |
+|------|--------------|
+| **Security by design** | Secure default config, no known vulns, encryption |
+| **Vulnerability handling** | CVE process, coordinated disclosure |
+| **Security updates** | Free updates for support period |
+| **Documentation** | Technical documentation, SBOM |
+| **Incident reporting** | 24h notification of exploited vulns |
+
+**Manufacturer Obligations:**
+| Obligation | Description |
+|------------|-------------|
+| Conformity assessment | Before market placement |
+| CE marking | Compliance indicator |
+| SBOM | Software bill of materials |
+| Support period | Minimum 5 years (default) |
+| Vulnerability reporting | 24h to ENISA |
+
+**Penalties:**
+| Violation | Maximum Fine |
+|-----------|--------------|
+| Essential requirements | €15M or 2.5% global turnover |
+| Other obligations | €10M or 2% global turnover |
+| Incorrect information | €5M or 1% global turnover |
+
+---
+
+#### 21. AI Liability Directive (EU) - Proposed
+**Scope:** Civil liability for AI-caused damage
+**Status:** Proposed (expected 2025-2026)
+
+**Key Provisions:**
+| Provision | Description |
+|-----------|-------------|
+| Presumption of causality | AI output presumed to cause damage if fault shown |
+| Disclosure of evidence | Courts can order AI providers to disclose evidence |
+| Burden of proof | Shifted to defendant for high-risk AI |
+| Fault-based liability | Extends existing liability rules to AI |
+
+**Relationship to AI Act:**
+| AI Act | Liability Directive |
+|--------|---------------------|
+| Defines high-risk AI | Uses same classification |
+| Sets compliance requirements | Non-compliance = presumed fault |
+| Requires documentation | Documentation discoverable |
+
+**Implications for AI Developers:**
+- Maintain comprehensive documentation
+- Implement AI Act compliance
+- Establish incident response
+- Consider liability insurance
+
+---
+
+#### 22. CMMC 2.0 (2024)
+**Scope:** US DoD contractor cybersecurity maturity
+**Structure:** 3 Levels (simplified from CMMC 1.0's 5 levels)
+
+| Level | Controls | Assessment | Applicability |
+|-------|----------|------------|---------------|
+| Level 1 | 17 (FCI) | Self-assessment | Federal Contract Info |
+| Level 2 | 110 (CUI) | Third-party or self | Controlled Unclassified Info |
+| Level 3 | 134 | Government-led | Critical programs |
+
+**Level 1 - Foundational (17 controls):**
+- Access control basics
+- Identification & authentication
+- Media protection
+- Physical protection
+- System & communications protection
+- System & information integrity
+
+**Level 2 - Advanced (110 controls from NIST 800-171):**
+| Domain | # Controls |
+|--------|------------|
+| Access Control | 22 |
+| Awareness & Training | 3 |
+| Audit & Accountability | 9 |
+| Configuration Management | 9 |
+| Identification & Authentication | 11 |
+| Incident Response | 3 |
+| Maintenance | 6 |
+| Media Protection | 9 |
+| Personnel Security | 2 |
+| Physical Protection | 6 |
+| Risk Assessment | 3 |
+| Security Assessment | 4 |
+| System & Communications | 16 |
+| System & Information Integrity | 7 |
+
+**Assessment Requirements:**
+| Level | Assessor | Frequency |
+|-------|----------|-----------|
+| 1 | Self-assessment | Annual |
+| 2 | C3PAO (third-party) | Triennial |
+| 3 | DIBCAC (government) | Triennial |
+
+---
+
+#### 23. SEC Cybersecurity Disclosure Rules (2023)
+**Scope:** US public company cyber incident and risk disclosure
+**Effective:** December 18, 2023
+
+**Form 8-K (Incident Disclosure):**
+| Requirement | Detail |
+|-------------|--------|
+| Trigger | Material cybersecurity incident |
+| Timeline | 4 business days |
+| Content | Nature, scope, timing, material impact |
+| Delay | Only for national security/public safety |
+
+**Form 10-K (Annual Disclosure):**
+| Section | Required Disclosure |
+|---------|---------------------|
+| Risk management | Processes for assessing, identifying, managing cyber risks |
+| Strategy | Integration of cyber risk into overall risk management |
+| Governance | Board oversight of cyber risks |
+| Management | Management's role in cyber risk assessment |
+
+**Materiality Considerations:**
+| Factor | Assessment |
+|--------|------------|
+| Financial impact | Quantifiable losses, costs |
+| Operational impact | Business disruption |
+| Reputational harm | Customer trust, brand damage |
+| Litigation risk | Legal exposure |
+| Regulatory impact | Compliance implications |
+
+---
+
+#### 24. CISA Cybersecurity Performance Goals (CPGs) 2024
+**Scope:** Baseline cybersecurity practices for critical infrastructure
+**Structure:** 8 Areas → 38 Goals
+
+| Area | # Goals | Focus |
+|------|---------|-------|
+| Account Security | 6 | MFA, password policies, access control |
+| Device Security | 7 | Asset inventory, secure config, patching |
+| Data Security | 5 | Encryption, backup, data protection |
+| Governance & Training | 5 | Leadership, awareness, policies |
+| Vulnerability Management | 5 | Scanning, remediation, testing |
+| Supply Chain | 4 | Vendor management, SBOM |
+| Response & Recovery | 4 | Incident response, DR/BCP |
+| Other | 2 | OT security, email security |
+
+**Priority Goals:**
+| ID | Goal | Priority |
+|----|------|----------|
+| 1.A | MFA | Essential |
+| 1.B | Strong passwords | Essential |
+| 2.A | Asset inventory | Essential |
+| 2.E | Patching | Essential |
+| 3.A | Log collection | Essential |
+| 6.A | Incident reporting | Essential |
+| 7.A | Backup | Essential |
+| 8.A | Vendor risk | Essential |
+
+**CISA CPG to NIST CSF Mapping:**
+| CPG Area | NIST CSF Function |
+|----------|-------------------|
+| Account Security | Protect (PR.AC) |
+| Device Security | Identify (ID.AM), Protect |
+| Data Security | Protect (PR.DS) |
+| Vulnerability Mgmt | Identify (ID.RA), Protect |
+| Response & Recovery | Respond, Recover |
+
+---
+
 ## Control Mapping Matrix
 
 ### Cross-Framework Mappings
 
-| Risk Area | NIST AI RMF | ISO 42001 | NIST CSF | ISO 27001 | CIS |
-|-----------|-------------|-----------|----------|-----------|-----|
-| AI Bias | MEASURE-2 | A.6.1 | - | - | - |
-| Prompt Injection | MANAGE-1 | A.8.2 | PR.DS | A.8.28 | 16 |
-| Data Privacy | MAP-2 | A.7.1 | PR.DS | A.5.34 | 3 |
-| Access Control | - | - | PR.AC | A.8.2 | 5,6 |
-| Encryption | - | - | PR.DS | A.8.24 | 3 |
-| Logging | - | - | DE.CM | A.8.15 | 8 |
-| Incident Response | MANAGE-2 | A.10.1 | RS | A.5.24 | 17 |
-| Config Management | - | - | PR.IP | A.8.9 | 4 |
-| Vulnerability Mgmt | - | - | ID.RA | A.8.8 | 7 |
-| Third-Party Risk | MAP-1 | A.9.1 | GV.SC | A.5.19 | 15 |
+| Risk Area | NIST AI RMF | ISO 42001 | NIST CSF | ISO 27001 | CIS | SOC 2 | NIST 800-53 |
+|-----------|-------------|-----------|----------|-----------|-----|-------|-------------|
+| AI Bias | MEASURE-2 | A.6.1 | - | - | - | - | - |
+| Prompt Injection | MANAGE-1 | A.8.2 | PR.DS | A.8.28 | 16 | CC6 | SI-10 |
+| Data Privacy | MAP-2 | A.7.1 | PR.DS | A.5.34 | 3 | Privacy | PT-2 |
+| Access Control | - | - | PR.AC | A.8.2 | 5,6 | CC6 | AC-2,3 |
+| Encryption | - | - | PR.DS | A.8.24 | 3 | CC6 | SC-13 |
+| Logging | - | - | DE.CM | A.8.15 | 8 | CC7 | AU-2,3 |
+| Incident Response | MANAGE-2 | A.10.1 | RS | A.5.24 | 17 | CC7 | IR-4 |
+| Config Management | - | - | PR.IP | A.8.9 | 4 | CC8 | CM-2,3 |
+| Vulnerability Mgmt | - | - | ID.RA | A.8.8 | 7 | CC7 | RA-5 |
+| Third-Party Risk | MAP-1 | A.9.1 | GV.SC | A.5.19 | 15 | CC9 | SA-9 |
+| Business Continuity | - | - | RC.RP | A.5.30 | - | A1 | CP-2 |
+| PHI/Healthcare | - | - | PR.DS | - | - | Privacy | - |
+
+### Regulatory Cross-Reference
+
+| Requirement | NIS2 | DORA | CRA | CMMC | SEC Rules |
+|-------------|------|------|-----|------|-----------|
+| Risk Assessment | Art.21(a) | Art.6 | - | RA | 10-K |
+| Incident Reporting | Art.23 | Art.19 | Art.14 | IR | 8-K (4 days) |
+| Supply Chain | Art.21(d) | Art.28 | Art.13 | SR | 10-K |
+| Vulnerability Mgmt | Art.21(e) | Art.8 | Art.11 | RA-5 | - |
+| Business Continuity | Art.21(c) | Art.11 | - | CP | - |
+| Encryption | Art.21(h) | Art.9 | Annex I | SC | - |
+| Access Control | Art.21(i) | Art.9 | Annex I | AC | - |
+| Testing | Art.21(f) | Art.24-27 | Art.10 | CA | - |
+| Board Oversight | Art.20 | Art.5 | - | - | 10-K |
+
+### Privacy Framework Mapping
+
+| Requirement | GDPR | ISO 27701 | NIST Privacy | HIPAA |
+|-------------|------|-----------|--------------|-------|
+| Lawful Basis | Art.6 | A.7.2.2 | CT.DP-P1 | - |
+| Consent | Art.7 | A.7.3.1 | CT.DP-P2 | - |
+| Data Subject Rights | Art.15-22 | A.7.3.6 | CM.AW-P | §164.524 |
+| Breach Notification | Art.33-34 | A.7.3.8 | - | §164.408 |
+| Data Minimization | Art.5(1)(c) | A.7.4.1 | CT.DM-P | §164.502(b) |
+| Security | Art.32 | Annex B | PR.DS-P | §164.312 |
+| DPO/Privacy Officer | Art.37 | A.7.2.8 | GV.PO-P | §164.530(a) |
+| International Transfer | Art.44-49 | A.7.5 | - | §164.532 |
 
 ### Mapping Confidence Levels
 
@@ -351,8 +970,12 @@
 ## Quick Reference
 
 ```
-AI Frameworks: NIST AI RMF | ISO 42001 | CSA AICM
-Security Frameworks: NIST CSF 2.0 | ISO 27001 | CIS v8.1 | PCI DSS 4.0
+AI Frameworks: NIST AI RMF | ISO 42001 | CSA AICM | OWASP LLM | MITRE ATLAS
+AI Industry: Google SAIF | Microsoft Responsible AI
+Security: NIST CSF 2.0 | ISO 27001 | CIS v8.1 | PCI DSS 4.0 | NIST 800-53
+IT Governance: SOC 2 | COBIT 2019 | ITIL v4/v5
+Privacy: ISO 27701 | NIST Privacy | HIPAA
+Regulatory: NIS2 | DORA | CRA | CMMC 2.0 | SEC Rules | CISA CPGs
 Meta-Framework: SCF v2025.4
 
 Control Types: Preventive | Detective | Corrective | Compensating
@@ -363,4 +986,17 @@ Priority Order:
 3. Data protection (classify and protect)
 4. Logging/monitoring (see what's happening)
 5. Incident response (be prepared)
+
+Regulatory Deadlines:
+- NIS2: Oct 2024 (member state)
+- DORA: Jan 2025 (financial)
+- CRA: Dec 2027 (product security)
+- CMMC: Ongoing (DoD contracts)
+
+Incident Reporting Timelines:
+- NIS2: 24h early warning, 72h notification
+- DORA: 72h initial notification
+- SEC: 4 business days (material)
+- CRA: 24h (exploited vulns)
+- HIPAA: 60 days
 ```
