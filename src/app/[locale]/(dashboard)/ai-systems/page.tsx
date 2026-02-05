@@ -54,24 +54,37 @@ export default function AISystemsPage() {
     }
   };
 
-  const getRiskBadgeVariant = (tier: RiskTier | null) => {
-    if (!tier) return 'secondary';
+  // Colored badge styles for Risk Tier
+  const getRiskBadgeStyle = (tier: RiskTier | null) => {
+    if (!tier) return 'bg-gray-500/10 text-gray-500';
     switch (tier) {
-      case 'HIGH': return 'destructive';
-      case 'MEDIUM': return 'default';
-      case 'LOW': return 'secondary';
-      default: return 'secondary';
+      case 'HIGH': return 'bg-red-500/15 text-red-500 border border-red-500/30';
+      case 'MEDIUM': return 'bg-yellow-500/15 text-yellow-500 border border-yellow-500/30';
+      case 'LOW': return 'bg-green-500/15 text-green-500 border border-green-500/30';
+      default: return 'bg-gray-500/10 text-gray-500';
     }
   };
 
-  const getStatusBadgeVariant = (status: LifecycleStatus) => {
+  // Colored badge styles for Lifecycle Status
+  const getStatusBadgeStyle = (status: LifecycleStatus) => {
     switch (status) {
-      case 'PRODUCTION': return 'default';
-      case 'DEVELOPMENT': return 'secondary';
-      case 'PILOT': return 'outline';
-      case 'DEPRECATED': return 'destructive';
-      case 'RETIRED': return 'destructive';
-      default: return 'secondary';
+      case 'PRODUCTION': return 'bg-green-500/15 text-green-500 border border-green-500/30';
+      case 'DEVELOPMENT': return 'bg-blue-500/15 text-blue-500 border border-blue-500/30';
+      case 'PILOT': return 'bg-purple-500/15 text-purple-500 border border-purple-500/30';
+      case 'DEPRECATED': return 'bg-orange-500/15 text-orange-500 border border-orange-500/30';
+      case 'RETIRED': return 'bg-gray-500/15 text-gray-500 border border-gray-500/30';
+      default: return 'bg-gray-500/10 text-gray-500';
+    }
+  };
+
+  // Colored badge styles for System Type
+  const getTypeBadgeStyle = (type: AISystemType) => {
+    switch (type) {
+      case 'GENAI': return 'bg-violet-500/15 text-violet-400 border border-violet-500/30';
+      case 'ML': return 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30';
+      case 'RPA': return 'bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      case 'HYBRID': return 'bg-pink-500/15 text-pink-400 border border-pink-500/30';
+      default: return 'bg-gray-500/10 text-gray-400';
     }
   };
 
@@ -171,10 +184,12 @@ export default function AISystemsPage() {
                   </td>
                 </tr>
               ) : (
-                systems.map((system) => (
+                systems.map((system, index) => (
                   <tr
                     key={system.id}
-                    className="cursor-pointer border-b transition-colors hover:bg-muted/50"
+                    className={`cursor-pointer border-b transition-colors hover:bg-primary/10 ${
+                      index % 2 === 0 ? 'bg-muted/20' : 'bg-transparent'
+                    }`}
                     onClick={() => router.push(`/ai-systems/${system.id}`)}
                   >
                     <td className="p-4">
@@ -186,23 +201,29 @@ export default function AISystemsPage() {
                       )}
                     </td>
                     <td className="p-4">
-                      <Badge variant="outline">{system.systemType}</Badge>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getTypeBadgeStyle(system.systemType)}`}>
+                        {system.systemType}
+                      </span>
                     </td>
                     <td className="p-4">
-                      <Badge variant={getStatusBadgeVariant(system.lifecycleStatus)}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusBadgeStyle(system.lifecycleStatus)}`}>
                         {system.lifecycleStatus}
-                      </Badge>
+                      </span>
                     </td>
                     <td className="p-4">
                       {system.riskTier ? (
-                        <Badge variant={getRiskBadgeVariant(system.riskTier)}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getRiskBadgeStyle(system.riskTier)}`}>
                           {system.riskTier}
-                        </Badge>
+                        </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
                       )}
                     </td>
-                    <td className="p-4 text-sm">{system.owner.name || system.owner.email}</td>
+                    <td className="p-4">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                        {system.owner.name || system.owner.email}
+                      </span>
+                    </td>
                     <td className="p-4 text-sm text-muted-foreground">
                       {new Date(system.updatedAt).toLocaleDateString()}
                     </td>

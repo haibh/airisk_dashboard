@@ -5,11 +5,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import type { ComplianceFramework } from '@/types/dashboard';
 
+// Color scheme with better contrast for readability
 const TREEMAP_COLORS = [
-  'hsl(142, 76%, 36%)',
-  'hsl(48, 96%, 53%)',
-  'hsl(25, 95%, 53%)',
-  'hsl(0, 84%, 60%)',
+  'hsl(142, 71%, 45%)',   // Green - high compliance (80%+)
+  'hsl(48, 96%, 45%)',    // Yellow - good compliance (60-79%)
+  'hsl(25, 95%, 50%)',    // Orange - medium compliance (40-59%)
+  'hsl(0, 72%, 55%)',     // Red - low compliance (<40%) - lighter for better text contrast
 ];
 
 function getColorByCompliance(percentage: number): string {
@@ -17,6 +18,19 @@ function getColorByCompliance(percentage: number): string {
   if (percentage >= 60) return TREEMAP_COLORS[1];
   if (percentage >= 40) return TREEMAP_COLORS[2];
   return TREEMAP_COLORS[3];
+}
+
+// Custom tooltip component for better visibility
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string; percentage: number; size: number } }> }) {
+  if (!active || !payload?.length) return null;
+  const data = payload[0].payload;
+  return (
+    <div className="bg-popover text-popover-foreground border rounded-lg shadow-lg px-3 py-2">
+      <p className="font-medium text-sm">{data.name}</p>
+      <p className="text-xs text-muted-foreground">{data.percentage}% compliance</p>
+      <p className="text-xs text-muted-foreground">{data.size} controls</p>
+    </div>
+  );
 }
 
 interface FrameworkCoverageTreemapProps {
@@ -103,19 +117,7 @@ export function FrameworkCoverageTreemap({ frameworks, isLoading }: FrameworkCov
               stroke="hsl(var(--background))"
               content={<TreemapCell x={0} y={0} width={0} height={0} name="" percentage={0} />}
             >
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  color: 'hsl(var(--foreground))',
-                }}
-                /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-                formatter={(value: any, _name: any, entry: any) => {
-                  const payload = entry?.payload;
-                  return [`${payload?.percentage ?? 0}% compliance (${value} controls)`, payload?.name ?? ''];
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </Treemap>
           </ResponsiveContainer>
         </div>

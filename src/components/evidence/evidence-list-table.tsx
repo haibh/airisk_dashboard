@@ -102,14 +102,6 @@ export function EvidenceListTable({
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      SUBMITTED: 'secondary',
-      UNDER_REVIEW: 'default',
-      APPROVED: 'outline',
-      REJECTED: 'destructive',
-      EXPIRED: 'destructive',
-    };
-
     const colors: Record<string, string> = {
       SUBMITTED: 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20',
       UNDER_REVIEW: 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20',
@@ -118,9 +110,20 @@ export function EvidenceListTable({
       EXPIRED: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20',
     };
 
+    // Map status to translation key (UNDER_REVIEW -> underReview)
+    const statusKeyMap: Record<string, string> = {
+      SUBMITTED: 'submitted',
+      UNDER_REVIEW: 'underReview',
+      APPROVED: 'approved',
+      REJECTED: 'rejected',
+      EXPIRED: 'expired',
+    };
+
+    const translationKey = statusKeyMap[status] || status.toLowerCase();
+
     return (
-      <Badge variant={variants[status] || 'default'} className={colors[status]}>
-        {t(`status.${status.toLowerCase()}`)}
+      <Badge variant="outline" className={colors[status]}>
+        {t(`status.${translationKey}`)}
       </Badge>
     );
   };

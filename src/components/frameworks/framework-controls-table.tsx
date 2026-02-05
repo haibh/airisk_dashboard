@@ -42,12 +42,12 @@ interface ControlsTableProps {
   showHierarchy?: boolean;
 }
 
-// Status badge configurations
-const complianceStatusConfig: Record<ComplianceStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
-  compliant: { label: 'Compliant', variant: 'default', icon: <CheckCircle2 className="w-3 h-3" /> },
-  partial: { label: 'Partial', variant: 'secondary', icon: <AlertCircle className="w-3 h-3" /> },
-  non_compliant: { label: 'Non-Compliant', variant: 'destructive', icon: <Circle className="w-3 h-3" /> },
-  not_assessed: { label: 'Not Assessed', variant: 'outline', icon: <Clock className="w-3 h-3" /> },
+// Status badge configurations with colors matching implementation column style
+const complianceStatusConfig: Record<ComplianceStatus, { label: string; color: string; icon: React.ReactNode }> = {
+  compliant: { label: 'Compliant', color: 'bg-green-500/20 text-green-600 dark:text-green-400', icon: <CheckCircle2 className="w-3 h-3" /> },
+  partial: { label: 'Partial', color: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400', icon: <AlertCircle className="w-3 h-3" /> },
+  non_compliant: { label: 'Non-Compliant', color: 'bg-red-500/20 text-red-600 dark:text-red-400', icon: <Circle className="w-3 h-3" /> },
+  not_assessed: { label: 'Not Assessed', color: 'bg-gray-500/20 text-gray-600 dark:text-gray-400', icon: <Clock className="w-3 h-3" /> },
 };
 
 const implementationStatusConfig: Record<ImplementationStatus, { label: string; color: string }> = {
@@ -262,10 +262,10 @@ export function FrameworkControlsTable({ controls, showHierarchy = true }: Contr
                 </TableCell>
                 <TableCell>
                   {isLeaf && (
-                    <Badge variant={complianceConfig.variant} className="gap-1">
+                    <span className={cn('inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium', complianceConfig.color)}>
                       {complianceConfig.icon}
                       {complianceConfig.label}
-                    </Badge>
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>
