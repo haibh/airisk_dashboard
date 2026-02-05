@@ -121,8 +121,8 @@ Validation: Zod 4.3 (input schemas, API validation)
 | **Organization** | Root tenant entity |
 | **User** | System users (5 roles, isActive, lastLoginAt, 30min idle timeout) |
 | **AISystem** | AI inventory (name, type, status, classification) |
-| **Framework** | NIST AI RMF + ISO 42001 frameworks |
-| **Control** | Framework-specific controls (85+ NIST, 38 ISO) |
+| **Framework** | 8 compliance frameworks (NIST AI RMF, ISO 42001, CSA AICM, NIST CSF, ISO 27001, CIS Controls, PCI DSS, SCF v2025.4) |
+| **Control** | Framework-specific controls (500+ across all frameworks) |
 | **Mapping** | Cross-framework control relationships (HIGH/MEDIUM/LOW confidence) |
 | **Assessment** | Risk assessment snapshots (DRAFT, IN_PROGRESS, UNDER_REVIEW, APPROVED) |
 | **Risk** | Individual risks (likelihood 1-5, impact 1-5, scores) |
@@ -212,7 +212,7 @@ Bias/Fairness, Privacy, Security, Reliability, Transparency, Accountability, Saf
 ```
 1. Create Assessment (Step 1-2)
    ↓
-2. Select Framework - NIST or ISO (Step 3)
+2. Select Framework - any of 8 supported frameworks (Step 3)
    ↓
 3. Identify & Score Risks (Step 4)
    - For each risk: category, likelihood, impact

@@ -35,10 +35,12 @@
 |-----------|---------|-----|
 | NIST AI RMF | 1.0 + GenAI Profile | ✅ MVP1 |
 | ISO/IEC 42001 | 2023 | ✅ MVP1 |
-| CSA AICM | 1.0 (07/2025) | MVP2 |
-| NIST CSF | 2.0 (02/2024) | MVP3 |
-| CIS Controls | 8.1 | MVP3 |
-| PCI DSS | 4.0.1 | MVP3 |
+| CSA AICM | 1.0 (07/2025) | ✅ MVP2 |
+| NIST CSF | 2.0 (02/2024) | ✅ MVP3 |
+| ISO 27001 | 2022 | ✅ MVP3 |
+| CIS Controls | 8.1 | ✅ MVP3 |
+| PCI DSS | 4.0.1 | ✅ MVP3 |
+| SCF | v2025.4 | ✅ MVP4 |
 
 ---
 
