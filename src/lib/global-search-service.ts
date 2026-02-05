@@ -437,10 +437,25 @@ function calculateRelevance(query: string, fields: string[]): number {
 }
 
 /**
+ * Escape HTML entities to prevent XSS attacks
+ */
+function escapeHtml(text: string): string {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEscapes[char] || char);
+}
+
+/**
  * Highlight query matches in text
+ * XSS-safe: escapes HTML entities before adding highlight markup
  */
 export function highlightMatches(text: string, query: string): string {
-  if (!text || !query) return text || '';
+  if (!text || !query) return escapeHtml(text || '');
 
   // Find the first occurrence of query (case-insensitive)
   const lowerText = text.toLowerCase();
@@ -448,8 +463,9 @@ export function highlightMatches(text: string, query: string): string {
   const index = lowerText.indexOf(lowerQuery);
 
   if (index === -1) {
-    // No match, return first 150 chars
-    return text.length > 150 ? text.substring(0, 150) + '...' : text;
+    // No match, return first 150 chars (escaped)
+    const truncated = text.length > 150 ? text.substring(0, 150) + '...' : text;
+    return escapeHtml(truncated);
   }
 
   // Extract context around match (50 chars before and after)
@@ -462,13 +478,15 @@ export function highlightMatches(text: string, query: string): string {
   if (start > 0) snippet = '...' + snippet;
   if (end < text.length) snippet = snippet + '...';
 
-  // Highlight the match
+  // Highlight the match (escape all parts first, then add safe markup)
   const matchStart = snippet.toLowerCase().indexOf(lowerQuery);
   if (matchStart !== -1) {
-    const before = snippet.substring(0, matchStart);
-    const match = snippet.substring(matchStart, matchStart + query.length);
-    const after = snippet.substring(matchStart + query.length);
+    const before = escapeHtml(snippet.substring(0, matchStart));
+    const match = escapeHtml(snippet.substring(matchStart, matchStart + query.length));
+    const after = escapeHtml(snippet.substring(matchStart + query.length));
     snippet = `${before}<mark>${match}</mark>${after}`;
+  } else {
+    snippet = escapeHtml(snippet);
   }
 
   return snippet;

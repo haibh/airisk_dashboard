@@ -697,6 +697,58 @@ const payload = createSystemSchema.parse(await request.json());
 - Never build raw SQL queries
 - Use parameterized queries only
 
+### XSS (Cross-Site Scripting) Prevention
+```typescript
+// src/lib/global-search-service.ts - escapeHtml utility
+function escapeHtml(text: string): string {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEscapes[char] || char);
+}
+
+// Usage: Always escape user-generated content before rendering
+export function highlightMatches(text: string, query: string): string {
+  // Escape all text segments BEFORE adding HTML markup
+  const before = escapeHtml(snippet.substring(0, matchStart));
+  const match = escapeHtml(snippet.substring(matchStart, matchStart + query.length));
+  const after = escapeHtml(snippet.substring(matchStart + query.length));
+  return `${before}<mark>${match}</mark>${after}`;
+}
+```
+
+### CSV Injection Prevention
+```typescript
+// src/lib/export-generator.ts - sanitizeCsvValue utility
+function sanitizeCsvValue(value: string): string {
+  // CSV injection: formulas starting with =, +, -, @, tab, or carriage return
+  // can execute arbitrary code in spreadsheet applications
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r', '\n'];
+  if (dangerousChars.some((char) => value.startsWith(char))) {
+    return `'${value}`; // Prefix with single quote to neutralize
+  }
+  return value;
+}
+
+// Applied in formatValue() to all string exports
+function formatValue(value: unknown): string {
+  if (typeof value === 'string') {
+    return sanitizeCsvValue(value);
+  }
+  return String(value);
+}
+```
+
+**Key Points:**
+- Always escape HTML before rendering user input in web context
+- Always sanitize CSV cell values that may contain formulas
+- These utilities are applied automatically in search results and exports
+- When adding new export/display features, use these utilities consistently
+
 ---
 
 ## Linting & Formatting
@@ -740,4 +792,5 @@ test(risk): add scoring calculation tests
 
 ---
 
-**Code Standards Version:** 2.0 | **Last Updated:** 2026-02-04 | **Maintained By:** docs-manager agent
+**Code Standards Version:** 2.1 | **Last Updated:** 2026-02-05 | **Maintained By:** docs-manager agent
+**Recent Additions:** XSS & CSV injection prevention patterns (Phase 15)

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle, Briefcase, BarChart3, Activity, Brain } from 'lucide-react';
+import { AlertCircle, Briefcase, BarChart3, Activity, Brain, ChevronRight } from 'lucide-react';
 import { useDashboardData } from '@/hooks/use-dashboard-data';
 import { ExecutiveBriefView } from '@/components/dashboard/executive-brief-view';
 import { DetailedAnalyticsView } from '@/components/dashboard/detailed-analytics-view';
@@ -44,6 +44,12 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
+          {/* Breadcrumb navigation */}
+          <nav className="flex items-center text-xs font-medium text-muted-foreground mb-2" aria-label="Breadcrumb">
+            <span>Overview</span>
+            <ChevronRight size={12} className="mx-1" aria-hidden="true" />
+            <span className="text-primary font-semibold">Executive Summary</span>
+          </nav>
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>

@@ -42,8 +42,8 @@ test.describe('Authentication Login Flow', () => {
     // Check that we're still on the login page
     expect(page.url()).toContain('/en/login');
 
-    // Verify error message is displayed
-    const errorElement = page.locator('[role="alert"]');
+    // Verify error message is displayed (filter to avoid Next.js route announcer)
+    const errorElement = page.getByRole('alert').filter({ hasText: /Invalid|error|failed/i });
     await expect(errorElement).toBeVisible();
   });
 

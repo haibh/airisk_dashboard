@@ -1,9 +1,10 @@
 # AIRisk Dashboard - Codebase Summary
 
-**Generated:** 2026-02-04
-**Codebase Status:** MVP4 Phase 14 (Theme Unification & Dashboard Consolidation) - Complete
-**Total Files:** 195+ files (including tests, migrations, seeds)
+**Generated:** 2026-02-05
+**Codebase Status:** MVP4 Phase 15 (Security Hardening) - In Progress
+**Total Files:** 252 files (including tests, migrations, seeds)
 **Total Lines:** ~20,000+ lines of TypeScript/TSX/SQL
+**Codebase Size:** 300,842 tokens, 1,252,223 chars
 
 ---
 
@@ -174,15 +175,16 @@ AIRisk_Dashboard/
 ### 1.1 Landing Page & Theme System (Feb 2026)
 **Status:** ✅ Completed (Commit ea1905a - Theme Unification)
 
-**Theme System Implementation:**
+**Theme System Implementation (Phase 14):**
 - Unified CSS variable token system across all pages (`hsl(var(--xxx))`)
 - Support for light/dark mode toggle via `next-themes`
 - Adaptive styling on all pages: auth, landing, dashboard
 - Removed hardcoded color classes, migrated to semantic tokens
 - Animation prefix standardization: `ai-scene-*` (float, pulse, dash-flow, logo-bob, shape-morph)
 - SVG backgrounds use `currentColor` for true theme support
+- Theme toggle button (Sun/Moon) added to auth layout
 
-**Landing Page Features (Commit ea1905a):**
+**Landing Page Features (Phase 14):**
 - Full-screen adaptive gradient background (`landing-gradient`)
 - Content sections: hero + stats bar + frameworks grid + capabilities + methodology + architecture
 - Modularized components: `landing-page.tsx` + `landing-page-content-sections.tsx`
@@ -381,7 +383,7 @@ model Risk {
 ---
 
 ### 5. Dashboard & Reporting (FR-DASH)
-**Status:** ✅ Completed (Phase 6 + Feb 2026 Consolidation)
+**Status:** ✅ Completed (Phase 6 + Phase 14 Consolidation)
 
 **Features Implemented:**
 - ✅ FR-DASH-01: Executive summary dashboard (Tab 1)
@@ -391,7 +393,7 @@ model Risk {
 - ✅ FR-DASH-05: Operations center (Tab 3 - formerly separate page)
 - ✅ FR-DASH-06: AI Risk specialist view (Tab 4 - formerly separate page)
 
-**Dashboard Consolidation (Feb 2026, Commit 200d3ac):**
+**Dashboard Consolidation (Phase 14, Commit 200d3ac):**
 - Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
 - Unified 4-tab interface in single `/dashboard` page (~85 LOC)
 - Removed `/technical-view` route entirely
@@ -714,7 +716,7 @@ npm run analyze             # Analyze bundle size
 ## Feature Completeness Summary
 
 **MVP4 Completed (Phases 1-14):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 8 compliance frameworks, evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system, dashboard consolidation.
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 8 compliance frameworks (NIST AI RMF, ISO 42001, CSA AICM, NIST CSF, ISO 27001, CIS Controls, PCI DSS, SCF v2025.4), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface).
 
 **MVP5+ Planned:**
 S3/Blob file storage, scheduled reports, advanced visualizations, connection pooling, SSO/SAML, mobile app.
@@ -730,6 +732,23 @@ S3/Blob file storage, scheduled reports, advanced visualizations, connection poo
 
 ---
 
+## Security Hardening (Phase 15 - In Progress)
+
+**XSS Prevention (2026-02-05):**
+- Added `escapeHtml()` utility in `src/lib/global-search-service.ts`
+- Escapes HTML entities: `&`, `<`, `>`, `"`, `'`
+- Applied to `highlightMatches()` function for search results
+- Prevents injection of malicious scripts through user-generated content
+
+**CSV Injection Prevention (2026-02-05):**
+- Added `sanitizeCsvValue()` utility in `src/lib/export-generator.ts`
+- Detects dangerous CSV formula characters: `=`, `+`, `-`, `@`, `\t`, `\r`, `\n`
+- Prefixes dangerous values with single quote to neutralize formulas
+- Applied to all CSV/Excel export generators
+- Prevents arbitrary code execution in spreadsheet applications
+
+---
+
 ## Code Review Findings (2026-02-04)
 
 ### Test & Build Status
@@ -738,7 +757,7 @@ S3/Blob file storage, scheduled reports, advanced visualizations, connection poo
 - **Build:** Production build successful
 - **Type Coverage:** 100% (no `any` abuse)
 
-### Critical Issues Identified (Fix Before Production)
+### Critical Issues Identified (In Progress - Phase 15)
 1. **Console.error in auth route** - Uses console.error instead of logger (info leakage risk)
 2. **Missing auth on framework controls endpoint** - No session check, should have defense-in-depth
 3. **Rate limit header bug** - Header shows `remaining+1` instead of total limit
@@ -776,6 +795,6 @@ S3/Blob file storage, scheduled reports, advanced visualizations, connection poo
 
 ---
 
-**Codebase Summary Generated:** 2026-02-04
-**Last Updated:** 2026-02-04 16:05 UTC (Dashboard consolidation + Login redesign)
+**Codebase Summary Generated:** 2026-02-05
+**Last Updated:** 2026-02-05 (Phase 15: Security Hardening - XSS & CSV Injection Prevention)
 **Maintained By:** docs-manager agent

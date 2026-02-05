@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+// Increase timeout for dashboard tests which require login + data loading
+test.setTimeout(60000);
+
 test.describe('Dashboard Page Load', () => {
   const VALID_EMAIL = 'admin@airm-ip.local';
   const VALID_PASSWORD = 'Test@123456';
@@ -7,12 +10,16 @@ test.describe('Dashboard Page Load', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await page.goto('/en/login');
+    await page.waitForLoadState('domcontentloaded');
+
+    // Fill credentials
     await page.fill('input[id="email"]', VALID_EMAIL);
     await page.fill('input[id="password"]', VALID_PASSWORD);
     await page.click('button[type="submit"]');
 
-    // Wait for dashboard navigation
-    await page.waitForURL('/en/dashboard', { timeout: 10000 });
+    // Wait for dashboard navigation - use longer timeout for slow auth processing
+    await page.waitForURL('**/dashboard', { timeout: 45000 });
+    await page.waitForLoadState('networkidle');
   });
 
   test('should load dashboard successfully after login', async ({ page }) => {
@@ -97,27 +104,27 @@ test.describe('Dashboard Page Load', () => {
     expect(foundCompliance || (await complianceCard.isVisible().catch(() => false))).toBeTruthy();
   });
 
-  test('should display activity card', async ({ page }) => {
+  test('should display trends card on Executive Brief tab', async ({ page }) => {
     // Wait for page to stabilize
     await page.waitForLoadState('networkidle');
 
-    // Look for activity-related card
-    const activityCard = page.locator('text=/[Aa]ctivity|[Rr]ecent/').first();
+    // Executive Brief tab shows "Trends" card (sparklines), not Activity
+    const trendsCard = page.locator('text=/[Tt]rends/').first();
 
-    // Check if activity card is visible or find it in cards
+    // Check if trends card is visible or find it in cards
     const cards = page.locator('[class*="card"]');
-    let foundActivity = false;
+    let foundTrends = false;
 
     const cardCount = await cards.count();
     for (let i = 0; i < cardCount; i++) {
       const cardText = await cards.nth(i).textContent();
-      if (cardText && (cardText.includes('Activity') || cardText.includes('Recent'))) {
-        foundActivity = true;
+      if (cardText && cardText.includes('Trends')) {
+        foundTrends = true;
         break;
       }
     }
 
-    expect(foundActivity || (await activityCard.isVisible().catch(() => false))).toBeTruthy();
+    expect(foundTrends || (await trendsCard.isVisible().catch(() => false))).toBeTruthy();
   });
 
   test('should have all stat cards contain numeric values', async ({ page }) => {

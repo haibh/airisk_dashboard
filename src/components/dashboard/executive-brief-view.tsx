@@ -37,6 +37,7 @@ export function ExecutiveBriefView({ stats, heatmapData, frameworks, isLoading }
               change={formatTrend(stats?.trends.totalSystems || 0)}
               trend={getTrendDirection(stats?.trends.totalSystems || 0)}
               icon={<Cpu className="h-4 w-4 text-muted-foreground" />}
+              status="neutral"
             />
             <StatCard
               title="High Risks"
@@ -44,6 +45,7 @@ export function ExecutiveBriefView({ stats, heatmapData, frameworks, isLoading }
               change={formatTrend(stats?.trends.highRisks || 0)}
               trend={getTrendDirection(stats?.trends.highRisks || 0, true)}
               icon={<AlertTriangle className="h-4 w-4 text-destructive" />}
+              status={(stats?.highRisks || 0) > 0 ? 'critical' : 'success'}
             />
             <StatCard
               title="Compliance Score"
@@ -51,6 +53,7 @@ export function ExecutiveBriefView({ stats, heatmapData, frameworks, isLoading }
               change={formatTrend(stats?.trends.complianceScore || 0)}
               trend={getTrendDirection(stats?.trends.complianceScore || 0)}
               icon={<CheckCircle className="h-4 w-4 text-green-500" />}
+              status={(stats?.complianceScore || 0) >= 80 ? 'success' : (stats?.complianceScore || 0) >= 60 ? 'warning' : 'critical'}
             />
             <StatCard
               title="Pending Actions"
@@ -58,6 +61,7 @@ export function ExecutiveBriefView({ stats, heatmapData, frameworks, isLoading }
               change={formatTrend(stats?.trends.pendingActions || 0)}
               trend={getTrendDirection(stats?.trends.pendingActions || 0, true)}
               icon={<Clock className="h-4 w-4 text-yellow-500" />}
+              status={(stats?.pendingActions || 0) > 10 ? 'warning' : 'neutral'}
             />
           </>
         )}

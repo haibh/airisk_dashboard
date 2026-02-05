@@ -311,7 +311,22 @@ export async function* streamExcel(
 // ============================================================================
 
 /**
+ * Sanitize a string to prevent CSV injection attacks
+ * Prefixes dangerous characters with a single quote to neutralize formulas
+ */
+function sanitizeCsvValue(value: string): string {
+  // CSV injection: formulas starting with =, +, -, @, tab, or carriage return
+  // can execute arbitrary code in spreadsheet applications
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r', '\n'];
+  if (dangerousChars.some((char) => value.startsWith(char))) {
+    return `'${value}`; // Prefix with single quote to neutralize
+  }
+  return value;
+}
+
+/**
  * Format a value for export
+ * Includes CSV injection protection for string values
  */
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) {
@@ -319,7 +334,8 @@ function formatValue(value: unknown): string {
   }
 
   if (Array.isArray(value)) {
-    return value.join('; ');
+    const joined = value.join('; ');
+    return sanitizeCsvValue(joined);
   }
 
   if (value instanceof Date) {
@@ -327,10 +343,12 @@ function formatValue(value: unknown): string {
   }
 
   if (typeof value === 'object') {
-    return JSON.stringify(value);
+    const json = JSON.stringify(value);
+    return sanitizeCsvValue(json);
   }
 
-  return String(value);
+  const stringValue = String(value);
+  return sanitizeCsvValue(stringValue);
 }
 
 /**

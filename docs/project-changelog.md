@@ -1,12 +1,59 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-04 | **Current Version:** MVP4.4
+**Last Updated:** 2026-02-05 | **Current Version:** MVP4.5
 
 ---
 
 ## Version History
 
-### MVP4.4 (Current) - 2026-02-04
+### MVP4.5 (Current) - 2026-02-05
+
+#### Phase 14 Security Hardening (In Progress)
+**Date:** 2026-02-05
+**Impact:** XSS & CSV injection prevention added
+
+**Security Fixes Applied:**
+- XSS prevention: Added `escapeHtml()` utility in `src/lib/global-search-service.ts`
+  - Escapes HTML entities (`&`, `<`, `>`, `"`, `'`) before rendering search results
+  - Applied to `highlightMatches()` function - sanitizes all text segments
+  - Prevents injection of malicious scripts through search results
+- CSV injection protection: Added `sanitizeCsvValue()` utility in `src/lib/export-generator.ts`
+  - Detects dangerous CSV formula characters: `=`, `+`, `-`, `@`, tab, carriage return, newline
+  - Prefixes dangerous values with single quote to neutralize formulas
+  - Applied to all CSV/Excel export generators
+  - Prevents arbitrary code execution in spreadsheet applications
+- Infrastructure: Updated Playwright config with extended webServer timeout (60s → 120s)
+
+**Test Status:** 262/262 unit tests passing
+**Build Status:** Production-ready
+
+---
+
+### MVP4.5 (Previous) - 2026-02-04
+
+#### Complete Phase 14: Theme Unification & Dashboard Consolidation
+**Date:** 2026-02-04
+**Impact:** Single coherent theme system + unified 4-tab dashboard navigation
+
+**Combined Changes (Commits ea1905a + 200d3ac):**
+- Unified 3 fragmented visual themes into single adaptive system
+- All pages respect dark/light toggle via `next-themes`
+- CSS variable tokens (`hsl(var(--xxx))`) replace hardcoded classes
+- Framework UI grouping: AI Risk Frameworks + Non-AI-Specific Frameworks
+- Per-framework icons (BrainCircuit, Settings2, ShieldCheck, ShieldAlert, Lock, Target, CreditCard, Layers)
+- SCF updated to v2025.4 (effective April 2025)
+- Dashboard merged: `/dashboard` + `/technical-view` → 4-tab interface (Executive Brief | Detailed Analytics | Operations | AI Risk)
+- Landing page expanded with stats, frameworks grid, capabilities, methodology, architecture sections
+- Theme toggle (Sun/Moon) button added to auth layout
+- Sidebar: single "Dashboard" nav entry
+
+**Test Status:** 262/262 passing (100%)
+**TypeScript:** 0 errors
+**Bundle:** Production-ready
+
+---
+
+### MVP4.4 - 2026-02-04
 
 #### Theme Unification + Dashboard Consolidation
 **Date:** 2026-02-04
@@ -672,9 +719,9 @@ See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
 
 ---
 
-**Document Version:** 2.0
-**Last Updated:** 2026-02-04 12:08 UTC
+**Document Version:** 2.2
+**Last Updated:** 2026-02-05 (Phase 15 Security Hardening - In Progress)
 **Maintained By:** docs-manager agent
-**Total Commits:** 50+ since project start
+**Total Commits:** 52+ since project start
 **Total Tests:** 262 (100% passing)
-**Production Ready:** ✅ After Phase 14 security fixes
+**Production Ready:** In Progress (Phase 15 security fixes underway)

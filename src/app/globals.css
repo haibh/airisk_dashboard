@@ -210,42 +210,61 @@
     background-size: 400% 400%;
   }
 
-  /* Adaptive glassmorphism card — solid in light, glass in dark */
+  /* Adaptive glassmorphism card — solid in light, glass in dark
+     Performance: reduced blur from 24px to 12px for faster paint */
   .auth-card-adaptive {
-    background: hsl(var(--card));
+    background: hsl(var(--card) / 0.95);
     border: 1px solid hsl(var(--border));
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.08),
       0 2px 8px rgba(0, 0, 0, 0.04);
   }
   .dark .auth-card-adaptive {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.3),
-      0 0 60px rgba(100, 140, 255, 0.08),
+      0 0 40px rgba(100, 140, 255, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
-  /* Auth background particle — theme-adaptive */
+  /* Auth background particle — theme-adaptive
+     Performance: contain property isolates paint from DOM */
   .auth-bg-particle {
     position: absolute;
     border-radius: 50%;
     background: hsl(var(--primary) / 0.12);
     box-shadow: 0 0 8px hsl(var(--primary) / 0.1);
+    contain: layout paint;
   }
   .dark .auth-bg-particle {
     background: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 8px rgba(180, 210, 255, 0.2);
   }
 
-  /* Mouse glow — fades in when cursor moves */
-  .auth-mouse-glow {
+  /* CSS-only mouse glow area — no JS tracking needed
+     Uses radial gradient that follows cursor via CSS (stationary glow effect) */
+  .auth-mouse-glow-area {
     opacity: 0;
+    background: radial-gradient(
+      circle at 50% 40%,
+      hsl(var(--primary) / 0.06) 0%,
+      hsl(var(--primary) / 0.02) 30%,
+      transparent 60%
+    );
+    transition: opacity 0.5s ease;
   }
-  .auth-adaptive-bg:hover .auth-mouse-glow {
+  .dark .auth-mouse-glow-area {
+    background: radial-gradient(
+      circle at 50% 40%,
+      rgba(140, 180, 255, 0.12) 0%,
+      rgba(100, 140, 255, 0.04) 30%,
+      transparent 60%
+    );
+  }
+  .auth-adaptive-bg:hover .auth-mouse-glow-area {
     opacity: 1;
   }
 
@@ -290,15 +309,18 @@
     background-clip: text;
   }
 
-  /* Floating nav bar — adaptive glass effect */
+  /* Floating nav bar — adaptive glass effect
+     Performance: reduced blur from 16px to 10px */
   .landing-nav {
-    background: hsl(var(--card) / 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: hsl(var(--card) / 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid hsl(var(--border));
   }
   .dark .landing-nav {
-    background: rgba(10, 22, 40, 0.6);
+    background: rgba(10, 22, 40, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
@@ -325,7 +347,8 @@
     transform: scale(1.08);
   }
 
-  /* Feature cards — adaptive glass surface */
+  /* Feature cards — adaptive glass surface
+     Performance: reduced blur from 12px to 8px in dark mode */
   .landing-feature-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
@@ -335,8 +358,8 @@
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .dark .landing-feature-card {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: none;
   }
@@ -359,28 +382,32 @@
     transform: translateY(-2px);
   }
 
-  /* Floating particles — adaptive */
+  /* Floating particles — adaptive
+     Performance: contain property isolates paint from DOM */
   .landing-particle {
     position: absolute;
     border-radius: 50%;
     background: hsl(var(--primary) / 0.15);
     box-shadow: 0 0 8px hsl(var(--primary) / 0.15);
+    contain: layout paint;
   }
   .dark .landing-particle {
     background: rgba(59, 130, 246, 0.25);
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
   }
 
-  /* Landing section card — for stats, frameworks, etc. */
+  /* Landing section card — for stats, frameworks, etc.
+     Performance: reduced blur, increased opacity for light mode */
   .landing-section-card {
-    background: hsl(var(--card) / 0.6);
+    background: hsl(var(--card) / 0.8);
     border: 1px solid hsl(var(--border));
     border-radius: 0.75rem;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
   }
   .dark .landing-section-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
   }
 
   /* ── Accessibility: respect prefers-reduced-motion ──────────────── */
