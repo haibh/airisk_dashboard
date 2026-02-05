@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
 import { useRouter, usePathname } from 'next/navigation';
@@ -32,6 +33,10 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { data: session } = useSession();
+
+  // Prevent hydration mismatch - only render theme-dependent content after mount
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const switchLocale = (newLocale: string) => {
     if (!pathname) return;
@@ -70,7 +75,8 @@ export function Header() {
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+          title={mounted ? (theme === 'dark' ? 'Switch to Light' : 'Switch to Dark') : 'Toggle theme'}
+          suppressHydrationWarning
         >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

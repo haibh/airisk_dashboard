@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { Link } from '@/components/ui/link';
 import { cn } from '@/lib/utils';
-import { Building2, Users, User, Key, Webhook } from 'lucide-react';
+import { Building2, Users, User, Key, Webhook, Scale } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { hasMinimumRole } from '@/lib/auth-helpers';
 
@@ -38,6 +38,12 @@ const tabs: Tab[] = [
     href: '/settings/webhooks',
     labelKey: 'settings.tabs.webhooks',
     icon: Webhook,
+    adminOnly: true,
+  },
+  {
+    href: '/settings/compliance-scoring',
+    labelKey: 'settings.tabs.complianceScoring',
+    icon: Scale,
     adminOnly: true,
   },
   {

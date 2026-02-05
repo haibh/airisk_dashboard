@@ -344,7 +344,8 @@
       "profile": "Hồ sơ",
       "auditLog": "Nhật ký kiểm toán",
       "apiKeys": "Khóa API",
-      "webhooks": "Webhooks"
+      "webhooks": "Webhooks",
+      "complianceScoring": "Điểm tuân thủ"
     },
     "auditLog": {
       "title": "Nhật ký kiểm toán",
@@ -560,13 +561,14 @@
     },
     "methodology": {
       "heading": "Phương pháp Chấm điểm Rủi ro",
-      "formula": "Rủi ro Vốn có = Khả năng x Tác động (Ma trận 5x5)",
-      "residual": "Rủi ro Dư = Vốn có x (1 - Hiệu quả Kiểm soát)",
+      "likelihood": "Khả năng →",
+      "impact": "Tác động",
+      "controlExample": "Kiểm soát giảm rủi ro vốn có. Ví dụ: kiểm soát hiệu quả 60% giảm điểm 15 → 6.",
       "levels": {
-        "low": "Thấp (1-4)",
-        "medium": "Trung bình (5-9)",
-        "high": "Cao (10-16)",
-        "critical": "Nghiêm trọng (17-25)"
+        "low": "Thấp",
+        "medium": "Trung bình",
+        "high": "Cao",
+        "critical": "Nghiêm trọng"
       }
     },
     "architecture": {

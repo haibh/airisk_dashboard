@@ -49,8 +49,12 @@ export function OrganizationProfileForm() {
       setLoading(true);
       const response = await fetch(`/api/organizations/${session?.user?.organizationId}`);
       if (response.ok) {
-        const data = await response.json();
-        setFormData(data.data);
+        const responseData = await response.json();
+        // Handle both { data: {...} } and direct object response formats
+        const orgData = responseData.data || responseData;
+        if (orgData && orgData.id) {
+          setFormData(orgData);
+        }
       }
     } catch (error) {
       toast.error('Failed to load organization data');

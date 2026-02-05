@@ -4,11 +4,59 @@
  */
 
 import { prisma } from '@/lib/db';
-import { Control, Framework, ControlMapping, Prisma } from '@prisma/client';
+import { Control, Framework, ControlMapping, Prisma, ControlPriority } from '@prisma/client';
 
 // ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
+
+/**
+ * Framework scoring configuration - stored in Framework.scoringConfig JSON field
+ */
+export interface ScoringConfig {
+  compliantThreshold: number;   // Default: 80 - effectiveness >= this = COMPLIANT
+  partialThreshold: number;     // Default: 50 - effectiveness >= this = PARTIAL
+  priorityWeights: {
+    CRITICAL: number;           // Default: 4.0
+    HIGH: number;               // Default: 2.0
+    MEDIUM: number;             // Default: 1.0
+    LOW: number;                // Default: 0.5
+  };
+}
+
+/**
+ * Default scoring configuration used when framework has no custom config
+ */
+export const DEFAULT_SCORING_CONFIG: ScoringConfig = {
+  compliantThreshold: 80,
+  partialThreshold: 50,
+  priorityWeights: {
+    CRITICAL: 4.0,
+    HIGH: 2.0,
+    MEDIUM: 1.0,
+    LOW: 0.5,
+  },
+};
+
+/**
+ * Get scoring config from framework or use defaults
+ */
+export function getScoringConfig(framework: Framework): ScoringConfig {
+  if (framework.scoringConfig && typeof framework.scoringConfig === 'object') {
+    const config = framework.scoringConfig as Partial<ScoringConfig>;
+    return {
+      compliantThreshold: config.compliantThreshold ?? DEFAULT_SCORING_CONFIG.compliantThreshold,
+      partialThreshold: config.partialThreshold ?? DEFAULT_SCORING_CONFIG.partialThreshold,
+      priorityWeights: {
+        CRITICAL: config.priorityWeights?.CRITICAL ?? DEFAULT_SCORING_CONFIG.priorityWeights.CRITICAL,
+        HIGH: config.priorityWeights?.HIGH ?? DEFAULT_SCORING_CONFIG.priorityWeights.HIGH,
+        MEDIUM: config.priorityWeights?.MEDIUM ?? DEFAULT_SCORING_CONFIG.priorityWeights.MEDIUM,
+        LOW: config.priorityWeights?.LOW ?? DEFAULT_SCORING_CONFIG.priorityWeights.LOW,
+      },
+    };
+  }
+  return DEFAULT_SCORING_CONFIG;
+}
 
 export interface FrameworkGap {
   controlId: string;
@@ -36,7 +84,9 @@ export interface FrameworkScore {
   partialControls: number;
   nonCompliantControls: number;
   notAssessedControls: number;
-  complianceScore: number; // 0-100
+  complianceScore: number;         // 0-100 (weighted by priority)
+  unweightedScore: number;         // 0-100 (simple average)
+  scoringConfig: ScoringConfig;    // Active scoring configuration
 }
 
 export interface GapAnalysisResult {
@@ -154,6 +204,7 @@ export async function loadControlMappings(
 
 /**
  * Calculate compliance scores for each framework
+ * Uses framework-specific thresholds and control priority weighting
  */
 export async function calculateComplianceScores(
   orgId: string,
@@ -173,32 +224,62 @@ export async function calculateComplianceScores(
     const controls = controlsMap.get(framework.id) || [];
     const totalControls = controls.length;
 
+    // Get framework-specific scoring config or use defaults
+    const scoringConfig = getScoringConfig(framework);
+    const { compliantThreshold, partialThreshold, priorityWeights } = scoringConfig;
+
     let compliantControls = 0;
     let partialControls = 0;
     let nonCompliantControls = 0;
     let notAssessedControls = 0;
+
+    // For weighted scoring
+    let weightedCompliantScore = 0;
+    let weightedPartialScore = 0;
+    let totalWeight = 0;
+
+    // For unweighted scoring (simple average)
+    let unweightedCompliantCount = 0;
+    let unweightedPartialCount = 0;
 
     for (const control of controls) {
       const assessment = assessmentData.find(
         (a) => a.controlId === control.id && a.frameworkId === framework.id
       );
 
+      // Get control priority weight
+      const priority = control.priority as ControlPriority;
+      const weight = priorityWeights[priority] || priorityWeights.MEDIUM;
+      totalWeight += weight;
+
       if (!assessment) {
         notAssessedControls++;
-      } else if (assessment.effectiveness >= 80) {
+        // Not assessed controls contribute 0 to score
+      } else if (assessment.effectiveness >= compliantThreshold) {
         compliantControls++;
-      } else if (assessment.effectiveness >= 50) {
+        unweightedCompliantCount++;
+        weightedCompliantScore += weight * 100;  // Full points weighted
+      } else if (assessment.effectiveness >= partialThreshold) {
         partialControls++;
+        unweightedPartialCount++;
+        weightedPartialScore += weight * 50;     // Half points weighted
       } else {
         nonCompliantControls++;
+        // Non-compliant contributes 0 to score
       }
     }
 
-    // Calculate compliance score (weighted)
+    // Calculate weighted compliance score (by control priority)
     const complianceScore =
+      totalWeight > 0
+        ? Math.round((weightedCompliantScore + weightedPartialScore) / totalWeight)
+        : 0;
+
+    // Calculate unweighted score (simple average for comparison)
+    const unweightedScore =
       totalControls > 0
         ? Math.round(
-            ((compliantControls * 100 + partialControls * 50) / totalControls)
+            ((unweightedCompliantCount * 100 + unweightedPartialCount * 50) / totalControls)
           )
         : 0;
 
@@ -212,6 +293,8 @@ export async function calculateComplianceScores(
       nonCompliantControls,
       notAssessedControls,
       complianceScore,
+      unweightedScore,
+      scoringConfig,
     });
   }
 

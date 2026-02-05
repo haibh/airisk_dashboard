@@ -344,7 +344,8 @@
       "profile": "Profile",
       "auditLog": "Audit Log",
       "apiKeys": "API Keys",
-      "webhooks": "Webhooks"
+      "webhooks": "Webhooks",
+      "complianceScoring": "Compliance Scoring"
     },
     "auditLog": {
       "title": "Audit Log",
@@ -560,13 +561,14 @@
     },
     "methodology": {
       "heading": "Risk Scoring Methodology",
-      "formula": "Inherent Risk = Likelihood x Impact (5x5 Matrix)",
-      "residual": "Residual Risk = Inherent x (1 - Control Effectiveness)",
+      "likelihood": "Likelihood →",
+      "impact": "Impact",
+      "controlExample": "Controls reduce inherent risk. Example: 60% effective controls reduce score 15 → 6.",
       "levels": {
-        "low": "Low (1-4)",
-        "medium": "Medium (5-9)",
-        "high": "High (10-16)",
-        "critical": "Critical (17-25)"
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
       }
     },
     "architecture": {
