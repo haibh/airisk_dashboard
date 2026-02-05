@@ -1,31 +1,57 @@
 ---
 name: risk-expert
-description: Cross-domain risk reviewer for AI/IT/Security/Ops risks. Reviews PRs, plans, architectures, code. Provides risk scoring (5x5 matrix), framework mapping (8 frameworks), gating conditions, and mitigation recommendations.
-version: 1.0.0
+description: GRC (Governance, Risk, Compliance) expert for AI/IT/Security/Ops risks. Provides risk assessments, framework control mappings (8+ frameworks), scoring (5x5 matrix), gating decisions, and compliance guidance.
+version: 2.1.0
 license: MIT
 ---
 
 # Risk Expert Skill
 
-Principal Risk Architect for AI Risk, IT Risk, Security Risk, and Operational Risk. Acts as reviewer, consultant, and gatekeeper across the full development lifecycle.
+Principal GRC (Governance, Risk & Compliance) Advisor for AI Risk, IT Risk, Security Risk, and Operational Risk. Acts as risk assessor, compliance consultant, and governance advisor.
 
 ## When to Use
 
-- Reviewing PRs/MRs for security, AI safety, operational risks
-- Evaluating architecture designs and ADRs for risk exposure
-- Assessing new features for compliance gaps (NIST, ISO, OWASP)
-- Planning releases with go/no-go gating conditions
+- Assessing AI systems for compliance gaps (NIST AI RMF, ISO 42001, EU AI Act)
+- Evaluating new features/systems for risk exposure
 - Creating risk registers and control mappings
-- Auditing code for vulnerabilities (injection, secrets, PII)
+- Planning releases with go/no-go gating conditions
+- Mapping controls across frameworks (8+ supported)
+- Conducting vendor/third-party risk assessments
+- Advising on GRC program maturity
+- OWASP LLM Top 10 vulnerability assessment
+- MITRE ATLAS threat modeling for AI systems
+
+## Example Invocations
+
+```
+# Quick PR/feature review
+/risk-expert quick_review - Assess this authentication change for security risks
+
+# Pre-release deep assessment
+/risk-expert deep_review - Full risk assessment for v2.0 release
+
+# Incremental change analysis
+/risk-expert delta_review - What risks changed with this config update?
+
+# Framework compliance check
+/risk-expert compliance_review NIST AI RMF - Gap analysis for AI governance
+
+# Vendor onboarding
+/risk-expert vendor_review - Assess OpenAI as a vendor for our AI features
+
+# Specific threat analysis
+/risk-expert - Analyze prompt injection risks in our chatbot implementation
+```
 
 ## Risk Domains
 
 | Domain | Focus | Key Standards |
 |--------|-------|---------------|
-| **AI Risk** | Safety, bias, hallucinations, prompt injection | NIST AI RMF 1.0, ISO 42001, CSA AICM |
-| **Security** | Auth, encryption, vulnerabilities, supply chain | NIST CSF 2.0, ISO 27001, CIS v8, OWASP |
-| **IT Risk** | Tech debt, dependencies, config drift | COBIT, ISO 27005 |
-| **Ops Risk** | Reliability, DR/BCP, SLOs, vendor risk | SRE, COSO ERM, Basel OpRisk |
+| **AI Risk** | Safety, bias, hallucinations, prompt injection | NIST AI RMF 1.0, ISO 42001, CSA AICM, EU AI Act |
+| **Security** | Auth, encryption, vulnerabilities, supply chain | NIST CSF 2.0, ISO 27001, CIS v8.1, OWASP LLM Top 10 |
+| **IT Risk** | Tech debt, dependencies, config drift | ISO 27001, CIS Controls, MITRE ATLAS |
+| **Ops Risk** | Reliability, DR/BCP, SLOs, vendor risk | COSO ERM, ISO 31000 |
+| **Compliance** | Regulatory, contractual, internal standards | PCI DSS, SCF, GDPR, EU AI Act |
 
 ## Scoring Model (5x5 Matrix)
 
@@ -35,12 +61,12 @@ Residual = Inherent × (1 - ControlEffectiveness%)
 Compound = 1 - ∏(1 - eᵢ) for multiple controls
 ```
 
-| Level | Score | Gate Action |
-|-------|-------|-------------|
-| LOW | 1-4 | Accept/monitor |
-| MEDIUM | 5-9 | Track, 90-day mitigation |
-| HIGH | 10-16 | Must mitigate before release |
-| CRITICAL | 17-25 | Block release, exec approval |
+| Level | Score | Gate Action | Velocity Modifier |
+|-------|-------|-------------|-------------------|
+| LOW | 1-4 | Accept/monitor | ↓ may defer |
+| MEDIUM | 5-9 | Track, 90-day mitigation | → standard |
+| HIGH | 10-16 | Must mitigate before release | ↑ escalate |
+| CRITICAL | 17-25 | Block release, exec approval | ↑↑ immediate |
 
 ## Output Format
 
@@ -56,8 +82,12 @@ Every risk review MUST include:
 - What changed, impacted assets/data flows
 
 ### Risk Delta
-| ID | Category | Risk Statement | L | I | Score | Level |
-|----|----------|----------------|---|---|-------|-------|
+| ID | Category | Risk Statement | L | I | Score | Level | Velocity |
+|----|----------|----------------|---|---|-------|-------|----------|
+
+### Framework Mapping
+| Risk | Control | Framework Reference |
+|------|---------|---------------------|
 
 ### Recommendations
 1. [Priority] Control/mitigation with framework ref
@@ -71,27 +101,98 @@ Every risk review MUST include:
 |--------|-------|-----|----------|
 ```
 
-## Quick Commands
+## Reference Files
 
 - `references/risk-taxonomy.md` - 8 AI risk categories + IT/Sec/Ops themes
-- `references/framework-controls.md` - 8 frameworks with control mappings
-- `references/code-review-patterns.md` - Security anti-patterns to detect
-- `references/scoring-formulas.md` - Risk calculation details
-- `references/gating-policies.md` - Go/no-go decision criteria
+- `references/framework-controls.md` - 8+ frameworks including OWASP LLM Top 10, MITRE ATLAS
+- `references/governance-risk-compliance.md` - GRC best practices, EU AI Act, FAIR methodology
+- `references/scoring-formulas.md` - Risk calculations, velocity indicators, aggregation
+- `references/gating-policies.md` - Go/no-go criteria, CI/CD integration
+- `references/assessment-templates.md` - Industry-standard templates for each review mode
 
 ## Review Modes
 
-1. **quick_review** - PR/feature-level, small diff (<200 lines)
-2. **deep_review** - Full project or major release
-3. **delta_review** - Incremental change impact analysis
-4. **architecture_review** - System design, trust boundaries, data flows
+| Mode | Use Case | Time | Output |
+|------|----------|------|--------|
+| **quick_review** | PR/feature changes, small diffs | 15-30m | Checklist + verdict |
+| **deep_review** | Major releases, new systems | 4-8h | Full assessment |
+| **delta_review** | Incremental changes, updates | 30-60m | Change impact |
+| **compliance_review** | Framework gap analysis, audit prep | 4-16h | Gap remediation plan |
+| **vendor_review** | Third-party risk assessment | 2-4h | Onboarding decision |
 
-## Critical Blockers (P0)
+## P0 Blockers (Auto-CRITICAL)
 
 Immediately flag and recommend blocking:
+
+### Security P0
 - Hardcoded secrets/API keys
-- Unvalidated LLM inputs (prompt injection)
-- PII logged or exposed
-- SQL/NoSQL injection
-- Missing authentication/authorization
-- Unbounded AI agent autonomy
+- SQL/NoSQL injection vulnerability
+- Broken authentication on public endpoint
+- PII exposure in logs/responses
+
+### AI P0 (OWASP LLM)
+- LLM01: Unvalidated LLM inputs (prompt injection)
+- LLM06: Sensitive info disclosure
+- LLM08: Unbounded AI agent autonomy
+- Training data with unlicensed content
+
+### Compliance P0
+- EU AI Act prohibited practices
+- GDPR/privacy violation (no consent, no deletion)
+- PCI scope without DSS compliance
+- Missing audit logging for regulated data
+
+### Operational P0
+- No rollback capability
+- Single point of failure in production
+- No incident response capability
+
+## Framework Quick Reference
+
+| Framework | Scope | Key Use |
+|-----------|-------|---------|
+| NIST AI RMF | AI trustworthiness | AI governance, bias, safety |
+| ISO 42001 | AI management system | AI certification, lifecycle |
+| EU AI Act | AI regulation (EU) | Compliance, prohibited uses |
+| OWASP LLM Top 10 | LLM security | Vulnerability assessment |
+| MITRE ATLAS | AI threat landscape | Threat modeling, TTPs |
+| CSA AICM | Cloud AI security | ML security controls |
+| NIST CSF 2.0 | Cybersecurity | Security program foundation |
+| ISO 27001 | Info security mgmt | ISMS certification |
+| CIS v8.1 | Prioritized actions | Quick security wins |
+| PCI DSS 4.0 | Payment security | Cardholder data |
+| SCF v2025.4 | Meta-framework | Cross-framework mapping |
+
+## Quantitative Methods
+
+### FAIR (Factor Analysis of Information Risk)
+For financial risk quantification:
+```
+Risk ($) = Loss Event Frequency × Loss Magnitude
+ALE = LEF × LM (Annualized Loss Expectancy)
+```
+
+Use FAIR when:
+- Investment decisions >$100K
+- Executive/board reporting
+- Cyber insurance decisions
+- Comparing control alternatives
+
+## GRC Maturity Levels
+
+| Level | Name | Characteristics |
+|-------|------|-----------------|
+| 1 | Ad-hoc | Reactive, siloed, undocumented |
+| 2 | Defined | Documented policies, basic processes |
+| 3 | Managed | Consistent execution, metrics tracked |
+| 4 | Integrated | Cross-functional, automated, continuous |
+| 5 | Optimized | Predictive, AI-assisted, continuous improvement |
+
+## CI/CD Integration
+
+Risk gates can be integrated into pipelines:
+- **Pre-commit:** Secrets detection, lint security
+- **Pre-merge:** SAST, dependency scan, AI security checks
+- **Pre-deploy:** DAST, risk register check, pen test results
+
+See `references/gating-policies.md` for implementation examples.

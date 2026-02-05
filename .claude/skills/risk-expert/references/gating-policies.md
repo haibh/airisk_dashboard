@@ -224,6 +224,175 @@ These conditions automatically trigger CRITICAL gate:
 
 ---
 
+## CI/CD Gate Integration
+
+### Pipeline Risk Gates
+
+#### Pre-Commit Gates (Local)
+```yaml
+pre_commit:
+  checks:
+    - secrets_scan: block_on_detect
+    - lint_security: warn
+  tools: [gitleaks, trivy, semgrep]
+```
+
+#### Pre-Merge Gates (PR/MR)
+```yaml
+pull_request:
+  required_checks:
+    - sast_scan:
+        block: [critical, high]
+        warn: [medium]
+    - dependency_scan:
+        block: [known_exploited]
+        warn: [critical_cvss_9+]
+    - secrets_detection:
+        block: true
+    - code_review:
+        min_approvers: 1
+        security_team: required_for_auth_changes
+
+  ai_specific:
+    - prompt_injection_test:
+        block: true
+    - pii_detection:
+        block: true
+    - bias_test:
+        warn: true
+```
+
+#### Pre-Deploy Gates (Release)
+```yaml
+deployment:
+  staging:
+    required:
+      - dast_scan: pass
+      - integration_tests: pass
+      - ai_evaluation: pass
+    block_on:
+      - critical_findings: true
+      - high_findings_unresolved: true
+
+  production:
+    required:
+      - staging_gate: pass
+      - pen_test_current: true  # <90 days
+      - risk_register_reviewed: true
+      - change_approval: true
+    block_on:
+      - p0_open: true
+      - critical_risk_unmitigated: true
+```
+
+### GitHub Actions Example
+
+```yaml
+name: Security Gates
+
+on: [push, pull_request]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secrets Detection
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          fail: true
+
+      - name: SAST Scan
+        uses: github/codeql-action/analyze@v3
+
+      - name: Dependency Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: AI Security Checks
+        run: |
+          # Prompt injection patterns
+          ! grep -rn "user_input.*prompt" --include="*.py" || exit 1
+          # PII in logs
+          ! grep -rn "logger.*email\|ssn\|password" --include="*.py" || exit 1
+
+  risk-gate:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Risk Register
+        run: |
+          # Verify no blocking risks
+          curl -s $RISK_API/blocking-risks | jq -e '.count == 0'
+```
+
+### GitLab CI Example
+
+```yaml
+stages:
+  - security
+  - risk-gate
+  - deploy
+
+sast:
+  stage: security
+  script:
+    - semgrep --config=auto --error --severity=ERROR .
+  allow_failure: false
+
+dependency-scan:
+  stage: security
+  script:
+    - trivy fs --exit-code 1 --severity CRITICAL,HIGH .
+  allow_failure: false
+
+risk-gate:
+  stage: risk-gate
+  script:
+    - |
+      BLOCKING=$(curl -s $RISK_API/check?level=critical)
+      if [ "$BLOCKING" != "0" ]; then
+        echo "Blocked by $BLOCKING critical risks"
+        exit 1
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+```
+
+### Security Tool Matrix
+
+| Gate | Tool | Purpose | Block Threshold |
+|------|------|---------|-----------------|
+| Secrets | Gitleaks, TruffleHog | Detect credentials | Any detection |
+| SAST | Semgrep, CodeQL | Code vulnerabilities | Critical/High |
+| DAST | OWASP ZAP, Burp | Runtime vulnerabilities | Critical |
+| SCA | Trivy, Snyk | Dependency vulns | KEV list, CVSS 9+ |
+| Container | Trivy, Grype | Image vulnerabilities | Critical |
+| IaC | Checkov, tfsec | Infra misconfig | High severity |
+| AI | Custom, Garak | LLM vulnerabilities | Prompt injection |
+
+### Feature Flag Gates
+
+```yaml
+feature_flags:
+  new_ai_feature:
+    enabled: false
+    gates:
+      - risk_assessment_complete: true
+      - bias_testing_passed: true
+      - security_review_approved: true
+    rollout:
+      - internal: 100%
+      - beta: 10%
+      - production: 0%  # Blocked until gates pass
+```
+
+---
+
 ## Quick Reference
 
 ```
@@ -244,4 +413,10 @@ P0 Auto-Blockers:
 Exception Max Duration:
 - CRITICAL: 30 days
 - HIGH: 90 days
+
+CI/CD Tool Chain:
+- Pre-commit: gitleaks, trivy
+- PR/MR: semgrep, codeql, snyk
+- Deploy: zap, pen test results
+- AI: custom prompt injection tests
 ```

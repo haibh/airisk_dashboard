@@ -2,9 +2,9 @@
 
 ## Supported Frameworks (8)
 
-### AI-Risk Specific Frameworks
+### AI-Risk Frameworks
 
-#### 1. NIST AI RMF 1.0
+#### 1. NIST AI RMF 1.0 (2023)
 **Scope:** AI trustworthiness, risk management lifecycle
 **Structure:** 4 Functions → 19 Categories → 85+ Subcategories
 
@@ -16,15 +16,22 @@
 | **MANAGE** | Risk treatment | Mitigations, prioritization, improvement |
 
 **Key Controls:**
-- GOVERN-1: Legal/regulatory compliance
-- MAP-1: AI use case documentation
-- MAP-2: Data governance practices
-- MEASURE-2: Bias and fairness testing
-- MANAGE-1: Risk prioritization
+| ID | Control | Description |
+|----|---------|-------------|
+| GOVERN-1 | Legal/regulatory compliance | Ensure AI complies with applicable laws |
+| GOVERN-2 | Accountability structure | Define roles and responsibilities |
+| MAP-1 | Use case documentation | Document intended use and limitations |
+| MAP-2 | Data governance | Manage training/inference data quality |
+| MEASURE-1 | Performance metrics | Define and track AI performance |
+| MEASURE-2 | Bias/fairness testing | Test for discriminatory outcomes |
+| MANAGE-1 | Risk prioritization | Rank and address risks systematically |
+| MANAGE-2 | Incident response | Plan for AI failures and incidents |
+
+---
 
 #### 2. ISO/IEC 42001:2023
-**Scope:** AI Management System (AIMS)
-**Structure:** 10 Clauses + Annex A Controls (38 controls)
+**Scope:** AI Management System (AIMS) certification
+**Structure:** 10 Clauses + Annex A (38 controls)
 
 | Clause | Focus |
 |--------|-------|
@@ -36,35 +43,123 @@
 | 9 | Performance evaluation |
 | 10 | Improvement |
 
-**Key Controls (Annex A):**
-- A.5.1: AI policy
-- A.6.1: AI risk assessment
-- A.7.1: Data management
-- A.8.1: AI system development
-- A.9.1: Third-party AI
+**Annex A Controls:**
+| ID | Control | Description |
+|----|---------|-------------|
+| A.5.1 | AI policy | Establish AI governance policy |
+| A.5.2 | Roles & responsibilities | Define AI accountability |
+| A.6.1 | AI risk assessment | Systematic risk identification |
+| A.6.2 | Risk treatment | Plan risk mitigation |
+| A.7.1 | Data management | Data quality, privacy, governance |
+| A.7.2 | Data for learning | Training data validation |
+| A.8.1 | AI development lifecycle | Secure development practices |
+| A.8.2 | AI testing & validation | Verify AI behavior |
+| A.9.1 | Third-party AI | Manage external AI components |
+| A.10.1 | AI system operation | Monitor production AI |
+
+---
 
 #### 3. CSA AICM (AI Controls Matrix)
 **Scope:** Cloud-based AI security controls
 **Structure:** 4 Domains → Control Objectives
 
-| Domain | Focus |
-|--------|-------|
-| Governance | Policies, accountability, ethics |
-| Development | Secure ML lifecycle, testing |
-| Operations | Deployment, monitoring, incident |
-| Data | Privacy, quality, lineage |
+| Domain | Focus | Key Controls |
+|--------|-------|--------------|
+| **Governance** | Policies, accountability, ethics | AI ethics policy, risk ownership |
+| **Development** | Secure ML lifecycle, testing | Model validation, code security |
+| **Operations** | Deployment, monitoring, incident | Drift detection, incident response |
+| **Data** | Privacy, quality, lineage | Data classification, consent mgmt |
+
+---
+
+### AI Threat Frameworks
+
+#### OWASP LLM Top 10 (2025)
+**Scope:** Large Language Model security risks
+**Structure:** 10 vulnerability categories
+
+| ID | Risk | Description | Mitigation |
+|----|------|-------------|------------|
+| **LLM01** | Prompt Injection | Malicious prompts manipulate LLM behavior | Input validation, output filtering, sandboxing |
+| **LLM02** | Insecure Output Handling | Unvalidated LLM output causes downstream issues | Output sanitization, encoding, validation |
+| **LLM03** | Training Data Poisoning | Malicious data corrupts model behavior | Data provenance, validation pipelines |
+| **LLM04** | Model Denial of Service | Resource exhaustion via complex queries | Rate limiting, resource caps, timeouts |
+| **LLM05** | Supply Chain Vulnerabilities | Compromised models, plugins, or data | SBOM, provenance verification, signing |
+| **LLM06** | Sensitive Info Disclosure | PII/secrets leaked in responses | PII filtering, output scanning, redaction |
+| **LLM07** | Insecure Plugin Design | Plugins with excessive permissions | Least privilege, input validation, sandboxing |
+| **LLM08** | Excessive Agency | AI takes unauthorized actions | Human-in-loop, action limits, approval gates |
+| **LLM09** | Overreliance | Blind trust in AI outputs | Uncertainty display, disclaimers, verification |
+| **LLM10** | Model Theft | Unauthorized model extraction | Access controls, monitoring, watermarking |
+
+**Control Mapping:**
+| OWASP LLM | NIST AI RMF | ISO 42001 | Mitigation Priority |
+|-----------|-------------|-----------|---------------------|
+| LLM01 | MANAGE-1 | A.8.2 | P0 - Critical |
+| LLM02 | MANAGE-1 | A.8.2 | P1 - High |
+| LLM03 | MAP-2 | A.7.2 | P1 - High |
+| LLM04 | MANAGE-2 | A.10.1 | P2 - Medium |
+| LLM05 | MAP-1 | A.9.1 | P1 - High |
+| LLM06 | MAP-2 | A.7.1 | P0 - Critical |
+| LLM07 | GOVERN-1 | A.5.2 | P1 - High |
+| LLM08 | GOVERN-2 | A.5.2 | P0 - Critical |
+| LLM09 | MEASURE-1 | A.8.2 | P2 - Medium |
+| LLM10 | MANAGE-1 | A.8.1 | P1 - High |
+
+---
+
+#### MITRE ATLAS (Adversarial Threat Landscape for AI Systems)
+**Scope:** AI/ML adversarial attack taxonomy
+**Structure:** Tactics → Techniques → Procedures (TTPs)
+
+**Tactics (Attack Phases):**
+| ID | Tactic | Description |
+|----|--------|-------------|
+| AML.TA0001 | Reconnaissance | Gather info about target ML system |
+| AML.TA0002 | Resource Development | Prepare attack infrastructure |
+| AML.TA0003 | Initial Access | Gain entry to ML system |
+| AML.TA0004 | ML Model Access | Access target model |
+| AML.TA0005 | Execution | Run adversarial techniques |
+| AML.TA0006 | Persistence | Maintain access to ML system |
+| AML.TA0007 | Defense Evasion | Avoid detection |
+| AML.TA0008 | Discovery | Learn about ML environment |
+| AML.TA0009 | Collection | Gather ML artifacts |
+| AML.TA0010 | ML Attack Staging | Prepare ML-specific attacks |
+| AML.TA0011 | Exfiltration | Steal model or data |
+| AML.TA0012 | Impact | Damage or manipulate system |
+
+**Key Techniques:**
+| ID | Technique | Description | Detection |
+|----|-----------|-------------|-----------|
+| AML.T0000 | Model Evasion | Craft inputs to cause misclassification | Anomaly detection, input validation |
+| AML.T0001 | Model Inversion | Extract training data from model | Query monitoring, differential privacy |
+| AML.T0002 | Model Stealing | Clone model via queries | Rate limiting, query monitoring |
+| AML.T0003 | Data Poisoning | Corrupt training data | Data validation, provenance tracking |
+| AML.T0004 | Backdoor Attack | Insert hidden trigger patterns | Model inspection, input sanitization |
+| AML.T0005 | Prompt Injection | Manipulate LLM via inputs | Input filtering, output validation |
+| AML.T0006 | Supply Chain Compromise | Attack ML dependencies | SBOM, integrity verification |
+
+**ATLAS to Framework Mapping:**
+| ATLAS Technique | OWASP LLM | NIST AI RMF | Control |
+|-----------------|-----------|-------------|---------|
+| Model Evasion | - | MEASURE-2 | Adversarial testing |
+| Model Inversion | LLM06 | MAP-2 | Differential privacy |
+| Model Stealing | LLM10 | MANAGE-1 | Access controls |
+| Data Poisoning | LLM03 | MAP-2 | Data validation |
+| Backdoor Attack | LLM03 | MEASURE-2 | Model inspection |
+| Prompt Injection | LLM01 | MANAGE-1 | Input validation |
+| Supply Chain | LLM05 | MAP-1 | SBOM, provenance |
 
 ---
 
 ### Security & Compliance Frameworks
 
-#### 4. NIST CSF 2.0
+#### 4. NIST CSF 2.0 (2024)
 **Scope:** Cybersecurity risk management
 **Structure:** 6 Functions → 23 Categories → 108 Subcategories
 
-| Function | Purpose | Example Categories |
-|----------|---------|-------------------|
-| **GOVERN** | Strategy, policy | Organizational context, risk strategy |
+| Function | Purpose | Key Categories |
+|----------|---------|----------------|
+| **GOVERN** | Strategy, policy | Context, risk strategy, supply chain |
 | **IDENTIFY** | Asset management | Asset inventory, risk assessment |
 | **PROTECT** | Safeguards | Access control, awareness, data security |
 | **DETECT** | Monitoring | Anomalies, continuous monitoring |
@@ -72,105 +167,200 @@
 | **RECOVER** | Restoration | Recovery planning, improvements |
 
 **Key Controls:**
-- GV.RM: Risk management strategy
-- ID.AM: Asset management
-- PR.AC: Access control
-- DE.CM: Continuous monitoring
-- RS.AN: Incident analysis
+| ID | Control | Description |
+|----|---------|-------------|
+| GV.RM | Risk management strategy | Define risk tolerance and approach |
+| GV.SC | Supply chain risk | Manage third-party cyber risks |
+| ID.AM | Asset management | Inventory hardware, software, data |
+| ID.RA | Risk assessment | Identify and evaluate cyber risks |
+| PR.AC | Access control | Manage identities and permissions |
+| PR.DS | Data security | Protect data at rest and in transit |
+| DE.CM | Continuous monitoring | Monitor for anomalies |
+| RS.AN | Incident analysis | Analyze and contain incidents |
+| RC.RP | Recovery planning | Restore operations after incidents |
+
+---
 
 #### 5. ISO 27001:2022
 **Scope:** Information security management system
 **Structure:** 10 Clauses + Annex A (93 controls, 4 themes)
 
-| Theme | Controls |
-|-------|----------|
-| Organizational | Policies, roles, asset mgmt (37) |
-| People | Screening, awareness, terms (8) |
-| Physical | Perimeters, equipment, media (14) |
-| Technological | Access, crypto, network, ops (34) |
+| Theme | # Controls | Focus Areas |
+|-------|-----------|-------------|
+| Organizational | 37 | Policies, roles, asset mgmt, supplier |
+| People | 8 | Screening, awareness, terms, discipline |
+| Physical | 14 | Perimeters, equipment, media, utilities |
+| Technological | 34 | Access, crypto, network, ops, dev |
 
 **Key Controls:**
-- A.5.1: Information security policies
-- A.8.2: Access rights management
-- A.8.24: Cryptography
-- A.8.9: Configuration management
-- A.8.15: Logging
+| ID | Control | Description |
+|----|---------|-------------|
+| A.5.1 | Information security policies | Establish and maintain policies |
+| A.5.15 | Access control | Restrict access based on need |
+| A.5.23 | Cloud service security | Secure cloud usage |
+| A.8.2 | Privileged access rights | Manage admin accounts |
+| A.8.9 | Configuration management | Secure system configurations |
+| A.8.15 | Logging | Record security events |
+| A.8.16 | Monitoring activities | Monitor for anomalies |
+| A.8.24 | Cryptography | Use encryption appropriately |
+| A.8.25 | Secure development | Build security into SDLC |
+| A.8.28 | Secure coding | Follow secure coding practices |
 
-#### 6. CIS Controls v8.1
+---
+
+#### 6. CIS Controls v8.1 (2024)
 **Scope:** Prioritized cybersecurity actions
 **Structure:** 18 Controls → Implementation Groups (IG1-IG3)
 
-| # | Control | IG |
-|---|---------|-----|
-| 1 | Inventory of enterprise assets | IG1 |
-| 2 | Inventory of software assets | IG1 |
-| 3 | Data protection | IG1 |
-| 4 | Secure configuration | IG1 |
-| 5 | Account management | IG1 |
-| 6 | Access control management | IG1 |
-| 7 | Continuous vulnerability mgmt | IG2 |
-| 8 | Audit log management | IG2 |
-| 14 | Security awareness training | IG1 |
-| 17 | Incident response | IG2 |
+| IG | Description | Controls |
+|----|-------------|----------|
+| IG1 | Essential cyber hygiene | Basic controls for all orgs |
+| IG2 | Foundational | Additional for sensitive data |
+| IG3 | Comprehensive | Full implementation |
 
-#### 7. PCI DSS v4.0.1
+**Priority Controls:**
+| # | Control | IG | Description |
+|---|---------|-----|-------------|
+| 1 | Enterprise asset inventory | IG1 | Know what you have |
+| 2 | Software asset inventory | IG1 | Know what's installed |
+| 3 | Data protection | IG1 | Classify and protect data |
+| 4 | Secure configuration | IG1 | Harden systems |
+| 5 | Account management | IG1 | Manage user accounts |
+| 6 | Access control | IG1 | Implement least privilege |
+| 7 | Continuous vulnerability mgmt | IG2 | Find and fix vulns |
+| 8 | Audit log management | IG2 | Collect and review logs |
+| 14 | Security awareness training | IG1 | Train users |
+| 17 | Incident response | IG2 | Prepare for incidents |
+
+---
+
+#### 7. PCI DSS v4.0.1 (2024)
 **Scope:** Payment card data security
 **Structure:** 12 Requirements → 200+ sub-requirements
 
-| Req | Focus |
-|-----|-------|
-| 1-2 | Network security (firewalls, configs) |
-| 3-4 | Data protection (storage, transmission) |
-| 5-6 | Vulnerability mgmt (malware, patching) |
-| 7-9 | Access control (need-to-know, auth, physical) |
-| 10-11 | Monitoring (logging, testing) |
-| 12 | Policies & procedures |
+| Req | Focus | Key Areas |
+|-----|-------|-----------|
+| 1-2 | Network security | Firewalls, secure configs |
+| 3-4 | Data protection | Storage encryption, transmission |
+| 5-6 | Vulnerability mgmt | Malware protection, patching |
+| 7-9 | Access control | Need-to-know, auth, physical |
+| 10-11 | Monitoring & testing | Logging, pen testing |
+| 12 | Policies & procedures | Security policies, training |
 
-#### 8. SCF v2025.4
+**Key Requirements:**
+| Req | Control | Description |
+|-----|---------|-------------|
+| 3.5 | PAN protection | Protect primary account numbers |
+| 4.2 | Encryption in transit | TLS for cardholder data |
+| 6.4 | Change control | Manage changes to systems |
+| 8.3 | MFA | Multi-factor for admin access |
+| 10.2 | Audit logging | Log all access to cardholder data |
+| 11.3 | Penetration testing | Annual pen tests |
+
+---
+
+#### 8. SCF v2025.4 (Secure Controls Framework)
 **Scope:** Meta-framework, comprehensive controls
 **Structure:** 32 Domains → 1000+ controls
 
 **Key Domains:**
-- AST: Asset management
-- CPL: Compliance
-- CRY: Cryptography
-- IAC: Identity & access
-- IRO: Incident response
-- PRI: Privacy
-- RSK: Risk management
-- TDA: Technology development
+| Domain | Code | Focus |
+|--------|------|-------|
+| Asset Management | AST | Hardware, software, data inventory |
+| Compliance | CPL | Regulatory adherence |
+| Cryptography | CRY | Encryption, key management |
+| Identity & Access | IAC | AuthN, AuthZ, privileged access |
+| Incident Response | IRO | Detection, response, recovery |
+| Privacy | PRI | Data protection, consent |
+| Risk Management | RSK | Risk assessment, treatment |
+| Technology Development | TDA | Secure SDLC, testing |
+| AI & Machine Learning | AIM | AI governance, model risk |
+| Third-Party | TPM | Vendor risk management |
 
 ---
 
-## Control Mapping Types
+## Control Mapping Matrix
 
-| Type | Meaning | Example |
-|------|---------|---------|
-| **EQUIVALENT** | Same intent/outcome | ISO 27001 A.8.24 ↔ NIST CSF PR.DS-2 |
-| **PARTIAL** | Covers subset | CIS-3 partially covers PCI-3 |
-| **RELATED** | Conceptually linked | NIST AI MAP-1 related to ISO 42001 A.7.1 |
-| **SUPERSET** | Source covers more | SCF-CRY superset of PCI-4 |
-| **SUBSET** | Source covers less | Single control vs comprehensive |
+### Cross-Framework Mappings
 
-## Confidence Levels
+| Risk Area | NIST AI RMF | ISO 42001 | NIST CSF | ISO 27001 | CIS |
+|-----------|-------------|-----------|----------|-----------|-----|
+| AI Bias | MEASURE-2 | A.6.1 | - | - | - |
+| Prompt Injection | MANAGE-1 | A.8.2 | PR.DS | A.8.28 | 16 |
+| Data Privacy | MAP-2 | A.7.1 | PR.DS | A.5.34 | 3 |
+| Access Control | - | - | PR.AC | A.8.2 | 5,6 |
+| Encryption | - | - | PR.DS | A.8.24 | 3 |
+| Logging | - | - | DE.CM | A.8.15 | 8 |
+| Incident Response | MANAGE-2 | A.10.1 | RS | A.5.24 | 17 |
+| Config Management | - | - | PR.IP | A.8.9 | 4 |
+| Vulnerability Mgmt | - | - | ID.RA | A.8.8 | 7 |
+| Third-Party Risk | MAP-1 | A.9.1 | GV.SC | A.5.19 | 15 |
 
-| Level | Meaning | Use |
-|-------|---------|-----|
+### Mapping Confidence Levels
+
+| Level | Meaning | Use Case |
+|-------|---------|----------|
 | **HIGH** | Expert-validated, well-documented | Audit-ready mappings |
 | **MEDIUM** | Reasonable interpretation | Working mappings |
 | **LOW** | Possible connection, needs validation | Exploratory |
 
 ---
 
-## Quick Reference: Risk → Framework
+## Risk-to-Control Quick Reference
 
-| Risk Type | Primary Framework | Secondary |
-|-----------|------------------|-----------|
-| AI Bias | NIST AI RMF MEASURE-2 | ISO 42001 A.6.1 |
-| Prompt Injection | NIST AI RMF MANAGE-1 | OWASP LLM01 |
-| Data Privacy | ISO 42001 A.7.1 | NIST CSF PR.DS |
-| Auth/Authz | ISO 27001 A.8.2 | CIS-5, CIS-6 |
-| Encryption | ISO 27001 A.8.24 | PCI-4, CIS-3 |
-| Logging | ISO 27001 A.8.15 | CIS-8, PCI-10 |
-| Incident Response | NIST CSF RS | CIS-17 |
-| Config Mgmt | ISO 27001 A.8.9 | CIS-4 |
+| Risk Type | Primary Control | Framework Reference |
+|-----------|-----------------|---------------------|
+| AI Bias/Discrimination | Fairness testing, diverse data | NIST AI MEASURE-2, ISO 42001 A.6.1 |
+| Prompt Injection | Input validation, output filtering | NIST AI MANAGE-1, OWASP LLM01 |
+| Model Hallucination | Grounding, fact-checking | NIST AI MEASURE-1 |
+| Data Poisoning | Data validation, provenance | ISO 42001 A.7.2 |
+| Unauthorized Access | MFA, RBAC, least privilege | ISO 27001 A.8.2, CIS-5,6 |
+| Data Breach | Encryption, DLP, logging | ISO 27001 A.8.24, CIS-3 |
+| Insider Threat | Monitoring, access reviews | NIST CSF DE.CM, CIS-8 |
+| Vendor Failure | Due diligence, contracts, monitoring | NIST CSF GV.SC, ISO 27001 A.5.19 |
+| Compliance Violation | Policy, training, audit | PCI DSS 12, ISO 27001 A.5.1 |
+| System Unavailability | DR/BCP, redundancy | NIST CSF RC.RP |
+
+---
+
+## Implementation Priority
+
+### Quick Wins (30 days)
+- Asset inventory (CIS-1,2)
+- Access control review (CIS-5,6)
+- Security awareness (CIS-14)
+- Logging enabled (CIS-8)
+- AI use case documentation (NIST AI MAP-1)
+
+### Foundation (90 days)
+- Risk assessment complete
+- Key policies documented
+- Vulnerability management active
+- Incident response plan tested
+- AI bias testing implemented
+
+### Maturity (12 months)
+- Full framework compliance
+- Automated control monitoring
+- Third-party risk program
+- Continuous improvement cycle
+- AI governance matured
+
+---
+
+## Quick Reference
+
+```
+AI Frameworks: NIST AI RMF | ISO 42001 | CSA AICM
+Security Frameworks: NIST CSF 2.0 | ISO 27001 | CIS v8.1 | PCI DSS 4.0
+Meta-Framework: SCF v2025.4
+
+Control Types: Preventive | Detective | Corrective | Compensating
+
+Priority Order:
+1. Asset inventory (know what you have)
+2. Access control (who can access what)
+3. Data protection (classify and protect)
+4. Logging/monitoring (see what's happening)
+5. Incident response (be prepared)
+```

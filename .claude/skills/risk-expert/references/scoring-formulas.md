@@ -104,6 +104,91 @@ Legend: ■ Critical ■ High ■ Medium ■ Low
 
 ---
 
+## Risk Velocity (Trend Indicators)
+
+### Velocity Scale
+
+| Symbol | Velocity | Description | Action Modifier |
+|--------|----------|-------------|-----------------|
+| ↑↑ | Rapidly Increasing | Getting much worse | +2 priority |
+| ↑ | Increasing | Trending upward | +1 priority |
+| → | Stable | No significant change | No change |
+| ↓ | Decreasing | Improving trend | May defer |
+| ↓↓ | Rapidly Decreasing | Strong improvement | Reduce focus |
+
+### Velocity Factors
+
+**Triggers for Increasing (↑):**
+- New threat actors targeting this risk
+- Control degradation observed
+- Increased attack surface
+- Regulatory enforcement increasing
+- Recent incidents in industry
+
+**Triggers for Decreasing (↓):**
+- New controls implemented
+- Control effectiveness improving
+- Threat landscape shifting away
+- Industry maturity increasing
+- Successful remediation efforts
+
+### Velocity-Adjusted Prioritization
+
+| Base Level | Velocity | Effective Priority |
+|------------|----------|-------------------|
+| HIGH | ↑↑ | CRITICAL (treat as P0) |
+| HIGH | ↑ | HIGH+ (escalate timeline) |
+| HIGH | → | HIGH (standard) |
+| HIGH | ↓ | HIGH- (may extend timeline) |
+| MEDIUM | ↑↑ | HIGH (escalate) |
+| MEDIUM | ↑ | MEDIUM+ (closer monitoring) |
+| LOW | ↑↑ | MEDIUM (reassess) |
+
+### Risk Record with Velocity
+
+```markdown
+| ID | Risk | L | I | Score | Level | Velocity | Adj. Priority |
+|----|------|---|---|-------|-------|----------|---------------|
+| R001 | Prompt injection | 4 | 4 | 16 | HIGH | ↑↑ | CRITICAL |
+| R002 | Data breach | 3 | 5 | 15 | HIGH | → | HIGH |
+| R003 | Model drift | 3 | 3 | 9 | MEDIUM | ↓ | MEDIUM- |
+```
+
+---
+
+## Risk Aggregation (Portfolio View)
+
+### Simple Aggregation Methods
+
+**Count-Based:**
+```
+Portfolio Risk = Σ(Risks by Level)
+Critical: 2, High: 5, Medium: 12, Low: 8
+```
+
+**Weighted Score:**
+```
+Portfolio Score = Σ(Score × Weight)
+Where weights reflect business criticality
+```
+
+### Risk Concentration Analysis
+
+| Asset/System | Critical | High | Medium | Concentration |
+|--------------|----------|------|--------|---------------|
+| AI Platform | 3 | 4 | 2 | HIGH |
+| Payment System | 1 | 2 | 5 | MEDIUM |
+| Internal Tools | 0 | 1 | 8 | LOW |
+
+### Aggregation Warnings
+
+- **Correlation Risk:** Related risks may trigger together
+- **Cascade Risk:** One risk can trigger others
+- **Concentration Risk:** Too many risks in one area
+- **Tail Risk:** Low probability, catastrophic impact
+
+---
+
 ## Control Effectiveness Guidelines
 
 ### Effectiveness Ratings
