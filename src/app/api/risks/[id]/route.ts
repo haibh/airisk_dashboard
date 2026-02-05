@@ -180,6 +180,34 @@ export async function PUT(
       },
     });
 
+    // Record score history if scores changed
+    const scoresChanged =
+      updateData.inherentScore !== undefined ||
+      updateData.residualScore !== undefined ||
+      updateData.controlEffectiveness !== undefined;
+
+    if (scoresChanged) {
+      // Determine history source based on what triggered the change
+      let source: 'MANUAL' | 'AUTO_RECALC' | 'CONTROL_CHANGE' = 'AUTO_RECALC';
+      if (body.controlEffectiveness !== undefined) {
+        source = 'MANUAL';
+      } else if (body.likelihood !== undefined || body.impact !== undefined) {
+        source = 'MANUAL';
+      }
+
+      await prisma.riskScoreHistory.create({
+        data: {
+          riskId: risk.id,
+          inherentScore: risk.inherentScore,
+          residualScore: risk.residualScore,
+          targetScore: risk.targetScore ?? null,
+          controlEffectiveness: risk.controlEffectiveness,
+          source,
+          notes: body.historyNotes ?? null,
+        },
+      });
+    }
+
     return NextResponse.json(risk);
   } catch (error) {
     console.error('Error updating risk:', error);

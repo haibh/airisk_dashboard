@@ -1,4 +1,5 @@
 import { RiskLevel } from '@/types/risk-assessment';
+import type { RiskVelocity, RiskScoreHistoryRecord } from '@/types/risk-history';
 
 /**
  * Calculate inherent risk score
@@ -112,4 +113,74 @@ export function validateRiskParameters(
     throw new Error('Impact must be an integer between 1 and 5');
   }
   return true;
+}
+
+/**
+ * Calculate risk velocity (rate of change) from history
+ * @param history - Score history records (oldest to newest)
+ * @returns Velocity metrics including trend direction
+ */
+export function calculateRiskVelocity(
+  history: RiskScoreHistoryRecord[]
+): RiskVelocity {
+  if (history.length < 2) {
+    return {
+      inherentChange: 0,
+      residualChange: 0,
+      trend: 'stable',
+      periodDays: 0,
+    };
+  }
+
+  const sorted = [...history].sort(
+    (a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
+  );
+
+  const oldest = sorted[0];
+  const newest = sorted[sorted.length - 1];
+
+  const daysDiff = Math.max(
+    1,
+    (new Date(newest.recordedAt).getTime() - new Date(oldest.recordedAt).getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+
+  const inherentChange = (newest.inherentScore - oldest.inherentScore) / daysDiff;
+  const residualChange = (newest.residualScore - oldest.residualScore) / daysDiff;
+
+  // Determine trend based on residual score change
+  // Negative change = improving (score going down)
+  // Positive change = worsening (score going up)
+  let trend: RiskVelocity['trend'] = 'stable';
+  const threshold = 0.1; // 0.1 points per day threshold
+
+  if (residualChange < -threshold) {
+    trend = 'improving';
+  } else if (residualChange > threshold) {
+    trend = 'worsening';
+  }
+
+  return {
+    inherentChange: Math.round(inherentChange * 100) / 100,
+    residualChange: Math.round(residualChange * 100) / 100,
+    trend,
+    periodDays: Math.round(daysDiff),
+  };
+}
+
+/**
+ * Calculate velocity for multiple risks in batch
+ * @param risksWithHistory - Array of risks with their history records
+ * @returns Map of riskId to velocity
+ */
+export function calculateBatchRiskVelocity(
+  risksWithHistory: Array<{ riskId: string; history: RiskScoreHistoryRecord[] }>
+): Map<string, RiskVelocity> {
+  const velocityMap = new Map<string, RiskVelocity>();
+
+  for (const { riskId, history } of risksWithHistory) {
+    velocityMap.set(riskId, calculateRiskVelocity(history));
+  }
+
+  return velocityMap;
 }

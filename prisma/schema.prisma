@@ -363,6 +363,7 @@ model Risk {
   inherentScore       Float         // likelihood × impact
   controlEffectiveness Float        @default(0) // 0-100%
   residualScore       Float         // inherentScore × (1 - controlEffectiveness)
+  targetScore         Float?        // Target residual score after treatment
   treatmentStatus     TreatmentStatus @default(PENDING)
   treatmentPlan       String?       @db.Text
   treatmentDueDate    DateTime?
@@ -377,6 +378,7 @@ model Risk {
   controls      RiskControl[]
   tasks         Task[]
   evidenceLinks EvidenceLink[]
+  scoreHistory  RiskScoreHistory[]
 
   @@map("risks")
 }
@@ -399,6 +401,37 @@ enum TreatmentStatus {
   TRANSFERRED
   AVOIDED
   COMPLETED
+}
+
+// ============================================================================
+// RISK SCORE HISTORY (for trajectory visualization)
+// ============================================================================
+
+enum HistorySource {
+  MANUAL           // User manually updated scores
+  AUTO_RECALC      // System recalculated from controls
+  CONTROL_CHANGE   // Control effectiveness changed
+  IMPORT           // Imported from external source
+  INITIAL          // First record on risk creation
+}
+
+model RiskScoreHistory {
+  id                   String        @id @default(cuid())
+  inherentScore        Float
+  residualScore        Float
+  targetScore          Float?        // Desired future state after treatment
+  controlEffectiveness Float
+  source               HistorySource
+  notes                String?       @db.Text
+  recordedAt           DateTime      @default(now())
+  createdAt            DateTime      @default(now())
+
+  // Risk relation
+  riskId String
+  risk   Risk   @relation(fields: [riskId], references: [id], onDelete: Cascade)
+
+  @@index([riskId, recordedAt])
+  @@map("risk_score_history")
 }
 
 model RiskControl {

@@ -131,7 +131,9 @@ export async function POST(
       controlEffectiveness
     );
 
-    // Create risk
+    // Create risk with optional target score
+    const targetScore = body.targetScore ?? null;
+
     const risk = await prisma.risk.create({
       data: {
         title: body.title,
@@ -142,6 +144,7 @@ export async function POST(
         inherentScore,
         controlEffectiveness,
         residualScore,
+        targetScore,
         treatmentStatus: body.treatmentStatus || 'PENDING',
         treatmentPlan: body.treatmentPlan || null,
         treatmentDueDate: body.treatmentDueDate
@@ -161,6 +164,19 @@ export async function POST(
             },
           },
         },
+      },
+    });
+
+    // Create initial history record for trajectory tracking
+    await prisma.riskScoreHistory.create({
+      data: {
+        riskId: risk.id,
+        inherentScore: risk.inherentScore,
+        residualScore: risk.residualScore,
+        targetScore: risk.targetScore,
+        controlEffectiveness: risk.controlEffectiveness,
+        source: 'INITIAL',
+        notes: 'Initial risk assessment',
       },
     });
 
