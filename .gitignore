@@ -80,7 +80,10 @@ ck.md
 # ===========================================
 # AI Assistants & Code Tracking
 # ===========================================
-.claude/
+.claude/*
+!.claude/skills/
+.claude/skills/*
+!.claude/skills/risk-expert/
 .cursor/
 .aider/
 .opencode/
