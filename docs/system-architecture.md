@@ -1,6 +1,6 @@
 # AIRisk Dashboard - System Architecture
 
-**Version:** 3.0 | **Date:** 2026-02-04 | **Status:** MVP4 Complete (Phase 13)
+**Version:** 3.1 | **Date:** 2026-02-06 | **Status:** MVP4 (Phase 14.5 + Phase 15)
 
 ---
 
@@ -121,8 +121,8 @@ Validation: Zod 4.3 (input schemas, API validation)
 | **Organization** | Root tenant entity |
 | **User** | System users (5 roles, isActive, lastLoginAt, 30min idle timeout) |
 | **AISystem** | AI inventory (name, type, status, classification) |
-| **Framework** | 8 compliance frameworks (NIST AI RMF, ISO 42001, CSA AICM, NIST CSF, ISO 27001, CIS Controls, PCI DSS, SCF v2025.4) |
-| **Control** | Framework-specific controls (500+ across all frameworks) |
+| **Framework** | 23 compliance frameworks (1,323 total controls) - AI Risk (4), AI Management (4), Security (7), Compliance (7), AI Control (1) |
+| **Control** | 1,323 framework-specific controls with 172 cross-framework mappings |
 | **Mapping** | Cross-framework control relationships (HIGH/MEDIUM/LOW confidence) |
 | **Assessment** | Risk assessment snapshots (DRAFT, IN_PROGRESS, UNDER_REVIEW, APPROVED) |
 | **Risk** | Individual risks (likelihood 1-5, impact 1-5, scores) |
@@ -212,7 +212,7 @@ Bias/Fairness, Privacy, Security, Reliability, Transparency, Accountability, Saf
 ```
 1. Create Assessment (Step 1-2)
    ↓
-2. Select Framework - any of 8 supported frameworks (Step 3)
+2. Select Framework - any of 23 supported frameworks (Step 3)
    ↓
 3. Identify & Score Risks (Step 4)
    - For each risk: category, likelihood, impact
@@ -227,26 +227,43 @@ Bias/Fairness, Privacy, Security, Reliability, Transparency, Accountability, Saf
 
 ---
 
+## Dashboard Architecture (Phase 14.5 - Feb 2026)
+
+**4-Tab Interface:**
+1. **Executive Brief** - KPI summary, top risks, compliance overview
+2. **Detailed Analytics** - Comprehensive charts (heatmap, compliance radar, treemap)
+3. **Operations** - System health, risk alerts, assessment progress
+4. **AI Risk** - Model registry, risk cards, lifecycle tracking, cross-framework mapping
+
+**Widget System (NEW):**
+- **Simple Mode** (6 consolidated widgets): Risk Pulse Strip, Unified Risk View, Compliance Status, Next-Best Actions, Activity Feed, Model Registry
+- **Advanced Mode** (15 individual widgets): All metrics + framework-specific visualizations (23 frameworks)
+- **Customization**: Drag-and-drop reordering via dnd-kit, widget visibility toggles, view mode persistence (localStorage via use-dashboard-widget-config)
+
 ## Dashboard Data Flow
 
 ```
 User opens Dashboard
     ↓
-[Parallel API calls]
+[Select view mode: Simple | Advanced]
+    ↓
+[Parallel API calls via useDashboardData hook]
 ├── GET /api/dashboard/stats           (KPI counts)
 ├── GET /api/dashboard/risk-heatmap    (risk distribution)
-├── GET /api/dashboard/compliance      (framework scores)
+├── GET /api/dashboard/compliance      (framework scores - 23 frameworks)
 └── GET /api/dashboard/activity        (recent actions)
     ↓
 [PostgreSQL aggregations]
 ├── COUNT(*) risks by status/level
 ├── SUM(score) by category
-├── Compliance % per framework
+├── Compliance % per 23 frameworks
 └── Recent activities
     ↓
-[React components render]
-├── Stat cards, Risk heatmap
-├── Compliance scorecard, Activity feed
+[Render in dnd-kit sortable container]
+├── Dashboard-widget-wrapper components (minimize/close controls)
+├── Portal-based tooltips (escape CSS transforms)
+├── Settings panel (mode switch, visibility toggles)
+└── Simple or Advanced mode layout
 ```
 
 ---

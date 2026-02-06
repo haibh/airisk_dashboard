@@ -101,7 +101,7 @@ export function RiskHeatmapDrilldownModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl !bg-white dark:!bg-slate-900 border-border shadow-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Risks at L{likelihood} × I{impact}
@@ -128,19 +128,19 @@ export function RiskHeatmapDrilldownModal({
               {risks.map((risk) => (
                 <div
                   key={risk.id}
-                  className="border rounded-lg p-3 hover:bg-muted/50 transition-colors"
+                  className="border border-border bg-gray-50 dark:bg-slate-800 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{risk.title}</h4>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <h4 className="font-medium text-sm text-foreground truncate">{risk.title}</h4>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
                         {risk.aiSystemName} • {risk.assessmentTitle}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       {onViewTrajectory && (
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
                           className="h-7 px-2"
                           onClick={() => {
@@ -153,7 +153,7 @@ export function RiskHeatmapDrilldownModal({
                         </Button>
                       )}
                       <Link href={`/risk-assessment?riskId=${risk.id}`}>
-                        <Button variant="ghost" size="sm" className="h-7 px-2" title="View details">
+                        <Button variant="outline" size="sm" className="h-7 px-2" title="View details">
                           <ExternalLink className="h-3 w-3" />
                         </Button>
                       </Link>
@@ -172,7 +172,7 @@ export function RiskHeatmapDrilldownModal({
                     >
                       {risk.treatmentStatus}
                     </Badge>
-                    <span className="text-xs text-muted-foreground ml-auto">
+                    <span className="text-xs text-muted-foreground ml-auto font-medium">
                       Residual: {risk.residualScore.toFixed(1)}
                     </span>
                   </div>

@@ -82,7 +82,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ReportsPage() {
-  const t = useTranslations('common');
+  const t = useTranslations();
 
   const [report, setReport] = useState<ComplianceReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -146,7 +146,7 @@ export default function ReportsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('reports')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
           <p className="text-muted-foreground">Compliance status reports and exports</p>
         </div>
         <div className="grid gap-4 md:grid-cols-4">
@@ -164,7 +164,7 @@ export default function ReportsPage() {
       {/* Page Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('reports')}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
           <p className="text-muted-foreground">Compliance status reports and exports</p>
         </div>
         <div className="flex items-center gap-3">
@@ -273,10 +273,10 @@ export default function ReportsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {report.frameworks.map((fw) => {
+                    {report.frameworks.map((fw, index) => {
                       const config = statusConfig[fw.status] || statusConfig.NOT_STARTED;
                       return (
-                        <TableRow key={fw.id}>
+                        <TableRow key={fw.id} className={`hover:bg-primary/10 ${index % 2 === 0 ? 'bg-muted/20' : 'bg-transparent'}`}>
                           <TableCell>
                             <div>
                               <div className="font-medium">{fw.shortName}</div>

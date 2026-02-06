@@ -518,10 +518,28 @@ async function seedControlMappings(nistFramework: any, isoFramework: any) {
 export async function seedFrameworks() {
   console.log('\n🏛️  Seeding Compliance Frameworks...\n');
 
-  // Clear existing data
+  // Clear existing data (respecting foreign key constraints)
+  console.log('🗑️  Clearing existing framework data...');
+
+  // First, clear records that reference controls
   await prisma.controlMapping.deleteMany({});
+  await prisma.riskControl.deleteMany({});
+
+  // Clear records that reference frameworks
+  // Note: Delete risks first (they reference assessments), then assessments
+  await prisma.risk.deleteMany({});
+  await prisma.riskAssessment.deleteMany({});
+
+  // Now safe to delete controls and frameworks
   await prisma.control.deleteMany({});
   await prisma.framework.deleteMany({});
+
+  console.log('  ✅ Existing framework data cleared\n');
+
+  // ========================================
+  // CORE AI FRAMEWORKS
+  // ========================================
+  console.log('\n📂 Core AI Frameworks\n');
 
   const nistFramework = await seedNISTFramework();
   const isoFramework = await seedISOFramework();
@@ -531,6 +549,73 @@ export async function seedFrameworks() {
   const { seedCSAAICM, seedCSAMappings } = await import('./seed-csa-aicm');
   await seedCSAAICM();
   await seedCSAMappings();
+
+  // ========================================
+  // AI THREAT & SECURITY FRAMEWORKS
+  // ========================================
+  console.log('\n📂 AI Threat & Security Frameworks\n');
+
+  // OWASP LLM Top 10
+  const { seedOWASPLLM, seedOWASPLLMMappings } = await import('./seed-owasp-llm');
+  await seedOWASPLLM();
+  await seedOWASPLLMMappings();
+
+  // MITRE ATLAS
+  const { seedMITREATLAS, seedMITREATLASMappings } = await import('./seed-mitre-atlas');
+  await seedMITREATLAS();
+  await seedMITREATLASMappings();
+
+  // ========================================
+  // ENTERPRISE AI FRAMEWORKS
+  // ========================================
+  console.log('\n📂 Enterprise AI Frameworks\n');
+
+  const { seedGoogleSAIF, seedMicrosoftRAI, seedOECDAI, seedSingaporeAI, seedEnterpriseAIMappings } = await import('./seed-ai-enterprise-frameworks');
+  await seedGoogleSAIF();
+  await seedMicrosoftRAI();
+  await seedOECDAI();
+  await seedSingaporeAI();
+  await seedEnterpriseAIMappings();
+
+  // ========================================
+  // REGULATORY FRAMEWORKS
+  // ========================================
+  console.log('\n📂 Regulatory Frameworks\n');
+
+  // EU AI Act
+  const { seedEUAIAct, seedEUAIActMappings } = await import('./seed-eu-ai-act');
+  await seedEUAIAct();
+  await seedEUAIActMappings();
+
+  // NIS2 Directive
+  const { seedNIS2, seedNIS2Mappings } = await import('./seed-nis2-directive');
+  await seedNIS2();
+  await seedNIS2Mappings();
+
+  // DORA (Financial Sector)
+  const { seedDORA, seedDORAMappings } = await import('./seed-dora');
+  await seedDORA();
+  await seedDORAMappings();
+
+  // CMMC 2.0 (DoD Contractors)
+  const { seedCMMC, seedCMMCMappings } = await import('./seed-cmmc');
+  await seedCMMC();
+  await seedCMMCMappings();
+
+  // HIPAA (Healthcare)
+  const { seedHIPAA, seedHIPAAMappings } = await import('./seed-hipaa');
+  await seedHIPAA();
+  await seedHIPAAMappings();
+
+  // ========================================
+  // SECURITY FRAMEWORKS
+  // ========================================
+  console.log('\n📂 Security Frameworks\n');
+
+  // NIST 800-53
+  const { seedNIST80053, seedNIST80053Mappings } = await import('./seed-nist-800-53');
+  await seedNIST80053();
+  await seedNIST80053Mappings();
 
   // Import and seed PCI DSS 4.0.1
   const { seedPCIDSS, seedPCIDSSMappings } = await import('./seed-pci-dss');
@@ -552,10 +637,39 @@ export async function seedFrameworks() {
   await seedISO27001();
   await seedISO27001Mappings();
 
+  // SOC 2
+  const { seedSOC2, seedSOC2Mappings } = await import('./seed-soc2');
+  await seedSOC2();
+  await seedSOC2Mappings();
+
+  // ========================================
+  // IT GOVERNANCE FRAMEWORKS
+  // ========================================
+  console.log('\n📂 IT Governance Frameworks\n');
+
+  // COBIT and ITIL
+  const { seedCOBIT, seedITIL, seedCOBITITILMappings } = await import('./seed-cobit-itil');
+  await seedCOBIT();
+  await seedITIL();
+  await seedCOBITITILMappings();
+
+  // ========================================
+  // META-FRAMEWORKS
+  // ========================================
+  console.log('\n📂 Meta-Frameworks\n');
+
   // Import and seed SCF 2024.1
   const { seedSCF, seedSCFMappings } = await import('./seed-scf');
   await seedSCF();
   await seedSCFMappings();
 
   console.log('\n✅ Framework seeding completed!\n');
+  console.log('📊 Summary:');
+  console.log('   - Core AI: NIST AI RMF, ISO 42001, CSA AICM');
+  console.log('   - AI Threat: OWASP LLM Top 10, MITRE ATLAS');
+  console.log('   - Enterprise AI: Google SAIF, Microsoft RAI, OECD AI, Singapore AI Gov');
+  console.log('   - Regulatory: EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA');
+  console.log('   - Security: NIST 800-53, PCI DSS, CIS Controls, NIST CSF, ISO 27001, SOC 2');
+  console.log('   - IT Governance: COBIT 2019, ITIL v4');
+  console.log('   - Meta-Framework: SCF 2024.1\n');
 }

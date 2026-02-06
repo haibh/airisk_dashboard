@@ -1,14 +1,14 @@
 # AIRisk Dashboard - Project Overview & PDR
 
-**Version:** 3.0 | **Date:** 2026-02-04 | **Status:** MVP4 Complete (Phase 13)
+**Version:** 3.1 | **Date:** 2026-02-06 | **Status:** MVP4 (Phase 14.5 + Phase 15)
 
 ---
 
 ## Executive Summary
 
-AIRisk Dashboard (AIRM-IP) is an enterprise AI Risk Management Intelligence Platform enabling organizations to manage AI system risks end-to-end through comprehensive dashboards, assessments, framework mapping, and compliance tracking.
+AIRisk Dashboard (AIRM-IP) is an enterprise AI Risk Management Intelligence Platform enabling organizations to manage AI system risks end-to-end through comprehensive dashboards, assessments, framework mapping (23 frameworks), and compliance tracking.
 
-**Current Status:** MVP4 complete with 13 phases delivered including multi-tenant features (org/user management, API keys, webhooks, notifications, audit logs).
+**Current Status:** MVP4 complete with 14.5 phases delivered including customizable dashboard widget system with Simple/Advanced modes, drag-and-drop reordering, and security hardening (in progress).
 
 ---
 
@@ -17,24 +17,31 @@ AIRisk Dashboard (AIRM-IP) is an enterprise AI Risk Management Intelligence Plat
 | Item | Description |
 |------|-------------|
 | **Vision** | Single pane of glass for AI risk management, compliance, and audit-readiness |
-| **Primary Goal** | Unified risk taxonomy across AI frameworks (NIST AI RMF + ISO 42001) |
+| **Primary Goal** | Unified risk taxonomy across 23 AI/Security/Compliance frameworks with 1,323+ controls |
 | **Secondary Goals** | Wizard-style assessments, evidence-based compliance, bilingual support (EN/VI) |
 | **Non-Goals (MVP1-4)** | MLOps integration, SIEM, full framework text hosting |
 
 ---
 
-## Supported Frameworks
+## Supported Frameworks (23 Total, 1,323 Controls, 172 Mappings)
 
-| Framework | Version | Status |
-|-----------|---------|--------|
-| **NIST AI RMF** | 1.0 + GenAI Profile | ✅ MVP1 Complete |
-| **ISO/IEC 42001** | 2023 | ✅ MVP1 Complete |
-| **CSA AICM** | 1.0 (07/2025) | ✅ MVP2 Complete |
-| **NIST CSF** | 2.0 (02/2024) | ✅ MVP3 Complete |
-| **ISO 27001** | 2022 | ✅ MVP3 Complete |
-| **CIS Controls** | 8.1 | ✅ MVP3 Complete |
-| **PCI DSS** | 4.0.1 | ✅ MVP3 Complete |
-| **SCF** | v2025.4 | ✅ MVP4 Complete |
+**AI Risk (4):** NIST AI RMF 1.0, ISO 42001:2023, OWASP LLM Top 10 v2025, MITRE ATLAS
+**AI Management (4):** Microsoft Responsible AI, OECD AI Principles, Singapore AI Gov, CSA AICM 1.0
+**Security (7):** NIST 800-53 Rev.5, NIST CSF 2.0, ISO 27001:2022, CIS Controls v8.1, COBIT 2019, ITIL v4, SCF v2025.4
+**Compliance (7):** EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, PCI DSS 4.0.1, SOC 2
+**AI Control (1):** Google SAIF
+
+| Framework | Controls | Status |
+|-----------|----------|--------|
+| **NIST AI RMF** | 72+ | ✅ Complete |
+| **ISO 42001** | 38 | ✅ Complete |
+| **OWASP LLM** | 10 | ✅ Complete |
+| **MITRE ATLAS** | 48 | ✅ Complete |
+| **NIST 800-53** | 282+ | ✅ Complete |
+| **NIST CSF** | 22 | ✅ Complete |
+| **ISO 27001** | 93 | ✅ Complete |
+| **CIS Controls** | 153 | ✅ Complete |
+| **+ 15 Others** | 600+ | ✅ Complete |
 
 ---
 

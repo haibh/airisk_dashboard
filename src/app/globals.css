@@ -40,9 +40,9 @@
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 47% 11%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 47% 13%;
     --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -200,14 +200,15 @@
     animation: ai-scene-gradient-shift 15s ease infinite;
   }
   .dark .auth-adaptive-bg {
+    /* Match landing-gradient dark navy theme */
     background: linear-gradient(
-      -45deg,
-      hsl(221 83% 53% / 0.8),
-      hsl(250 70% 50% / 0.8),
-      hsl(221 83% 40% / 0.8),
-      hsl(200 80% 45% / 0.8)
+      135deg,
+      #050a18 0%,
+      #0a1628 25%,
+      #0f1f3d 50%,
+      #0a1a35 75%,
+      #060e20 100%
     );
-    background-size: 400% 400%;
   }
 
   /* Adaptive glassmorphism card — solid in light, glass in dark
@@ -436,6 +437,28 @@
      Scoped via .dashboard-enhanced wrapper on layout
      ═══════════════════════════════════════════════════════════════════ */
 
+  /* Dashboard gradient background — matches landing page */
+  .dashboard-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(220 25% 96%) 0%,
+      hsl(215 30% 92%) 25%,
+      hsl(225 28% 94%) 50%,
+      hsl(220 25% 95%) 75%,
+      hsl(215 22% 97%) 100%
+    );
+  }
+  .dark .dashboard-gradient {
+    background: linear-gradient(
+      135deg,
+      #050a18 0%,
+      #0a1628 25%,
+      #0f1f3d 50%,
+      #0a1a35 75%,
+      #060e20 100%
+    );
+  }
+
   /* Card enhancement — refined shadows + subtle hover lift */
   .dashboard-enhanced [data-slot="card"] {
     box-shadow:
@@ -460,15 +483,14 @@
       0 8px 24px rgba(0, 0, 0, 0.2);
   }
 
-  /* Sidebar — subtle gradient + active accent bar */
+  /* Sidebar — transparent to show parent gradient */
   .internal-sidebar {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.03);
-    border-right: 1px solid hsl(var(--border));
+    background: transparent;
+    border-right: 1px solid hsl(var(--border) / 0.5);
   }
   .dark .internal-sidebar {
-    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(222 84% 3%) 100%);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    background: transparent;
+    border-right: 1px solid hsl(var(--border) / 0.3);
   }
   .internal-sidebar-item {
     position: relative;
@@ -486,16 +508,14 @@
     box-shadow: inset 3px 0 0 hsl(var(--primary));
   }
 
-  /* Header — frosted glass effect */
+  /* Header — transparent to show parent gradient */
   .internal-header {
-    background-color: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid hsl(var(--border));
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+    background: transparent;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
   }
   .dark .internal-header {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    background: transparent;
+    border-bottom: 1px solid hsl(var(--border) / 0.3);
   }
 
   /* Tabs — inset background + active shadow */
@@ -521,5 +541,31 @@
     .dashboard-enhanced [data-slot="card"]:hover {
       transform: none !important;
     }
+  }
+
+  /* Dashboard drag-and-drop styles */
+  .widget-dragging {
+    opacity: 0.5;
+    transform: scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    z-index: 50;
+  }
+
+  .widget-drag-handle {
+    cursor: grab;
+    transition: color 150ms ease;
+  }
+  .widget-drag-handle:hover {
+    color: hsl(var(--primary));
+  }
+  .widget-drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .widget-drop-placeholder {
+    border: 2px dashed hsl(var(--primary) / 0.5);
+    border-radius: var(--radius);
+    background-color: hsl(var(--primary) / 0.05);
+    min-height: 100px;
   }
 }

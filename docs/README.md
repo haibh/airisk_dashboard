@@ -1,7 +1,7 @@
 # AIRisk Dashboard Documentation
 
-**Status:** MVP4 Phase 13 Complete (Multi-Tenant Features & Polish)
-**Last Updated:** 2026-02-04
+**Status:** MVP4 Phase 14.5 + Phase 15 (Dashboard Widgets & Security Hardening)
+**Last Updated:** 2026-02-06
 
 ---
 
@@ -40,7 +40,7 @@
 ### Current Features
 1. ✅ Authentication & Authorization (5 roles + RBAC)
 2. ✅ AI System Registry (CRUD, lifecycle, classification)
-3. ✅ Framework Integration (NIST AI RMF + ISO 42001)
+3. ✅ Framework Integration (23 frameworks, 1,323 controls, 172 mappings)
 4. ✅ Risk Assessment Engine (5-step wizard, 5×5 matrix)
 5. ✅ Dashboard & Reporting (analytics + exports)
 6. ✅ Organization & User Management (invitations, roles)
@@ -87,7 +87,7 @@ src/
 │   ├── (auth)/login/            # Login page
 │   └── (dashboard)/             # Protected dashboard (29 pages)
 ├── app/api/                     # REST API (53 routes across 21 groups)
-├── components/                  # React components (59 files, 8.3K LOC)
+├── components/                  # React components (112+ files, 12K+ LOC)
 ├── lib/                        # Utilities (28 files: caching, webhooks, jobs, etc.)
 ├── store/                      # Zustand state (4 stores)
 ├── types/                      # TypeScript definitions

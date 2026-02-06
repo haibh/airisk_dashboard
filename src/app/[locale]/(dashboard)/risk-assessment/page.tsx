@@ -62,12 +62,12 @@ export default function RiskAssessmentPage() {
   const getStatusBadge = (status: AssessmentStatus) => {
     const variants: Record<
       AssessmentStatus,
-      { variant: any; label: string }
+      { variant: any; label: string; className?: string }
     > = {
       DRAFT: { variant: 'secondary', label: 'Draft' },
-      IN_PROGRESS: { variant: 'default', label: 'In Progress' },
-      UNDER_REVIEW: { variant: 'outline', label: 'Under Review' },
-      APPROVED: { variant: 'default', label: 'Approved' },
+      IN_PROGRESS: { variant: 'default', label: 'In Progress', className: 'bg-blue-500 hover:bg-blue-600' },
+      UNDER_REVIEW: { variant: 'outline', label: 'Under Review', className: 'border-yellow-500 text-yellow-600 dark:text-yellow-400' },
+      APPROVED: { variant: 'default', label: 'Approved', className: 'bg-emerald-500 hover:bg-emerald-600 text-white' },
       ARCHIVED: { variant: 'destructive', label: 'Archived' },
     };
     return variants[status];
@@ -144,6 +144,7 @@ export default function RiskAssessmentPage() {
                     </h3>
                     <Badge
                       variant={getStatusBadge(assessment.status).variant}
+                      className={getStatusBadge(assessment.status).className}
                     >
                       {getStatusBadge(assessment.status).label}
                     </Badge>

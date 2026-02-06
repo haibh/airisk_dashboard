@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useTheme } from 'next-themes';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,8 +19,6 @@ import { NotificationDropdownMenu } from '@/components/layout/notification-dropd
 import {
   Sun,
   Moon,
-  Monitor,
-  Globe,
   User,
   LogOut,
   Settings,
@@ -31,7 +29,6 @@ export function Header() {
   const locale = useLocale();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
-  const pathname = usePathname();
   const { data: session } = useSession();
 
   // Prevent hydration mismatch - only render theme-dependent content after mount
@@ -39,8 +36,9 @@ export function Header() {
   useEffect(() => setMounted(true), []);
 
   const switchLocale = (newLocale: string) => {
-    if (!pathname) return;
-    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
+    // Replace locale segment in current URL
+    const current = window.location.pathname;
+    const newPath = current.replace(`/${locale}`, `/${newLocale}`);
     router.push(newPath);
   };
 
@@ -59,13 +57,7 @@ export function Header() {
     : session?.user?.email?.[0]?.toUpperCase() || 'U';
 
   return (
-    <header className="flex h-16 items-center justify-between internal-header px-6">
-      {/* Left side - Breadcrumb or Title */}
-      <div className="flex items-center gap-4">
-        <h1 className="text-lg font-semibold">{t('dashboard.title')}</h1>
-      </div>
-
-      {/* Right side - Actions */}
+    <header className="flex h-12 items-center justify-end internal-header px-6">
       <div className="flex items-center gap-2">
         {/* Notifications */}
         <NotificationDropdownMenu />

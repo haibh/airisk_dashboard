@@ -54,6 +54,43 @@
       "detailedAnalytics": "Phân tích Chi tiết",
       "operations": "Vận hành",
       "aiRisk": "Rủi ro AI"
+    },
+    "viewMode": {
+      "simple": "Đơn giản",
+      "advanced": "Nâng cao"
+    },
+    "riskPulseStrip": {
+      "title": "Nhịp Rủi ro",
+      "overallScore": "Điểm Tổng",
+      "aiSystems": "Hệ thống AI",
+      "highRisks": "Rủi ro Cao",
+      "compliance": "Tuân thủ",
+      "pending": "Chờ xử lý"
+    },
+    "unifiedRisk": {
+      "title": "Phân tích Rủi ro",
+      "heatmap": "Bản đồ nhiệt",
+      "byCategory": "Theo Danh mục",
+      "alerts": "Cảnh báo",
+      "totalRisks": "tổng rủi ro",
+      "critical": "nghiêm trọng"
+    },
+    "complianceStatus": {
+      "title": "Trạng thái Tuân thủ",
+      "showDetails": "Hiện Chi tiết",
+      "hideDetails": "Ẩn Chi tiết",
+      "onTrack": "Đúng tiến độ",
+      "attentionNeeded": "Cần chú ý",
+      "actionRequired": "Cần hành động",
+      "average": "TB"
+    },
+    "nextActions": {
+      "title": "Cần Chú ý",
+      "assessmentProgress": "Tiến độ Đánh giá",
+      "reviewRisks": "Xem xét rủi ro nghiêm trọng",
+      "improveCoverage": "Cải thiện phạm vi khung",
+      "pendingActions": "hành động chờ xử lý",
+      "noActions": "Không có hành động khẩn cấp"
     }
   },
   "aiSystems": {

@@ -54,6 +54,43 @@
       "detailedAnalytics": "Detailed Analytics",
       "operations": "Operations",
       "aiRisk": "AI Risk"
+    },
+    "viewMode": {
+      "simple": "Simple",
+      "advanced": "Advanced"
+    },
+    "riskPulseStrip": {
+      "title": "Risk Pulse",
+      "overallScore": "Overall Score",
+      "aiSystems": "AI Systems",
+      "highRisks": "High Risks",
+      "compliance": "Compliance",
+      "pending": "Pending"
+    },
+    "unifiedRisk": {
+      "title": "Risk Intelligence",
+      "heatmap": "Heatmap",
+      "byCategory": "By Category",
+      "alerts": "Alerts",
+      "totalRisks": "total risks",
+      "critical": "critical"
+    },
+    "complianceStatus": {
+      "title": "Compliance Status",
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details",
+      "onTrack": "On track",
+      "attentionNeeded": "Attention needed",
+      "actionRequired": "Action required",
+      "average": "Avg"
+    },
+    "nextActions": {
+      "title": "What Needs Your Attention",
+      "assessmentProgress": "Assessment Progress",
+      "reviewRisks": "Review critical risks",
+      "improveCoverage": "Improve framework coverage",
+      "pendingActions": "pending actions",
+      "noActions": "No urgent actions needed"
     }
   },
   "aiSystems": {

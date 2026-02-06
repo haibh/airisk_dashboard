@@ -124,8 +124,8 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 - Error handling improvements
 
 ### Phase 14: Theme Unification & Dashboard Consolidation (COMPLETE)
-**Status:** ✅ Delivered | **Timeline:** Feb 04, 2026
-**Commits:** ea1905a (Theme), 200d3ac (Dashboard)
+**Status:** ✅ Delivered | **Timeline:** Feb 04-06, 2026
+**Commits:** ea1905a (Theme), 200d3ac (Dashboard), + Phase 14.5 Widget System (Feb 5-6)
 
 **Theme Unification (ea1905a):**
 - Unified 3 fragmented themes → single adaptive CSS variable system
@@ -145,7 +145,17 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 - Types extracted to `src/types/dashboard.ts`
 - Sidebar: single Dashboard nav entry
 
-**Metrics:** 262/262 tests passing, TypeScript 0 errors, production-ready
+**Phase 14.5: Dashboard Widget System (Feb 5-6, 2026):**
+- Customizable widgets with Simple/Advanced modes
+- **Simple Mode (6 consolidated):** Risk Pulse Strip, Unified Risk View, Compliance Status, Next-Best Actions, Activity Feed, Model Registry
+- **Advanced Mode (15 individual):** All widgets + framework-specific visualizations
+- Drag-and-drop reordering via dnd-kit (rectSortingStrategy)
+- Widget visibility toggles, view mode persistence (localStorage)
+- New components: dashboard-sortable-container, dashboard-widget-wrapper, dashboard-widget-settings-panel, sortable-widget, 4 consolidated widgets
+- New hook: use-dashboard-widget-config
+- UX improvements: CSS Grid heatmap, React Portal tooltips, explicit modal backgrounds
+
+**Metrics:** 308 files, 400K+ tokens, 262/262 tests passing, TypeScript 0 errors, production-ready
 
 ---
 
@@ -170,6 +180,12 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 ---
 
 ## Planned Phases (MVP5+)
+
+### Phase 14.5: Dashboard Widget System (IN PROGRESS)
+**Status:** ✅ COMPLETE | **Timeline:** 2026-02-05 to 2026-02-06
+**Progress:** 100% (all widget components + hook + UI integration complete)
+
+---
 
 ### Phase 15: Critical Security Fixes (IN PROGRESS)
 **Status:** 🟡 IN PROGRESS | **Timeline:** 2026-02-05 to 2026-02-07

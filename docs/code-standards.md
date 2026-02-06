@@ -80,8 +80,8 @@ src/
 │       ├── scheduled-jobs/        # CRUD, trigger, logs
 │       ├── health/                # DB + Redis + S3 status
 │       └── cron/                  # Cron job handlers
-├── components/                    # React components (59 files, 8.3K LOC)
-│   ├── layout/                    # Header, Sidebar, with notification dropdown
+├── components/                    # React components (112+ files, 12K+ LOC)
+│   ├── layout/                    # Header, Sidebar, notification dropdown (4 files)
 │   ├── ui/                        # Shadcn/ui wrappers (23 components)
 │   ├── forms/                     # Forms with React Hook Form + Zod
 │   ├── tables/                    # Data tables with pagination
@@ -91,10 +91,27 @@ src/
 │   ├── risk-assessment/           # 5-step wizard, matrix visualization
 │   ├── evidence/                  # Evidence upload, approval
 │   ├── gap-analysis/              # Gap analysis visualization
-│   ├── settings/                  # Organization, users, API keys, webhooks
+│   ├── settings/                  # Organization, users, API keys, webhooks (15 files)
 │   ├── notifications/             # Dropdown, notification list
 │   ├── audit-log/                 # Viewer, filters, detail diff
 │   ├── search/                    # Global search interface
+│   ├── dashboard/                 # 26 files: views + widgets + drag-drop + consolidated
+│   │   ├── executive-brief-view.tsx
+│   │   ├── detailed-analytics-view.tsx
+│   │   ├── operations-view.tsx
+│   │   ├── ai-risk-view-panel.tsx
+│   │   ├── dashboard-sortable-container.tsx    # dnd-kit container
+│   │   ├── dashboard-widget-wrapper.tsx         # Widget controls wrapper
+│   │   ├── dashboard-widget-settings-panel.tsx # Settings UI
+│   │   ├── sortable-widget.tsx                  # useSortable wrapper
+│   │   ├── risk-pulse-strip.tsx                 # Simple mode consolidated
+│   │   ├── unified-risk-view.tsx                # Simple mode consolidated
+│   │   ├── compliance-status-card.tsx           # Simple mode consolidated
+│   │   ├── next-best-actions-card.tsx           # Simple mode consolidated
+│   │   └── 11 individual widgets (stat-cards, risk-score, heatmap, etc.)
+│   ├── ops-center/                # 6 files: health indicators, risk alerts, monitoring
+│   ├── ai-risk-view/             # 7 files: model registry, risk card, treemap, lifecycle, mapping
+│   ├── landing/                   # Landing page (3 files: main + content sections)
 │   └── providers/                 # NextAuth, Theme providers
 ├── lib/                           # Utilities (28 files, 6.2K LOC)
 │   ├── auth-helpers.ts            # RBAC, hasMinimumRole()
@@ -127,6 +144,18 @@ prisma/
 ├── schema.prisma                  # Database schema (20 models, 11 enums)
 ├── seed.ts                        # User & org seeding
 ├── seed-frameworks.ts             # NIST AI RMF + ISO 42001
+├── seed-ai-enterprise-frameworks.ts # Microsoft RAI, OECD, Singapore
+├── seed-cmmc.ts                   # CMMC 2.0
+├── seed-cobit-itil.ts             # COBIT 2019 + ITIL v4
+├── seed-dora.ts                   # DORA (Digital Operational Resilience)
+├── seed-eu-ai-act.ts              # EU AI Act
+├── seed-hipaa.ts                  # HIPAA
+├── seed-mitre-atlas.ts            # MITRE ATLAS
+├── seed-mock-data.ts              # Test data for assessments, risks
+├── seed-nis2-directive.ts         # NIS2 Directive
+├── seed-nist-800-53.ts            # NIST 800-53 Rev.5
+├── seed-owasp-llm.ts              # OWASP LLM Top 10
+├── seed-soc2.ts                   # SOC 2
 ├── seed-cis-controls.ts           # CIS Controls v8.1
 ├── seed-csa-aicm.ts               # CSA AICM framework
 ├── seed-nist-csf.ts               # NIST Cybersecurity Framework

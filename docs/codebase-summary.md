@@ -1,10 +1,10 @@
 # AIRisk Dashboard - Codebase Summary
 
-**Generated:** 2026-02-05
-**Codebase Status:** MVP4 Phase 15 (Security Hardening) - In Progress
-**Total Files:** 252 files (including tests, migrations, seeds)
-**Total Lines:** ~20,000+ lines of TypeScript/TSX/SQL
-**Codebase Size:** 300,842 tokens, 1,252,223 chars
+**Generated:** 2026-02-06
+**Codebase Status:** MVP4 Phase 14.5 + Phase 15 (Dashboard Widgets & Security Hardening) - In Progress
+**Total Files:** 308 files (including tests, migrations, seeds)
+**Total Lines:** ~55,000+ lines of TypeScript/TSX/SQL
+**Codebase Size:** 400,766 tokens, 1,666,070 chars
 
 ---
 
@@ -71,19 +71,33 @@ AIRisk_Dashboard/
 │   │       ├── frameworks/
 │   │       ├── dashboard/
 │   │       └── reports/
-│   ├── components/             # 59 files, 8.3K LOC
-│   │   ├── layout/             # Header, Sidebar, notification dropdown
+│   ├── components/             # 112+ files, 12K+ LOC (16 directories)
+│   │   ├── layout/             # Header, Sidebar, notification dropdown (4 files)
 │   │   ├── ui/                 # Shadcn/ui wrappers (23 components)
 │   │   ├── forms/              # Form components with Zod validation
 │   │   ├── tables/             # Data tables with pagination
 │   │   ├── charts/             # Risk heatmap, compliance scorecard
 │   │   ├── risk-assessment/    # 5-step wizard, matrix visualization
 │   │   ├── frameworks/         # Framework tree, controls table
-│   │   ├── settings/           # Organization, users, API keys, webhooks
+│   │   ├── settings/           # Organization, users, API keys, webhooks (15 files)
 │   │   ├── evidence/           # Evidence upload, approval workflow
-│   │   ├── dashboard/          # Dashboard sub-components (operations-view, ai-risk-view-panel, stat-cards, etc.)
-│   │   ├── ops-center/         # [RETAINED] Operations panel components (used by dashboard)
-│   │   ├── ai-risk-view/      # [RETAINED] AI risk specialist components (used by dashboard)
+│   │   ├── dashboard/          # 26 files: 4 main views + 15 widgets + 4 drag-drop + consolidated widgets
+│   │   │   ├── executive-brief-view.tsx
+│   │   │   ├── detailed-analytics-view.tsx
+│   │   │   ├── operations-view.tsx
+│   │   │   ├── ai-risk-view-panel.tsx
+│   │   │   ├── dashboard-sortable-container.tsx    # dnd-kit container (NEW Feb 6)
+│   │   │   ├── dashboard-widget-wrapper.tsx         # Widget wrapper with controls (NEW Feb 6)
+│   │   │   ├── dashboard-widget-settings-panel.tsx # Settings panel (NEW Feb 6)
+│   │   │   ├── sortable-widget.tsx                  # dnd-kit useSortable wrapper (NEW Feb 6)
+│   │   │   ├── risk-pulse-strip.tsx                 # Consolidated widget (NEW Feb 5)
+│   │   │   ├── unified-risk-view.tsx                # Consolidated widget (NEW Feb 5)
+│   │   │   ├── compliance-status-card.tsx           # Consolidated widget (NEW Feb 5)
+│   │   │   ├── next-best-actions-card.tsx           # Consolidated widget (NEW Feb 5)
+│   │   │   └── 11 individual widgets (stat-cards, risk-score, heatmap, etc.)
+│   │   ├── ops-center/         # 6 files: system-health-indicators, risk-alerts-panel, etc.
+│   │   ├── ai-risk-view/      # 7 files: model-registry-panel, risk-card-panel, treemap-panel, etc.
+│   │   ├── landing/            # Landing page (3 files: main + content sections)
 │   │   ├── gap-analysis/       # Gap analysis engine and visualization
 │   │   ├── notifications/      # Notification dropdown, list
 │   │   ├── audit-log/          # Audit log viewer with filters
@@ -246,21 +260,38 @@ model AISystem {
 ---
 
 ### 3. Framework Knowledge Base (FR-MAP)
-**Status:** ✅ Completed (Phase 4, expanded Phase 10+)
+**Status:** ✅ Completed (Phase 4, expanded Phases 10-14: now 23 frameworks)
 
-**Frameworks grouped into two sections in UI:**
+**Framework Portfolio (1,323 total controls, 172 cross-framework mappings):**
 
-**AI Risk Frameworks** (with per-framework icons):
-1. **NIST AI RMF 1.0** — BrainCircuit icon — 4 Functions, 19 Categories, 72+ Subcategories
-2. **ISO/IEC 42001:2023** — Settings2 icon — 9 Domains, 38 Controls
-3. **CSA AI Controls Matrix 1.0** — ShieldCheck icon — 18 Domains, 51 Controls
+**AI Risk (4 frameworks):**
+1. **NIST AI RMF 1.0** — 4 Functions, 19 Categories, 72+ Subcategories
+2. **ISO/IEC 42001:2023** — 9 Domains, 38 Controls
+3. **OWASP LLM Top 10 v2025** — 10 vulnerability classes
+4. **MITRE ATLAS** — 8 tactics, 48 techniques
 
-**Non-AI-Specific Frameworks**:
-4. **NIST CSF 2.0** — ShieldAlert icon — 6 Functions, 22 Categories
-5. **ISO 27001:2022** — Lock icon — 4 Themes, 93 Controls
-6. **CIS Controls v8.1** — Target icon — 18 Controls, 153 Safeguards
-7. **PCI DSS v4.0.1** — CreditCard icon — 12 Requirements, 58 Sub-requirements
-8. **SCF v2025.4** — Layers icon — 21 Domains, ~90 Controls
+**AI Management (4 frameworks):**
+5. **Microsoft Responsible AI** — 7 principles
+6. **OECD AI Principles** — 5 principles
+7. **Singapore AI Governance** — 5 pillars
+8. **CSA AI Controls Matrix 1.0** — 18 Domains, 51 Controls
+
+**Security & Compliance (15 frameworks):**
+9. **NIST CSF 2.0** — 6 Functions, 22 Categories
+10. **ISO 27001:2022** — 4 Themes, 93 Controls
+11. **CIS Controls v8.1** — 18 Controls, 153 Safeguards
+12. **NIST 800-53 Rev.5** — 6 Categories, 282+ Controls
+13. **COBIT 2019** — 5 Domains, 40+ Processes
+14. **ITIL v4** — 4 Dimensions, 34 Practices
+15. **PCI DSS v4.0.1** — 12 Requirements, 58 Sub-requirements
+16. **SCF v2025.4** — 21 Domains, ~90 Controls
+17. **EU AI Act** — 6 Risk Levels, 4 Regulatory tiers
+18. **NIS2 Directive** — 10 Areas, 39 Measures
+19. **DORA** — 3 Pillars, 8 domains
+20. **CMMC 2.0** — 3 Maturity Levels, 110+ practices
+21. **HIPAA** — 5 Standards, 65+ Rules
+22. **SOC 2** — 5 Trust Service Categories
+23. **Google SAIF** — 4 Dimensions, 18 Safeguards
 
 **API Endpoints:**
 ```
@@ -383,7 +414,7 @@ model Risk {
 ---
 
 ### 5. Dashboard & Reporting (FR-DASH)
-**Status:** ✅ Completed (Phase 6 + Phase 14 Consolidation)
+**Status:** ✅ Completed (Phase 6 + Phase 14 Consolidation + Phase 14.5 Widget System - Feb 6, 2026)
 
 **Features Implemented:**
 - ✅ FR-DASH-01: Executive summary dashboard (Tab 1)
@@ -392,6 +423,33 @@ model Risk {
 - ✅ FR-DASH-04: Report export (PDF/CSV)
 - ✅ FR-DASH-05: Operations center (Tab 3 - formerly separate page)
 - ✅ FR-DASH-06: AI Risk specialist view (Tab 4 - formerly separate page)
+- ✅ FR-DASH-07: Customizable widget dashboard (NEW Phase 14.5)
+
+**Dashboard Widget System (Phase 14.5 - Feb 5-6, 2026):**
+- **Two view modes** with localStorage persistence via `use-dashboard-widget-config` hook
+  - **Simple Mode:** 6 consolidated widgets optimized for executives
+    1. Risk Pulse Strip (stat-cards + risk-score + framework-rag combined)
+    2. Unified Risk View (heatmap + top-risks + alerts with internal tabs)
+    3. Compliance Status (compliance-overview + compliance-radar + framework-bars)
+    4. Next-Best Actions (action-queue + assessment-progress)
+    5. Activity Feed (recent activities)
+    6. AI Model Registry (deployed models)
+  - **Advanced Mode:** 15 individual widgets for deep analysis
+    1-4. Executive view widgets (stat-cards, risk-score, compliance-overview, framework-rag)
+    5-8. Risk analysis widgets (heatmap, top-risks, risk-alerts, compliance-radar)
+    9-12. Framework widgets (framework-bars, framework-treemap, cross-framework-mapping, control-coverage)
+    13-15. Operational widgets (assessment-progress, activity-feed, ai-model-registry)
+
+- **Drag-and-drop reordering** via dnd-kit with rectSortingStrategy
+  - 4 new components: `dashboard-sortable-container.tsx`, `dashboard-widget-wrapper.tsx`, `dashboard-widget-settings-panel.tsx`, `sortable-widget.tsx`
+  - Widget visibility toggle per widget
+  - Widget minimize/close controls
+  - Settings panel for mode switching and widget management
+
+- **UX Improvements (Feb 6):**
+  - Heatmap: CSS Grid layout with Portal-based tooltips to escape dnd-kit transforms
+  - Drilldown modal: Explicit opaque backgrounds instead of CSS variable
+  - Header: Slimmed from h-16 to h-12, removed duplicate title
 
 **Dashboard Consolidation (Phase 14, Commit 200d3ac):**
 - Merged `/dashboard` (Executive Brief + Detailed Analytics) with `/technical-view` (Operations + AI Risk)
@@ -419,9 +477,18 @@ GET    /api/reports/compliance       # Compliance report
 - `src/app/[locale]/(dashboard)/dashboard/page.tsx` (4-tab tabbed interface, ~85 LOC)
 - `src/components/dashboard/operations-view.tsx` (extracted, 35 LOC)
 - `src/components/dashboard/ai-risk-view-panel.tsx` (extracted, 74 LOC)
-- `src/components/layout/sidebar.tsx` (single Dashboard entry)
+- `src/components/dashboard/dashboard-sortable-container.tsx` (dnd-kit container, NEW)
+- `src/components/dashboard/dashboard-widget-wrapper.tsx` (widget controls, NEW)
+- `src/components/dashboard/dashboard-widget-settings-panel.tsx` (settings UI, NEW)
+- `src/components/dashboard/sortable-widget.tsx` (dnd-kit wrapper, NEW)
+- `src/components/dashboard/risk-pulse-strip.tsx` (consolidated, NEW)
+- `src/components/dashboard/unified-risk-view.tsx` (consolidated, NEW)
+- `src/components/dashboard/compliance-status-card.tsx` (consolidated, NEW)
+- `src/components/dashboard/next-best-actions-card.tsx` (consolidated, NEW)
 - `src/hooks/use-dashboard-data.ts` (parallel API fetching)
+- `src/hooks/use-dashboard-widget-config.ts` (widget state management, NEW)
 - `src/types/dashboard.ts` (extracted types)
+- `src/components/layout/sidebar.tsx` (single Dashboard entry)
 
 ---
 
@@ -715,8 +782,8 @@ npm run analyze             # Analyze bundle size
 
 ## Feature Completeness Summary
 
-**MVP4 Completed (Phases 1-14):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 8 compliance frameworks (NIST AI RMF, ISO 42001, CSA AICM, NIST CSF, ISO 27001, CIS Controls, PCI DSS, SCF v2025.4), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface).
+**MVP4 Completed (Phases 1-14.5):**
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), 28 E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering.
 
 **MVP5+ Planned:**
 S3/Blob file storage, scheduled reports, advanced visualizations, connection pooling, SSO/SAML, mobile app.
@@ -795,6 +862,6 @@ S3/Blob file storage, scheduled reports, advanced visualizations, connection poo
 
 ---
 
-**Codebase Summary Generated:** 2026-02-05
-**Last Updated:** 2026-02-05 (Phase 15: Security Hardening - XSS & CSV Injection Prevention)
+**Codebase Summary Generated:** 2026-02-06
+**Last Updated:** 2026-02-06 (Phase 14.5: Dashboard Widget System + Phase 15: Security Hardening)
 **Maintained By:** docs-manager agent

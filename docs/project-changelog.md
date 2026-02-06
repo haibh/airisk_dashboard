@@ -1,14 +1,26 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-05 | **Current Version:** MVP4.5
+**Last Updated:** 2026-02-06 | **Current Version:** MVP4.5
 
 ---
 
 ## Version History
 
-### MVP4.5 (Current) - 2026-02-05
+### MVP4.5 (Current) - 2026-02-06
 
-#### Phase 14 Security Hardening (In Progress)
+#### Phase 14.5: Dashboard Widget System + Phase 15 Security Hardening
+**Date:** 2026-02-05 to 2026-02-06
+**Impact:** Customizable dashboard with Simple/Advanced widget modes + security hardening
+
+**Dashboard Widget System (Feb 5-6):**
+- **New components (8):** dashboard-sortable-container, dashboard-widget-wrapper, dashboard-widget-settings-panel, sortable-widget, risk-pulse-strip, unified-risk-view, compliance-status-card, next-best-actions-card
+- **New hook:** use-dashboard-widget-config (view mode + widget state management via localStorage)
+- **Dnd-kit integration:** Drag-and-drop widget reordering with rectSortingStrategy
+- **Simple Mode (6 consolidated widgets):** Risk Pulse Strip, Unified Risk View, Compliance Status, Next-Best Actions, Activity Feed, AI Model Registry
+- **Advanced Mode (15 individual widgets):** All metrics + framework-specific visualizations
+- **UX improvements:** CSS Grid heatmap, React Portal for tooltips (escape dnd-kit transforms), explicit modal backgrounds, slimmed header (h-16 → h-12)
+
+**Phase 15 Security Hardening (In Progress - 2/12 items):**
 **Date:** 2026-02-05
 **Impact:** XSS & CSV injection prevention added
 

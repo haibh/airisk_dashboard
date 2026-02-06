@@ -8,6 +8,7 @@
 import { PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { seedFrameworks } from './seed-frameworks';
+import { seedMockData } from './seed-mock-data';
 
 const prisma = new PrismaClient();
 
@@ -103,6 +104,9 @@ async function main() {
 
   // Seed frameworks
   await seedFrameworks();
+
+  // Seed comprehensive mock data (AI Systems, Risk Assessments, Evidence)
+  await seedMockData();
 }
 
 main()
