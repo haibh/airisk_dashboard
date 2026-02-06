@@ -1,10 +1,75 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-06 | **Current Version:** MVP4.5
+**Last Updated:** 2026-02-06 | **Current Version:** 2.0.0 (MVP4.5)
 
 ---
 
 ## Version History
+
+### 2.0.0 — Dashboard Features & UI/UX Upgrade (2026-02-06)
+
+#### Phase 21: 9 New Advanced Features
+**Date:** 2026-02-06
+**Impact:** Enterprise-grade analytics, risk visualization, benchmarking, and ROI capabilities
+
+**New Features (9 total):**
+
+**Group A — Data Features (4):**
+1. **Risk Supply Chain Mapping** — Graph-based vendor risk propagation using React Flow
+   - Interactive vendor registry with risk scoring
+   - Bidirectional risk path tracking
+   - Risk cascade visualization across supply chain
+2. **Regulatory Change Tracker** — Timeline view with impact assessment
+   - Track regulatory changes and effective dates
+   - Assess impact on frameworks and controls
+   - Historical change annotations
+3. **Peer Benchmarking** — Anonymous cross-org comparison with differential privacy
+   - Laplace noise for data privacy protection
+   - Percentile ranking against peer group
+   - Compliance score comparison by framework
+4. **ROI Calculator** — Financial analysis with ALE/ROSI formulas
+   - Annualized Loss Expectancy calculation
+   - Return on Security Investment (ROSI) modeling
+   - Scenario comparison and investment recommendation
+
+**Group B — Visualization Features (2):**
+5. **Remediation Burndown Charts** — Sprint-based progress tracking
+   - Recharts burndown and velocity charts
+   - Task completion tracking
+   - Team capacity planning
+6. **Framework Control Overlap** — Sankey diagram + mapping matrix
+   - React Flow visualization of 172 control mappings
+   - Coverage matrix across 23 frameworks
+   - Mapping confidence indicators
+
+**Group C — UI/UX Improvements (3):**
+7. **Bento Grid Layouts** — Customizable dashboard presets
+   - 3 preset layouts (Executive, Analyst, Auditor)
+   - Drag-and-drop reordering with dnd-kit
+   - Widget visibility toggles and persistence
+8. **Data Storytelling** — Template-based narrative insights
+   - Automatic insight generation from data patterns
+   - Z-score anomaly detection
+   - Actionable recommendations based on trends
+9. **Compliance Chain Graph** — Requirement→Control→Evidence visualization
+   - React Flow chain diagram
+   - Coverage donut chart
+   - Gap identification
+
+**Infrastructure:**
+- 16 new Prisma models (Vendor, RegulatoryChange, BenchmarkSnapshot, ROSICalculation, InsightTemplate, DashboardLayout, ComplianceChain, etc.)
+- 8 new API route groups (38 routes)
+- 8 new utility libraries (differential-privacy.ts, rosi-calculator.ts, insight-generator.ts, compliance-chain-builder.ts, etc.)
+- 41 new UI component files (6,972+ lines)
+- 4 new sidebar pages (/supply-chain, /regulatory, /benchmarking, /roi-calculator)
+- 179 new i18n keys (EN + VI)
+- New dependencies: reactflow (~45KB gzip), @radix-ui/react-slider
+
+**Test Status:** 375/375 tests passing (100%)
+**Build Status:** Production-ready
+**Bundle Size:** ~500KB gzip (45KB increase from new visualizations)
+
+---
 
 ### MVP4.5 (Current) - 2026-02-06
 

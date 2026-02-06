@@ -1,10 +1,10 @@
 # AIRisk Dashboard - Codebase Summary
 
 **Generated:** 2026-02-06
-**Codebase Status:** MVP4 Phase 14.5 + Phase 15 (Dashboard Widgets & Security Hardening) - In Progress
-**Total Files:** 308 files (including tests, migrations, seeds)
-**Total Lines:** ~55,000+ lines of TypeScript/TSX/SQL
-**Codebase Size:** 400,766 tokens, 1,666,070 chars
+**Codebase Status:** MVP4.5 Phase 15 (Dashboard Widgets & Security Hardening) + Phase 21 (Dashboard Features & UI/UX Upgrade) - Complete
+**Total Files:** 350+ files (including tests, migrations, seeds)
+**Total Lines:** ~65,000+ lines of TypeScript/TSX/SQL
+**Codebase Size:** 480,000+ tokens, 1,900,000+ chars
 
 ---
 
@@ -13,12 +13,15 @@
 AIRisk Dashboard is a comprehensive AI Risk Management Intelligence Platform built with:
 - **Frontend:** React 19 + TypeScript + Tailwind CSS v4
 - **Backend:** Next.js 16 App Router
-- **Database:** PostgreSQL 15+ with Prisma ORM (20 models)
+- **Database:** PostgreSQL 15+ with Prisma ORM (36 models, 15 enums)
 - **Authentication:** NextAuth.js with JWT (24h session, 30min idle)
 - **Internationalization:** next-intl (EN/VI)
 - **State Management:** Zustand (4 stores)
 - **UI Components:** Shadcn/ui (23 wrappers) + Radix UI
-- **Testing:** Vitest 4.0+ (262 passing) + Playwright 1.58
+- **Testing:** Vitest 4.0+ (375 passing) + Playwright 1.58
+- **Visualizations:** Recharts, React Flow (~45KB gzip)
+- **Drag & Drop:** dnd-kit with rectSortingStrategy
+- **Slider:** @radix-ui/react-slider for ROI inputs
 
 The platform enables organizations to manage AI system risks end-to-end through comprehensive dashboards, risk assessments, framework mapping, and compliance tracking.
 
@@ -413,6 +416,125 @@ model Risk {
 
 ---
 
+### 4.1 Risk Supply Chain Mapping (FR-SUPCHAIN)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- Interactive vendor risk propagation graph using React Flow
+- Vendor registry with risk scoring
+- Bidirectional vendor risk path tracking
+- Risk cascade visualization
+- Vendor search and filtering
+
+**Database Models:**
+- `Vendor` — Vendor entity with risk profile
+- `VendorRiskPath` — Risk propagation paths
+
+**Key Files:**
+- `src/components/supply-chain/` — Vendor graph, registry, risk visualization
+- `src/app/[locale]/(dashboard)/supply-chain/` — Page route
+- `prisma/migrations/` — Vendor schema
+
+**API Endpoints:**
+```
+GET    /api/supply-chain/vendors          # List vendors
+POST   /api/supply-chain/vendors          # Create vendor
+GET    /api/supply-chain/vendors/[id]     # Get vendor
+PUT    /api/supply-chain/vendors/[id]     # Update vendor
+GET    /api/supply-chain/risk-paths       # Get propagation paths
+```
+
+---
+
+### 4.2 Regulatory Change Tracker (FR-REGTRACK)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- Timeline view of regulatory changes
+- Impact assessment on controls and frameworks
+- Framework change annotations
+- Change impact propagation
+- Historical tracking and version control
+
+**Database Models:**
+- `RegulatoryChange` — Change event and metadata
+- `FrameworkChange` — Framework-level changes
+- `ChangeImpact` — Impact on affected controls/assessments
+
+**Key Files:**
+- `src/components/regulatory-tracker/` — Timeline, impact assessment, change list
+- `src/app/[locale]/(dashboard)/regulatory/` — Page route
+
+**API Endpoints:**
+```
+GET    /api/regulatory/changes             # List regulatory changes
+POST   /api/regulatory/changes             # Create change
+GET    /api/regulatory/changes/[id]        # Get change details
+GET    /api/regulatory/impacts             # List impacted controls
+```
+
+---
+
+### 4.3 Peer Benchmarking (FR-BENCHMARK)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- Anonymous cross-organization comparison
+- Differential privacy (Laplace noise) to protect individual org data
+- Benchmark snapshots (point-in-time measurements)
+- Compliance score comparison by framework
+- Risk distribution comparison across orgs
+- Percentile ranking against peer group
+
+**Database Models:**
+- `BenchmarkSnapshot` — Snapshot of org metrics at point in time
+- `BenchmarkResult` — Aggregated benchmark statistics with privacy
+
+**Key Files:**
+- `src/components/benchmarking/` — Peer comparison charts, percentile viz, metrics table
+- `src/app/[locale]/(dashboard)/benchmarking/` — Page route
+- `src/lib/differential-privacy.ts` — Laplace noise implementation
+
+**API Endpoints:**
+```
+GET    /api/benchmarking/snapshots         # List benchmarks
+POST   /api/benchmarking/snapshots         # Create snapshot
+GET    /api/benchmarking/comparison        # Get peer comparison (anonymized)
+GET    /api/benchmarking/percentiles       # Get percentile rankings
+```
+
+---
+
+### 4.4 ROI Calculator (FR-ROICALC)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- ALE (Annualized Loss Expectancy) calculation
+- ROSI (Return on Security Investment) formulas
+- Scenario comparison (baseline vs. mitigation strategies)
+- Cost/benefit analysis for risk treatments
+- Investment recommendation scoring
+
+**Database Models:**
+- `RiskCostProfile` — Cost parameters per risk (frequency, loss value)
+- `MitigationInvestment` — Cost of mitigation strategies
+- `ROSICalculation` — Calculated ROSI metrics and scenarios
+
+**Key Files:**
+- `src/components/roi-calculator/` — Calculator form, scenario builder, comparison table
+- `src/app/[locale]/(dashboard)/roi-calculator/` — Page route
+- `src/lib/rosi-calculator.ts` — Formulas: ALE = frequency × loss value; ROSI = (benefit - cost) / cost
+
+**API Endpoints:**
+```
+POST   /api/roi/calculate                  # Calculate ALE/ROSI
+GET    /api/roi/scenarios                  # List saved scenarios
+POST   /api/roi/scenarios                  # Save scenario
+GET    /api/roi/scenarios/[id]             # Get scenario details
+```
+
+---
+
 ### 5. Dashboard & Reporting (FR-DASH)
 **Status:** ✅ Completed (Phase 6 + Phase 14 Consolidation + Phase 14.5 Widget System - Feb 6, 2026)
 
@@ -489,6 +611,102 @@ GET    /api/reports/compliance       # Compliance report
 - `src/hooks/use-dashboard-widget-config.ts` (widget state management, NEW)
 - `src/types/dashboard.ts` (extracted types)
 - `src/components/layout/sidebar.tsx` (single Dashboard entry)
+
+---
+
+### 5.1 Remediation Burndown Charts (FR-BURNDOWN)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- Sprint-based remediation tracking
+- Burndown chart visualization (tasks completed vs. time)
+- Velocity bar chart (tasks closed per sprint)
+- Sprint retrospective metrics
+- Team capacity planning
+
+**Key Files:**
+- `src/components/dashboard/remediation-burndown-chart.tsx` — Recharts burndown + velocity
+- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Operations tab
+
+---
+
+### 5.2 Framework Control Overlap (FR-OVERLAP)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- React Flow Sankey diagram visualization
+- 172 control mappings across 23 frameworks
+- Control coverage matrix (framework vs. control)
+- Highlight unmapped controls
+- Mapping confidence indicators (HIGH/MEDIUM/LOW)
+
+**Key Files:**
+- `src/components/dashboard/framework-control-overlap.tsx` — React Flow Sankey
+- `src/components/dashboard/control-overlap-matrix.tsx` — Mapping matrix
+- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Detailed Analytics tab
+
+---
+
+### 5.3 Bento Grid Layouts (FR-BENTO)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- 3 preset dashboard layouts: Executive, Analyst, Auditor
+- Drag-and-drop widget reordering via dnd-kit
+- Widget visibility toggles per user
+- View mode persistence (localStorage)
+- Responsive grid adaptation
+
+**Database Model:**
+- `DashboardLayout` — User's layout configuration and widget order
+
+**Key Files:**
+- `src/components/dashboard/bento-grid-preset-selector.tsx` — Layout picker
+- `src/components/dashboard/dashboard-sortable-container.tsx` — dnd-kit container
+- `src/components/dashboard/dashboard-widget-wrapper.tsx` — Widget controls
+- `src/hooks/use-dashboard-widget-config.ts` — State management
+
+---
+
+### 5.4 Data Storytelling & Insights (FR-INSIGHTS)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- Template-based narrative insights generation
+- Z-score anomaly detection for statistical outliers
+- Auto-generated executive summaries
+- Key findings and risk trends
+- Actionable recommendations based on data patterns
+
+**Database Models:**
+- `InsightTemplate` — Narrative templates and rules
+- `GeneratedInsight` — AI-generated insights per assessment
+- `AnomalyEvent` — Detected anomalies (Z-score > 2.5)
+
+**Key Files:**
+- `src/components/insights/` — Insight display, anomaly indicators, trend analysis
+- `src/lib/insight-generator.ts` — Z-score calculation, template rendering
+- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Executive Brief tab
+
+---
+
+### 5.5 Compliance Chain Graph (FR-COMPCHAIN)
+**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+
+**Features:**
+- React Flow chain diagram: Requirement → Control → Evidence
+- Visual traceability across compliance chain
+- Coverage donut chart (% requirements with evidence)
+- Filter by framework
+- Gap identification (requirements without controls)
+
+**Database Model:**
+- `ComplianceChain` — Link between requirement, control, evidence
+
+**Key Files:**
+- `src/components/compliance-graph/` — Chain diagram, coverage donut, filter panel
+- `src/lib/compliance-chain-builder.ts` — Graph generation
+- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Detailed Analytics tab
 
 ---
 
@@ -659,34 +877,53 @@ All API endpoints follow this response format:
 
 ## Database Schema Overview
 
-### 20 Core Models + 11 Enums
+### 36 Core Models + 15 Enums
 
-**Models:**
+**Core Models (1-22):**
 1. **Organization** - Root tenant
 2. **User** - System users (5 roles, active/inactive, lastLoginAt)
 3. **Account** - OAuth provider accounts
 4. **Session** - NextAuth sessions
-5. **AISystem** - AI systems under assessment
-6. **Framework** - Compliance frameworks
-7. **Control** - Framework controls with hierarchy
-8. **ControlMapping** - Cross-framework relationships
-9. **Assessment** - Risk assessment snapshots
-10. **Risk** - Individual risks (5×5 matrix)
-11. **RiskControl** - Risk-to-control relationships
-12. **Evidence** - Evidence artifacts (SHA-256 hash)
-13. **EvidenceLink** - Evidence to entity links (polymorphic)
-14. **Task** - Remediation tasks (treatment workflow)
-15. **AuditLog** - Immutable action logs (detailed change tracking)
-16. **Invitation** - User invitations (token-based, expiry)
-17. **APIKey** - API keys (SHA-256 hashed, permissions)
-18. **Webhook** - Webhook endpoints (SSRF protected)
-19. **WebhookDelivery** - Delivery logs with retry tracking
-20. **Notification** - User notifications (7 types)
-21. **SavedFilter** - Per-user dashboard filters
-22. **ScheduledJob** - Cron-based scheduled tasks
+5. **VerificationToken** - Email verification tokens
+6. **AISystem** - AI systems under assessment
+7. **Framework** - Compliance frameworks (23 total)
+8. **Control** - Framework controls (1,323 total, 172 mappings)
+9. **ControlMapping** - Cross-framework relationships
+10. **RiskAssessment** - Risk assessment snapshots
+11. **Risk** - Individual risks (5×5 matrix)
+12. **RiskScoreHistory** - Historical risk score tracking
+13. **RiskControl** - Risk-to-control relationships
+14. **Evidence** - Evidence artifacts (SHA-256 hash)
+15. **EvidenceLink** - Evidence to entity links (polymorphic)
+16. **Task** - Remediation tasks (treatment workflow)
+17. **AuditLog** - Immutable action logs (detailed change tracking)
+18. **ScheduledJob** - Cron-based scheduled tasks
+19. **SavedFilter** - Per-user dashboard filters
+20. **Invitation** - User invitations (token-based, expiry)
+21. **APIKey** - API keys (SHA-256 hashed, permissions)
+22. **Webhook** - Webhook endpoints (SSRF protected)
 
-**Enums (11):**
-UserRole, AISystemType, DataClassification, LifecycleStatus, AssessmentStatus, RiskCategory, TreatmentStatus, TaskPriority, TaskStatus, EvidenceStatus, NotificationType
+**Enterprise Features (23-36 - Phase 21):**
+23. **WebhookDelivery** - Delivery logs with retry tracking
+24. **Notification** - User notifications (7 types)
+25. **Vendor** - Vendor registry for supply chain
+26. **VendorRiskPath** - Risk propagation paths
+27. **RegulatoryChange** - Regulatory change events
+28. **FrameworkChange** - Framework version changes
+29. **ChangeImpact** - Impact assessment on controls
+30. **BenchmarkSnapshot** - Point-in-time org metrics
+31. **BenchmarkResult** - Anonymized peer comparison
+32. **RiskCostProfile** - Cost parameters per risk
+33. **MitigationInvestment** - Mitigation cost tracking
+34. **ROSICalculation** - ROSI metrics and scenarios
+35. **InsightTemplate** - Narrative insight templates
+36. **GeneratedInsight** - AI-generated insights
+37. **AnomalyEvent** - Z-score anomalies
+38. **DashboardLayout** - User layout preferences
+39. **ComplianceChain** - Requirement→Control→Evidence chain
+
+**Enums (15):**
+UserRole, AISystemType, DataClassification, LifecycleStatus, AssessmentStatus, RiskCategory, TreatmentStatus, TaskPriority, TaskStatus, EvidenceStatus, NotificationType, RiskLevel, VendorRiskLevel, InsightCategory, ComplianceChainType
 
 ### Key Features
 - ✅ Row-Level Security (RLS) support via Prisma
@@ -782,11 +1019,11 @@ npm run analyze             # Analyze bundle size
 
 ## Feature Completeness Summary
 
-**MVP4 Completed (Phases 1-14.5):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 262+ tests (100% passing), 28 E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering.
+**MVP4.5 Completed (Phases 1-15 + 21):**
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 375 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering, **Phase 21 New Features:** risk supply chain mapping (React Flow vendor graph), regulatory change tracker (timeline + impact assessment), peer benchmarking (differential privacy + anonymized comparison), ROI calculator (ALE/ROSI formulas), remediation burndown charts (Recharts), framework control overlap (Sankey + matrix), bento grid layouts (3 presets with customization), data storytelling (anomaly detection + narrative insights), compliance chain graph (requirement→control→evidence visualization).
 
 **MVP5+ Planned:**
-S3/Blob file storage, scheduled reports, advanced visualizations, connection pooling, SSO/SAML, mobile app.
+S3/Blob file storage, scheduled reports, SSO/SAML integration, mobile app, advanced SIEM integrations.
 
 ---
 
@@ -863,5 +1100,5 @@ S3/Blob file storage, scheduled reports, advanced visualizations, connection poo
 ---
 
 **Codebase Summary Generated:** 2026-02-06
-**Last Updated:** 2026-02-06 (Phase 14.5: Dashboard Widget System + Phase 15: Security Hardening)
+**Last Updated:** 2026-02-06 (Phase 21: Dashboard Features & UI/UX Upgrade + Phase 15: Security Hardening Complete)
 **Maintained By:** docs-manager agent

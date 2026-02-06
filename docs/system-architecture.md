@@ -1,6 +1,6 @@
 # AIRisk Dashboard - System Architecture
 
-**Version:** 3.1 | **Date:** 2026-02-06 | **Status:** MVP4 (Phase 14.5 + Phase 15)
+**Version:** 3.2 | **Date:** 2026-02-06 | **Status:** MVP4.5 (Phase 14.5 + Phase 15 + Phase 21)
 
 ---
 
@@ -102,7 +102,11 @@ Validation: Zod 4.3 (input schemas, API validation)
 ├── /api-keys/                 # CRUD API keys (max 10/org)
 ├── /webhooks/                 # CRUD webhooks + /[id]/test + /[id]/deliveries
 ├── /notifications/            # GET list + /unread-count + /mark-read
-└── /audit-logs/               # GET paginated + filters + /export (CSV)
+├── /audit-logs/               # GET paginated + filters + /export (CSV)
+├── /supply-chain/             # NEW Phase 21: /vendors (CRUD), /risk-paths
+├── /regulatory/               # NEW Phase 21: /changes (CRUD), /impacts
+├── /benchmarking/             # NEW Phase 21: /snapshots (CRUD), /comparison, /percentiles
+└── /roi/                      # NEW Phase 21: POST /calculate, /scenarios (CRUD)
 ```
 
 **Standards:**
@@ -126,6 +130,7 @@ Validation: Zod 4.3 (input schemas, API validation)
 | **Mapping** | Cross-framework control relationships (HIGH/MEDIUM/LOW confidence) |
 | **Assessment** | Risk assessment snapshots (DRAFT, IN_PROGRESS, UNDER_REVIEW, APPROVED) |
 | **Risk** | Individual risks (likelihood 1-5, impact 1-5, scores) |
+| **RiskScoreHistory** | Historical risk scoring for trend analysis |
 | **Evidence** | Evidence artifact metadata (SHA-256 hash) |
 | **EvidenceLink** | Links evidence to risks/controls/assessments |
 | **Task** | Remediation tasks (treatment workflow) |
@@ -134,9 +139,24 @@ Validation: Zod 4.3 (input schemas, API validation)
 | **APIKey** | SHA-256 hashed API keys (prefix-based, permissions: READ/WRITE/ADMIN) |
 | **Webhook** | Webhook endpoints (URL, events, secret, active status, SSRF protected) |
 | **WebhookDelivery** | Delivery logs (status: PENDING/SUCCESS/FAILED, response code, retry count) |
-| **Notification** | User notifications (7 types: ASSESSMENT_APPROVED, RISK_ESCALATED, etc.)
-| **SavedFilter** | Per-user dashboard filters (search, sort, date range)
+| **Notification** | User notifications (7 types: ASSESSMENT_APPROVED, RISK_ESCALATED, etc.) |
+| **SavedFilter** | Per-user dashboard filters (search, sort, date range) |
 | **ScheduledJob** | Cron-based tasks (execution logs, retry tracking) |
+| **Vendor** | Vendor registry with risk profiles (Phase 21) |
+| **VendorRiskPath** | Risk propagation paths through supply chain (Phase 21) |
+| **RegulatoryChange** | Regulatory change events with effective dates (Phase 21) |
+| **FrameworkChange** | Framework version changes and updates (Phase 21) |
+| **ChangeImpact** | Impact assessment on controls/assessments (Phase 21) |
+| **BenchmarkSnapshot** | Point-in-time org metrics for comparison (Phase 21) |
+| **BenchmarkResult** | Anonymized peer comparison results (Phase 21) |
+| **RiskCostProfile** | Cost parameters per risk (frequency, loss value) (Phase 21) |
+| **MitigationInvestment** | Mitigation strategy cost tracking (Phase 21) |
+| **ROSICalculation** | ROSI metrics and scenario calculations (Phase 21) |
+| **InsightTemplate** | Narrative insight templates and rules (Phase 21) |
+| **GeneratedInsight** | AI-generated insights from data analysis (Phase 21) |
+| **AnomalyEvent** | Z-score anomalies and statistical outliers (Phase 21) |
+| **DashboardLayout** | User dashboard layout preferences and widget order (Phase 21) |
+| **ComplianceChain** | Requirement→Control→Evidence traceability chain (Phase 21) |
 
 ### Key Relationships
 - Organization 1:N User, AISystem, Assessment
@@ -156,14 +176,14 @@ idx_control_frameworkId, idx_user_orgId, idx_auditLog_timestamp
 
 ## Component Architecture
 
-### Directory Structure (59 Files, 8.3K LOC)
+### Directory Structure (100+ Files, 15K+ LOC)
 ```
 src/components/
 ├── layout/              # Header, Sidebar (with notification dropdown, user menu)
 ├── ui/                  # Shadcn/ui wrappers (23 components: table, switch, checkbox, alert-dialog, scroll-area, dialog, tabs, textarea, popover, etc.)
 ├── forms/               # AI System, Assessment, User, Webhook, Evidence forms
 ├── tables/              # Data table with pagination, sorting, filtering
-├── charts/              # Recharts: risk heatmap, compliance scorecard
+├── charts/              # Recharts: risk heatmap, compliance scorecard, burndown, velocity
 ├── risk-assessment/     # 5-step wizard, risk entry form, matrix visualization
 ├── frameworks/          # Framework control tree, controls table, mapping visualization
 ├── evidence/            # Evidence upload, approval workflow, versioning
@@ -173,6 +193,15 @@ src/components/
 ├── audit-log/           # Filter toolbar, viewer table, detail diff viewer
 ├── search/              # Global multi-entity search interface
 ├── ai-systems/          # AI system CRUD forms, list view
+├── dashboard/           # 26+ files: 4 views + 15+ widgets + dnd-kit components (Phase 14.5)
+├── ops-center/          # System health, risk alerts, assessment progress (NEW Phase 21)
+├── ai-risk-view/        # Model registry, risk cards, lifecycle tracking (NEW Phase 21)
+├── supply-chain/        # NEW Phase 21: Vendor graph, registry, risk visualization
+├── regulatory-tracker/  # NEW Phase 21: Timeline, impact assessment, change list
+├── benchmarking/        # NEW Phase 21: Peer comparison, percentile ranking, metrics
+├── roi-calculator/      # NEW Phase 21: ALE/ROSI calculator, scenario builder, comparison
+├── insights/            # NEW Phase 21: Narrative insights, anomaly indicators, trends
+├── compliance-graph/    # NEW Phase 21: Chain diagram, coverage donut, filter panel
 └── providers/           # NextAuth, Theme, Zustand providers
 ```
 
@@ -223,6 +252,177 @@ Bias/Fairness, Privacy, Security, Reliability, Transparency, Accountability, Saf
 4. Save Assessment (DRAFT)
    ↓
 5. Review & Submit (APPROVED, UNDER_REVIEW, IN_PROGRESS)
+```
+
+---
+
+## Advanced Features Architecture (Phase 21 - Feb 2026)
+
+### Risk Supply Chain Mapping
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Vendor Registry
+    ↓
+React Flow Graph Visualization
+    ├─ Nodes: Vendors with risk scores
+    ├─ Edges: Risk propagation paths
+    └─ Risk Cascade: Score aggregation through chains
+
+Database:
+    ├─ Vendor (id, name, risk_score, organization_id)
+    └─ VendorRiskPath (id, source_id, target_id, propagation_factor)
+```
+
+### Regulatory Change Tracker
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Regulatory Change Events
+    ↓
+Timeline Visualization
+    ├─ Filter by framework & date
+    ├─ Impact assessment engine
+    └─ Change propagation tracking
+
+Database:
+    ├─ RegulatoryChange (id, title, description, effective_date)
+    ├─ FrameworkChange (id, framework_id, version, change_type)
+    └─ ChangeImpact (id, control_id, risk_id, impact_score)
+```
+
+### Peer Benchmarking with Differential Privacy
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Org Metrics Collection
+    ↓
+Differential Privacy Layer (Laplace Noise)
+    ↓
+Anonymized Aggregation
+    ├─ Percentile ranking
+    ├─ Peer comparison by framework
+    └─ Risk distribution analysis
+
+Database:
+    ├─ BenchmarkSnapshot (id, org_id, timestamp, metrics_json)
+    └─ BenchmarkResult (id, aggregate_metrics, privacy_epsilon)
+
+Privacy Formula:
+    - Laplace(μ, b) where b = sensitivity / epsilon
+    - sensitivity = 1.0, epsilon = 0.5 (strong privacy)
+```
+
+### ROI Calculator
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Risk Cost Profile Input
+    ↓
+ALE Calculation
+    ├─ ALE = frequency × loss_value
+    └─ Baseline risk cost
+
+Mitigation Strategy Modeling
+    ↓
+ROSI Calculation
+    ├─ Benefit = ALE × (1 - residual_rate)
+    ├─ Cost = mitigation_investment
+    └─ ROSI = (benefit - cost) / cost
+
+Scenario Comparison
+    └─ Baseline vs. Strategy 1, 2, 3...
+
+Database:
+    ├─ RiskCostProfile (id, risk_id, frequency, loss_value)
+    ├─ MitigationInvestment (id, risk_id, cost, effectiveness%)
+    └─ ROSICalculation (id, baseline_ale, scenarios_json)
+```
+
+### Data Storytelling with Anomaly Detection
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Data Collection (Risks, Assessments, Controls)
+    ↓
+Z-Score Analysis
+    ├─ μ = mean, σ = std dev
+    ├─ Z = (x - μ) / σ
+    └─ Anomaly: |Z| > 2.5 (99.4% confidence)
+
+Narrative Generation
+    ├─ Select template from InsightTemplate
+    ├─ Populate with data points
+    └─ Highlight anomalies
+
+Database:
+    ├─ InsightTemplate (id, template_text, rules_json)
+    ├─ GeneratedInsight (id, assessment_id, content, confidence)
+    └─ AnomalyEvent (id, entity_id, z_score, flagged_at)
+```
+
+### Remediation Burndown & Framework Overlap
+**Status:** ✅ Complete (Phase 21)
+
+**Burndown Chart:**
+```
+Sprint Data Collection
+    ↓
+Recharts Visualization
+    ├─ X-axis: Days in sprint
+    ├─ Y-axis: Tasks remaining
+    └─ Velocity: Tasks closed per sprint
+
+Framework Overlap (Sankey + Matrix):
+    ├─ React Flow Sankey diagram (framework → controls)
+    ├─ Mapping coverage matrix (23 frameworks × control groups)
+    └─ Highlight unmapped controls
+```
+
+### Bento Grid Layouts
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+3 Preset Layouts
+    ├─ Executive (6 consolidated widgets)
+    ├─ Analyst (12 detailed widgets)
+    └─ Auditor (8 compliance-focused widgets)
+
+dnd-kit Reordering
+    ├─ rectSortingStrategy
+    ├─ Drag-drop enabled per widget
+    └─ CSS Grid responsive layout
+
+State Management:
+    ├─ DashboardLayout model (user's layout config)
+    ├─ useLayoutConfig hook (localStorage + DB)
+    └─ Widget order & visibility persistence
+```
+
+### Compliance Chain Graph
+**Status:** ✅ Complete (Phase 21)
+
+**Architecture:**
+```
+Requirement Node
+    ↓ (mapped to)
+Control Node
+    ↓ (verified by)
+Evidence Node
+
+React Flow Visualization:
+    ├─ Chain diagram with node styling
+    ├─ Coverage donut: % requirements with evidence
+    └─ Filter by framework & control
+
+Database:
+    └─ ComplianceChain (id, requirement_id, control_id, evidence_id)
 ```
 
 ---
@@ -508,10 +708,10 @@ Response: { database: ok, redis: ok, application: ok }
 
 ## Future Roadmap
 
-**MVP5:** Evidence management, Redis caching, rate limiting
-**MVP6:** Gap analysis, scheduled reports, workflow automation
-**MVP7:** Mobile app, real-time collaboration, SSO integrations
+**MVP5 (Phase 22):** File storage integration (S3/Blob), evidence file versioning, storage quota management
+**MVP6 (Phase 23):** Scheduled reports & cron jobs, email delivery, report templates
+**MVP7+ (Phase 24+):** Mobile app, real-time collaboration, SSO/SAML integrations, advanced SIEM analytics
 
 ---
 
-**Architecture Version:** 3.0 | **Last Updated:** 2026-02-04 | **Maintained By:** docs-manager agent
+**Architecture Version:** 3.2 | **Last Updated:** 2026-02-06 | **Maintained By:** docs-manager agent
