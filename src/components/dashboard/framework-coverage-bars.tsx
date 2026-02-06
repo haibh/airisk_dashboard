@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Layers } from 'lucide-react';
+import { FrameworkDrilldownModal } from './widgets/framework-drilldown-modal';
 import type { ComplianceFramework } from '@/types/dashboard';
 
 function getEffectivenessColor(effectiveness: number): string {
@@ -24,6 +26,8 @@ interface FrameworkCoverageBarsProps {
 }
 
 export function FrameworkCoverageBars({ frameworks, isLoading }: FrameworkCoverageBarsProps) {
+  const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null);
+
   if (isLoading) {
     return (
       <Card>
@@ -68,7 +72,12 @@ export function FrameworkCoverageBars({ frameworks, isLoading }: FrameworkCovera
       </CardHeader>
       <CardContent className="space-y-3">
         {frameworks.map((fw) => (
-          <div key={fw.frameworkId} className="space-y-1">
+          <button
+            key={fw.frameworkId}
+            type="button"
+            className="w-full text-left space-y-1 rounded-md px-1.5 py-1 -mx-1.5 cursor-pointer hover:bg-muted/60 transition-colors"
+            onClick={() => setSelectedFramework(fw)}
+          >
             <div className="flex items-center justify-between text-xs">
               <span className="font-medium">{fw.framework}</span>
               <div className="flex items-center gap-2">
@@ -86,9 +95,15 @@ export function FrameworkCoverageBars({ frameworks, isLoading }: FrameworkCovera
                 style={{ width: `${fw.percentage}%` }}
               />
             </div>
-          </div>
+          </button>
         ))}
       </CardContent>
+
+      <FrameworkDrilldownModal
+        open={selectedFramework !== null}
+        onOpenChange={(open) => !open && setSelectedFramework(null)}
+        framework={selectedFramework}
+      />
     </Card>
   );
 }

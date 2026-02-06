@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
+import { FrameworkDrilldownModal } from './widgets/framework-drilldown-modal';
 import type { ComplianceFramework } from '@/types/dashboard';
 
 const ComplianceSpiderChart = dynamic(
@@ -39,6 +40,7 @@ interface ComplianceStatusCardProps {
 
 export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatusCardProps) {
   const [showDetails, setShowDetails] = useState(false);
+  const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null);
 
   if (isLoading) {
     return (
@@ -94,7 +96,12 @@ export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatus
         {/* Traffic-light framework bars */}
         <div className="space-y-2.5">
           {sorted.map((fw) => (
-            <div key={fw.frameworkId} className="space-y-1">
+            <button
+              key={fw.frameworkId}
+              type="button"
+              className="w-full text-left space-y-1 rounded-md px-1.5 py-1 -mx-1.5 cursor-pointer hover:bg-muted/60 transition-colors"
+              onClick={() => setSelectedFramework(fw)}
+            >
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium truncate mr-2">{fw.framework}</span>
                 <div className="flex items-center gap-2 shrink-0">
@@ -110,7 +117,7 @@ export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatus
                   style={{ width: `${fw.percentage}%` }}
                 />
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -141,6 +148,12 @@ export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatus
           )}
         </div>
       </CardContent>
+
+      <FrameworkDrilldownModal
+        open={selectedFramework !== null}
+        onOpenChange={(open) => !open && setSelectedFramework(null)}
+        framework={selectedFramework}
+      />
     </Card>
   );
 }
