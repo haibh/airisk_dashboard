@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Zap, AlertTriangle, ShieldAlert, ClipboardList, ChevronRight } from 'lucide-react';
+import { Zap, AlertTriangle, ShieldAlert, ClipboardList, ChevronRight, CheckCircle } from 'lucide-react';
 import type { DashboardStats, Activity, RiskHeatmapData, ComplianceFramework } from '@/types/dashboard';
 
 interface ActionItem {
@@ -168,8 +168,10 @@ export function NextBestActionsCard({ stats, activities, heatmapData, frameworks
 
         {/* Action items */}
         {actionItems.length === 0 ? (
-          <div className="text-center py-4">
-            <p className="text-sm text-muted-foreground">No urgent actions needed</p>
+          <div className="flex flex-col items-center py-6 text-muted-foreground">
+            <CheckCircle className="h-8 w-8 mb-2 opacity-40 text-green-500" />
+            <p className="text-sm font-medium">All clear!</p>
+            <p className="text-xs mt-0.5">No urgent actions needed</p>
           </div>
         ) : (
           <div className="space-y-2">

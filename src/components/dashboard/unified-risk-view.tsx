@@ -78,7 +78,7 @@ export function UnifiedRiskView({ heatmapData, isLoading }: UnifiedRiskViewProps
             </TabsTrigger>
           </TabsList>
           <TabsContent value="heatmap" className="mt-3">
-            <RiskHeatmapEnhanced data={heatmapData} isLoading={false} />
+            <RiskHeatmapEnhanced data={heatmapData} isLoading={false} compact />
           </TabsContent>
           <TabsContent value="category" className="mt-3">
             <TopRisksListCard heatmapData={heatmapData} isLoading={false} />

@@ -2,9 +2,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { BarChart3, Scale, Lock, ShieldAlert, Cpu, Eye } from 'lucide-react';
 import type { RiskHeatmapData } from '@/types/dashboard';
 
 const RISK_CATEGORIES = ['Bias/Fairness', 'Privacy', 'Security', 'Reliability', 'Transparency'];
+
+/** Map risk category name to a contextual Lucide icon */
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  'Bias/Fairness': Scale,
+  'Privacy': Lock,
+  'Security': ShieldAlert,
+  'Reliability': Cpu,
+  'Transparency': Eye,
+};
 
 function getCategoryDistribution(heatmap: number[][]) {
   const total = heatmap.flat().reduce((s, v) => s + v, 0);
@@ -43,10 +53,16 @@ export function TopRisksListCard({ heatmapData, isLoading }: TopRisksListCardPro
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Risk by Category</CardTitle>
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            Risk by Category
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No data</p>
+          <div className="flex flex-col items-center py-4 text-muted-foreground">
+            <BarChart3 className="h-8 w-8 mb-2 opacity-40" />
+            <p className="text-sm">No data</p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -57,12 +73,20 @@ export function TopRisksListCard({ heatmapData, isLoading }: TopRisksListCardPro
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Risk by Category</CardTitle>
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+          Risk by Category
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {categories.map(({ name, count, percentage }) => (
+        {categories.map(({ name, count, percentage }) => {
+          const CatIcon = CATEGORY_ICONS[name] || ShieldAlert;
+          return (
           <div key={name} className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{name}</span>
+            <span className="text-muted-foreground flex items-center gap-2">
+              <CatIcon className="h-3.5 w-3.5 shrink-0" />
+              {name}
+            </span>
             <div className="flex items-center gap-2">
               <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
                 <div
@@ -73,7 +97,8 @@ export function TopRisksListCard({ heatmapData, isLoading }: TopRisksListCardPro
               <span className="font-medium w-6 text-right">{count}</span>
             </div>
           </div>
-        ))}
+          );
+        })}
       </CardContent>
     </Card>
   );

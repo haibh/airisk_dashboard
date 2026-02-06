@@ -26,18 +26,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parse and validate query params
+    // Parse and validate query params — filter nulls for Zod .optional() compatibility
     const searchParams = request.nextUrl.searchParams;
-    const queryParams = {
-      page: searchParams.get('page'),
-      pageSize: searchParams.get('pageSize'),
-      search: searchParams.get('search'),
-      entityType: searchParams.get('entityType'),
-      action: searchParams.get('action'),
-      userId: searchParams.get('userId'),
-      dateFrom: searchParams.get('dateFrom'),
-      dateTo: searchParams.get('dateTo'),
-    };
+    const queryParams = Object.fromEntries(
+      Object.entries({
+        page: searchParams.get('page'),
+        pageSize: searchParams.get('pageSize'),
+        search: searchParams.get('search'),
+        entityType: searchParams.get('entityType'),
+        action: searchParams.get('action'),
+        userId: searchParams.get('userId'),
+        dateFrom: searchParams.get('dateFrom'),
+        dateTo: searchParams.get('dateTo'),
+      }).filter(([, v]) => v !== null)
+    );
 
     const validation = auditLogFilterSchema.safeParse(queryParams);
     if (!validation.success) {

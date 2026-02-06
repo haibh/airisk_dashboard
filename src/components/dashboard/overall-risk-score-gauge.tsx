@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Gauge } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
 function getScoreColor(score: number): string {
@@ -45,7 +46,10 @@ export function OverallRiskScoreGauge({ score, isLoading }: OverallRiskScoreGaug
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Overall Risk Score</CardTitle>
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Gauge className="h-4 w-4 text-muted-foreground" />
+          Overall Risk Score
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center">
         <div className="relative h-44 w-44">

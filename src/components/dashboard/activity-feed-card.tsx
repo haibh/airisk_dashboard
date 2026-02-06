@@ -1,12 +1,25 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { Plus, Pencil, Trash2, CheckCircle, Send, FileText, RefreshCw } from 'lucide-react';
 
 const STATUS_COLORS = {
-  success: 'bg-green-500',
-  warning: 'bg-yellow-500',
-  info: 'bg-blue-500',
+  success: 'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40',
+  warning: 'text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40',
+  info: 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/40',
 };
+
+/** Map activity action verb to a contextual Lucide icon */
+function getActionIcon(action: string) {
+  const upper = action.toUpperCase();
+  if (upper.includes('CREATE') || upper.includes('ADD')) return Plus;
+  if (upper.includes('UPDATE') || upper.includes('EDIT') || upper.includes('MODIFY')) return Pencil;
+  if (upper.includes('DELETE') || upper.includes('REMOVE')) return Trash2;
+  if (upper.includes('APPROVE') || upper.includes('COMPLETE')) return CheckCircle;
+  if (upper.includes('SUBMIT') || upper.includes('SEND')) return Send;
+  if (upper.includes('REVIEW')) return FileText;
+  return RefreshCw;
+}
 
 interface ActivityItemProps {
   action: string;
@@ -16,14 +29,17 @@ interface ActivityItemProps {
 }
 
 export function ActivityItem({ action, target, time, status }: ActivityItemProps) {
+  const Icon = getActionIcon(action);
   return (
-    <div className="flex items-center gap-4">
-      <div className={`h-2 w-2 rounded-full ${STATUS_COLORS[status]}`} />
-      <div className="flex-1 space-y-1">
-        <p className="text-sm font-medium leading-none">{action}</p>
-        <p className="text-sm text-muted-foreground">{target}</p>
+    <div className="flex items-center gap-3">
+      <div className={`flex items-center justify-center h-6 w-6 rounded-full shrink-0 ${STATUS_COLORS[status]}`}>
+        <Icon className="h-3 w-3" />
       </div>
-      <div className="text-xs text-muted-foreground">{time}</div>
+      <div className="flex-1 space-y-0.5 min-w-0">
+        <p className="text-sm font-medium leading-none">{action}</p>
+        <p className="text-xs text-muted-foreground truncate">{target}</p>
+      </div>
+      <div className="text-xs text-muted-foreground shrink-0">{time}</div>
     </div>
   );
 }

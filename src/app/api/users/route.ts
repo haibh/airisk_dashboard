@@ -27,13 +27,16 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const filters = {
-      page: searchParams.get('page'),
-      pageSize: searchParams.get('pageSize'),
-      search: searchParams.get('search'),
-      role: searchParams.get('role'),
-      isActive: searchParams.get('isActive'),
-    };
+    // Filter out null values — Zod .optional() expects undefined, not null
+    const filters = Object.fromEntries(
+      Object.entries({
+        page: searchParams.get('page'),
+        pageSize: searchParams.get('pageSize'),
+        search: searchParams.get('search'),
+        role: searchParams.get('role'),
+        isActive: searchParams.get('isActive'),
+      }).filter(([, v]) => v !== null)
+    );
 
     // Validate filters
     const validation = validateBody(userFilterSchema, filters);

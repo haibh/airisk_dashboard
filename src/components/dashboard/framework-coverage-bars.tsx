@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Layers } from 'lucide-react';
 import type { ComplianceFramework } from '@/types/dashboard';
 
 function getEffectivenessColor(effectiveness: number): string {
@@ -45,10 +46,16 @@ export function FrameworkCoverageBars({ frameworks, isLoading }: FrameworkCovera
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Framework Coverage</CardTitle>
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Layers className="h-4 w-4 text-muted-foreground" />
+            Framework Coverage
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No data</p>
+          <div className="flex flex-col items-center py-4 text-muted-foreground">
+            <Layers className="h-8 w-8 mb-2 opacity-40" />
+            <p className="text-sm">No framework data</p>
+          </div>
         </CardContent>
       </Card>
     );

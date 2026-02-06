@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import type { ComplianceFramework } from '@/types/dashboard';
 
@@ -39,10 +40,16 @@ export function ComplianceDonutChart({ frameworks, isLoading }: ComplianceDonutC
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">Compliance Overview</CardTitle>
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <PieChartIcon className="h-4 w-4 text-muted-foreground" />
+            Compliance Overview
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">No compliance data</p>
+          <div className="flex flex-col items-center py-4 text-muted-foreground">
+            <PieChartIcon className="h-8 w-8 mb-2 opacity-40" />
+            <p className="text-sm">No compliance data</p>
+          </div>
         </CardContent>
       </Card>
     );

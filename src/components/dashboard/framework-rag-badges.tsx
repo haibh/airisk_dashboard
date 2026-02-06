@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tags } from 'lucide-react';
 import type { ComplianceFramework } from '@/types/dashboard';
 
 function getRagColor(percentage: number): string {
@@ -47,7 +48,10 @@ export function FrameworkRagBadges({ frameworks, isLoading }: FrameworkRagBadges
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Framework Status</CardTitle>
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <Tags className="h-4 w-4 text-muted-foreground" />
+          Framework Status
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-2">

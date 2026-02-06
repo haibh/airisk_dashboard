@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Activity as ActivityIcon } from 'lucide-react';
 import { ActivityItem, ActivityItemSkeleton } from '@/components/dashboard/activity-feed-card';
 import { formatTimestamp, getActivityStatus } from '@/components/dashboard/dashboard-helpers';
 import type { Activity } from '@/types/dashboard';
@@ -31,7 +32,10 @@ export function ActivityFeedCompact({ activities, isLoading, maxItems = 5 }: Act
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+        <CardTitle className="text-sm font-medium flex items-center gap-2">
+          <ActivityIcon className="h-4 w-4 text-muted-foreground" />
+          Recent Activity
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {activities.length > 0 ? (
@@ -47,7 +51,10 @@ export function ActivityFeedCompact({ activities, isLoading, maxItems = 5 }: Act
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">No recent activity</p>
+          <div className="flex flex-col items-center py-4 text-muted-foreground">
+            <ActivityIcon className="h-8 w-8 mb-2 opacity-40" />
+            <p className="text-sm">No recent activity</p>
+          </div>
         )}
       </CardContent>
     </Card>
