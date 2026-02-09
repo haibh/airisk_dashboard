@@ -1,6 +1,6 @@
 # AIRisk Dashboard - System Architecture
 
-**Version:** 3.2 | **Date:** 2026-02-06 | **Status:** MVP4.5 (Phase 14.5 + Phase 15 + Phase 21)
+**Version:** 3.5 | **Date:** 2026-02-09 | **Status:** MVP5 (Phases 16-18 + Security Hardening Complete)
 
 ---
 
@@ -10,11 +10,12 @@
 Frontend: React 19 + TypeScript + Tailwind CSS v4 + Shadcn/ui
 State: Zustand 5.0 (client, 4 stores), API routes (server)
 Backend: Next.js 16 App Router + NextAuth.js 4.24 (JWT, 24h session)
-Database: PostgreSQL 15+ with Prisma ORM 5.22 (20 models, 11 enums)
+Database: PostgreSQL 15+ with Prisma ORM 5.22 (42 models, 15 enums)
 Internationalization: next-intl 4.8 (EN/VI)
-Testing: Vitest 4.0 (262+ tests) + Playwright 1.58 (E2E)
+Testing: Vitest 4.0 (833 tests, 46 files) + Playwright 1.58 (28 E2E tests)
 Caching: Redis 5.9 (ioredis) + multi-layer LRU cache
 Validation: Zod 4.3 (input schemas, API validation)
+Security: ClamAV virus scanning, HMAC-SHA256 webhook signing, timing-safe auth
 ```
 
 ---
@@ -29,7 +30,7 @@ Validation: Zod 4.3 (input schemas, API validation)
 ┌───────────────▼──────────────────┐
 │   Next.js 16 App Router          │
 │  ├─ UI Routes (SSR, 29 pages)    │
-│  ├─ API Routes (REST, 53 routes) │
+│  ├─ API Routes (REST, 97 routes) │
 │  └─ Middleware (Auth + i18n)     │
 └───────────────┬──────────────────┘
                 │ Prisma ORM 5.22
@@ -857,3 +858,4 @@ Database:
 ---
 
 **Architecture Version:** 3.5 | **Last Updated:** 2026-02-09 | **Maintained By:** docs-manager agent
+**Test Coverage:** 833/833 passing (100%) | **Security:** All CRITICAL + HIGH resolved

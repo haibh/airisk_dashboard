@@ -34,6 +34,7 @@
     "gapAnalysis": "Phân tích khoảng cách",
     "evidence": "Bằng chứng",
     "reports": "Báo cáo",
+    "tasks": "Công việc",
     "settings": "Cài đặt",
     "profile": "Hồ sơ",
     "logout": "Đăng xuất",
@@ -303,6 +304,27 @@
       "noFile": "Vui lòng chọn tệp để tải lên",
       "uploadFailed": "Tải lên tệp thất bại",
       "fetchFailed": "Không tải được các tệp bằng chứng"
+    },
+    "versions": {
+      "title": "Lịch sử phiên bản",
+      "tab": "Phiên bản",
+      "detailsTab": "Chi tiết",
+      "current": "Hiện tại",
+      "version": "Phiên bản",
+      "uploadedBy": "Tải lên bởi",
+      "changeNote": "Ghi chú thay đổi",
+      "noVersions": "Chưa có lịch sử phiên bản",
+      "uploadNewVersion": "Tải lên phiên bản mới",
+      "changeNoteLabel": "Ghi chú thay đổi",
+      "changeNotePlaceholder": "Mô tả những thay đổi trong phiên bản này..."
+    },
+    "storage": {
+      "title": "Dung lượng lưu trữ",
+      "used": "Đã dùng",
+      "of": "trong",
+      "percentage": "Đã dùng {{percentage}}%",
+      "warning": "Dung lượng sắp hết",
+      "full": "Đã vượt quá hạn mức"
     }
   },
   "auth": {
@@ -812,5 +834,141 @@
     "resetLayout": "Đặt lại mặc định",
     "widgetLibrary": "Thư viện Widget",
     "dragToReorder": "Kéo để sắp xếp lại widget"
+  },
+  "tasks": {
+    "title": "Quản lý Công việc",
+    "description": "Theo dõi và quản lý các công việc khắc phục",
+    "createTask": "Tạo Công việc",
+    "noTasks": "Không tìm thấy công việc",
+    "table": {
+      "title": "Tiêu đề",
+      "status": "Trạng thái",
+      "priority": "Mức ưu tiên",
+      "assignee": "Người phụ trách",
+      "dueDate": "Hạn hoàn thành",
+      "risk": "Rủi ro liên quan",
+      "actions": "Thao tác",
+      "unassigned": "Chưa giao",
+      "noDueDate": "Chưa có hạn"
+    },
+    "status": {
+      "open": "Mở",
+      "inProgress": "Đang xử lý",
+      "completed": "Hoàn thành",
+      "cancelled": "Đã hủy"
+    },
+    "priority": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao",
+      "critical": "Nghiêm trọng"
+    },
+    "detail": {
+      "title": "Chi tiết Công việc",
+      "description": "Mô tả",
+      "linkedRisk": "Rủi ro liên quan",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Cập nhật",
+      "completedAt": "Ngày hoàn thành",
+      "updateStatus": "Cập nhật trạng thái",
+      "updatePriority": "Cập nhật mức ưu tiên",
+      "deleteTask": "Xóa công việc",
+      "deleteConfirm": "Bạn có chắc chắn muốn xóa công việc này?",
+      "deleteSuccess": "Đã xóa công việc thành công",
+      "updateSuccess": "Đã cập nhật công việc thành công"
+    },
+    "create": {
+      "title": "Tạo Công việc Mới",
+      "description": "Tạo công việc khắc phục gắn với rủi ro",
+      "titleLabel": "Tiêu đề",
+      "titlePlaceholder": "Nhập tiêu đề công việc...",
+      "descriptionLabel": "Mô tả",
+      "descriptionPlaceholder": "Mô tả công việc...",
+      "riskLabel": "Rủi ro liên quan",
+      "riskPlaceholder": "Chọn rủi ro...",
+      "assigneeLabel": "Người phụ trách",
+      "assigneePlaceholder": "Chọn người phụ trách...",
+      "priorityLabel": "Mức ưu tiên",
+      "dueDateLabel": "Hạn hoàn thành",
+      "success": "Đã tạo công việc thành công"
+    },
+    "comments": {
+      "title": "Bình luận",
+      "noComments": "Chưa có bình luận",
+      "placeholder": "Thêm bình luận...",
+      "submit": "Đăng bình luận",
+      "success": "Đã thêm bình luận"
+    }
+  },
+  "import": {
+    "title": "Nhập Rủi ro",
+    "description": "Nhập rủi ro từ tệp CSV hoặc Excel",
+    "step1": "Tải tệp",
+    "step2": "Xem trước & Xác thực",
+    "step3": "Nhập",
+    "selectAssessment": "Chọn Đánh giá",
+    "assessmentPlaceholder": "Chọn đánh giá...",
+    "dragDrop": "Kéo và thả tệp vào đây, hoặc nhấn để chọn",
+    "supportedFormats": "Định dạng hỗ trợ: CSV, XLSX",
+    "uploading": "Đang tải lên...",
+    "validating": "Đang xác thực...",
+    "importing": "Đang nhập...",
+    "preview": {
+      "title": "Xem trước",
+      "totalRows": "Tổng số hàng",
+      "validRows": "Hàng hợp lệ",
+      "invalidRows": "Hàng không hợp lệ",
+      "row": "Hàng",
+      "field": "Trường",
+      "error": "Lỗi"
+    },
+    "result": {
+      "title": "Nhập Hoàn tất",
+      "imported": "Đã nhập thành công",
+      "failed": "Không thể nhập",
+      "risks": "rủi ro"
+    },
+    "errors": {
+      "noFile": "Vui lòng chọn tệp",
+      "noAssessment": "Vui lòng chọn đánh giá",
+      "uploadFailed": "Tải tệp thất bại",
+      "importFailed": "Nhập thất bại"
+    }
+  },
+  "reportTemplates": {
+    "title": "Mẫu Báo cáo",
+    "description": "Tạo và quản lý mẫu báo cáo tùy chỉnh",
+    "createTemplate": "Tạo Mẫu",
+    "noTemplates": "Chưa có mẫu nào",
+    "complianceTab": "Tuân thủ",
+    "templatesTab": "Mẫu",
+    "form": {
+      "name": "Tên Mẫu",
+      "namePlaceholder": "Nhập tên mẫu...",
+      "dataSource": "Nguồn dữ liệu",
+      "dataSourcePlaceholder": "Chọn nguồn dữ liệu...",
+      "columns": "Cột",
+      "columnsPlaceholder": "Nhập tên cột, phân cách bằng dấu phẩy...",
+      "format": "Định dạng xuất",
+      "groupBy": "Nhóm theo",
+      "groupByPlaceholder": "Trường nhóm theo...",
+      "sortBy": "Sắp xếp theo",
+      "sortByPlaceholder": "Trường sắp xếp theo..."
+    },
+    "dataSources": {
+      "risks": "Rủi ro",
+      "assessments": "Đánh giá",
+      "compliance": "Tuân thủ",
+      "evidence": "Bằng chứng",
+      "ai-systems": "Hệ thống AI"
+    },
+    "actions": {
+      "edit": "Sửa",
+      "delete": "Xóa",
+      "deleteConfirm": "Xóa mẫu này?",
+      "createSuccess": "Đã tạo mẫu",
+      "updateSuccess": "Đã cập nhật mẫu",
+      "deleteSuccess": "Đã xóa mẫu"
+    }
   }
 }

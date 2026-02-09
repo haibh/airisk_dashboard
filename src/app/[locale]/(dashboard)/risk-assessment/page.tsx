@@ -14,12 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Upload } from 'lucide-react';
 import {
   AssessmentWithDetails,
   AssessmentListResponse,
 } from '@/types/risk-assessment';
 import { AssessmentStatus } from '@prisma/client';
+import { BulkImportWizard } from '@/components/import/bulk-import-wizard';
 
 export default function RiskAssessmentPage() {
   const t = useTranslations();
@@ -30,6 +31,7 @@ export default function RiskAssessmentPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showImportWizard, setShowImportWizard] = useState(false);
 
   useEffect(() => {
     fetchAssessments();
@@ -83,10 +85,16 @@ export default function RiskAssessmentPage() {
             Manage AI system risk assessments
           </p>
         </div>
-        <Button onClick={() => router.push('/risk-assessment/new')}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Assessment
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowImportWizard(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import Risks
+          </Button>
+          <Button onClick={() => router.push('/risk-assessment/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Assessment
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -217,6 +225,15 @@ export default function RiskAssessmentPage() {
           </Button>
         </div>
       )}
+
+      {/* Import Wizard */}
+      <BulkImportWizard
+        open={showImportWizard}
+        onClose={() => setShowImportWizard(false)}
+        onSuccess={() => {
+          fetchAssessments();
+        }}
+      />
     </div>
   );
 }

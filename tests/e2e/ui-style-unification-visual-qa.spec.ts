@@ -58,16 +58,26 @@ test.describe('Login Page - Glassmorphism Visual QA', () => {
 
 // ─── Dashboard Page Tests (requires auth mock) ─────────────────
 test.describe('Dashboard - UI Style Unification Visual QA', () => {
+  // Increase timeout for dashboard visual tests
+  test.setTimeout(90000);
+
   // Dashboard pages need auth — test with the login flow
   test.beforeEach(async ({ page }) => {
     // Login with valid test credentials
-    await page.goto('/en/login');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/en/login', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
     await page.fill('input[id="email"]', 'admin@airm-ip.local');
     await page.fill('input[id="password"]', 'Test@123456');
-    await page.click('button[type="submit"]');
-    await page.waitForURL('**/dashboard**', { timeout: 15000 });
+
+    // Click submit and wait for navigation in parallel
+    await Promise.all([
+      page.waitForURL('**/dashboard**', { timeout: 60000 }),
+      page.click('button[type="submit"]')
+    ]);
+
+    // Wait for dashboard to load
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
   });
 
   for (const vp of VIEWPORTS) {

@@ -1,10 +1,36 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-09 | **Current Version:** 2.5.0 (MVP5 Complete)
+**Last Updated:** 2026-02-09 | **Current Version:** 2.5.1 (MVP5 Complete + Security Hardening)
 
 ---
 
 ## Version History
+
+### 2.5.1 — Security Hardening & Test Expansion (2026-02-09)
+**Date:** 2026-02-09
+**Impact:** Security fixes for HIGH and MEDIUM code review findings
+
+**Security Fixes:**
+- **HIGH-01:** Filename sanitization - collapse consecutive dots to prevent path traversal
+- **HIGH-02:** Virus scanner path validation - ensure file path is within /tmp/ before scanning
+- **HIGH-03:** Atomic storage quota check - use Prisma transaction to prevent race conditions
+- **HIGH-04:** Rate limit bulk uploads - maximum 20 files per request
+
+**Additional Fixes:**
+- **MEDIUM-03:** Add 10K row limit to Excel/CSV import parsers to prevent DoS
+- **MEDIUM-04:** Only clear completedAt timestamp on COMPLETED→other status transitions
+- **CRITICAL:** Fix timing attack in cron auth - use timingSafeEqual for secret comparison
+
+**Testing:**
+- Expanded test coverage: 833/833 tests passing (100%)
+- 46 test files across all API endpoints and lib modules
+- Added 173 new tests for Phases 16-18
+- Test files: cron-trigger, evidence-versions, report-templates, tasks, bulk-import, email, virus-scanner, storage-quota
+
+**Build Status:** Production-ready
+**Security Status:** All CRITICAL + HIGH findings resolved
+
+---
 
 ### 2.5.0 — File Storage, Reports & Advanced Features (2026-02-09)
 
@@ -968,11 +994,12 @@ See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
 
 ---
 
-**Document Version:** 2.5
-**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend Implementation)
+**Document Version:** 2.5.1
+**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 + Security Hardening)
 **Maintained By:** docs-manager agent
-**Total Commits:** 60+ since project start
-**Total Tests:** 660 (100% passing)
+**Total Commits:** 70+ since project start
+**Total Tests:** 833/833 passing (100%) across 46 test files
 **Database Models:** 42 (Phases 1-18)
-**API Endpoints:** 50+ routes
-**Production Ready:** ✅ MVP5 Backend Complete
+**API Routes:** 97 route files
+**Security Status:** All CRITICAL + HIGH + 2 MEDIUM findings resolved
+**Production Ready:** ✅ MVP5 Backend + Security Hardening Complete

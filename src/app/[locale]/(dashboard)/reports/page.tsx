@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ import {
   AlertCircle,
   Clock,
 } from 'lucide-react';
+import { ReportTemplateManager } from '@/components/reports/report-template-manager';
 
 // Types matching the compliance API response
 interface ControlData {
@@ -83,6 +85,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 
 export default function ReportsPage() {
   const t = useTranslations();
+  const tTemplates = useTranslations('reportTemplates');
 
   const [report, setReport] = useState<ComplianceReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -167,42 +170,52 @@ export default function ReportsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
           <p className="text-muted-foreground">Compliance status reports and exports</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Select value={selectedFramework} onValueChange={setSelectedFramework}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Frameworks" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Frameworks</SelectItem>
-              {report?.frameworks.map((fw) => (
-                <SelectItem key={fw.id} value={fw.id}>
-                  {fw.shortName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleExport} disabled={isExporting} variant="outline" className="gap-2">
-            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            Export CSV
-          </Button>
-        </div>
       </div>
 
-      {/* Error */}
-      {error && (
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              <p>{error}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Tabs */}
+      <Tabs defaultValue="compliance" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="compliance">{tTemplates('complianceTab')}</TabsTrigger>
+          <TabsTrigger value="templates">{tTemplates('templatesTab')}</TabsTrigger>
+        </TabsList>
 
-      {report && (
-        <>
-          {/* Summary Stats */}
+        <TabsContent value="compliance" className="space-y-6">
+          {/* Compliance Tab Controls */}
+          <div className="flex items-center justify-end gap-3">
+            <Select value={selectedFramework} onValueChange={setSelectedFramework}>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Frameworks" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Frameworks</SelectItem>
+                {report?.frameworks.map((fw) => (
+                  <SelectItem key={fw.id} value={fw.id}>
+                    {fw.shortName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleExport} disabled={isExporting} variant="outline" className="gap-2">
+              {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              Export CSV
+            </Button>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <Card className="border-destructive">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <p>{error}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {report && (
+            <>
+              {/* Summary Stats */}
           <div className="grid gap-4 md:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -330,8 +343,14 @@ export default function ReportsPage() {
               </div>
             </CardContent>
           </Card>
-        </>
-      )}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="templates">
+          <ReportTemplateManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

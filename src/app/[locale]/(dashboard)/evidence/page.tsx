@@ -2,18 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSession } from 'next-auth/react';
 import { FileText, Upload } from 'lucide-react';
+import { hasMinimumRole } from '@/lib/auth-helpers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EvidenceUploadForm } from '@/components/evidence/evidence-upload-form';
 import { EvidenceListTable, type Evidence } from '@/components/evidence/evidence-list-table';
 import { EvidenceDetailModal } from '@/components/evidence/evidence-detail-modal';
+import { StorageQuotaIndicator } from '@/components/evidence/storage-quota-indicator';
 import { toast } from 'sonner';
 
 export default function EvidencePage() {
   const t = useTranslations('evidence');
   const tCommon = useTranslations('common');
+  const { data: session } = useSession();
 
   const [evidence, setEvidence] = useState<Evidence[]>([]);
   const [total, setTotal] = useState(0);
@@ -22,8 +26,12 @@ export default function EvidencePage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'create' | 'new-version'>('create');
+  const [uploadEvidenceId, setUploadEvidenceId] = useState<string | undefined>(undefined);
   const [selectedEvidence, setSelectedEvidence] = useState<Evidence | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  const isAdmin = session?.user?.role && hasMinimumRole(session.user.role, 'ADMIN');
 
   // Fetch evidence list
   const fetchEvidence = async () => {
@@ -63,7 +71,16 @@ export default function EvidencePage() {
   // Handle upload success
   const handleUploadSuccess = () => {
     setShowUploadDialog(false);
+    setUploadMode('create');
+    setUploadEvidenceId(undefined);
     fetchEvidence(); // Refresh list
+  };
+
+  // Handle new version upload
+  const handleUploadNewVersion = (item: Evidence) => {
+    setUploadEvidenceId(item.id);
+    setUploadMode('new-version');
+    setShowUploadDialog(true);
   };
 
   // Handle view detail
@@ -162,11 +179,18 @@ export default function EvidencePage() {
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button onClick={() => setShowUploadDialog(true)}>
+        <Button onClick={() => {
+          setUploadMode('create');
+          setUploadEvidenceId(undefined);
+          setShowUploadDialog(true);
+        }}>
           <Upload className="h-4 w-4 mr-2" />
           {t('upload')}
         </Button>
       </div>
+
+      {/* Storage Quota Indicator (Admin only) */}
+      {isAdmin && <StorageQuotaIndicator />}
 
       {/* Evidence List */}
       <Card>
@@ -200,18 +224,30 @@ export default function EvidencePage() {
       </Card>
 
       {/* Upload Dialog */}
-      <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+      <Dialog open={showUploadDialog} onOpenChange={(open) => {
+        setShowUploadDialog(open);
+        if (!open) {
+          setUploadMode('create');
+          setUploadEvidenceId(undefined);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
-              {t('upload')}
+              {uploadMode === 'new-version' ? t('versions.uploadNewVersion') : t('upload')}
             </DialogTitle>
             <DialogDescription>{t('uploadDescription')}</DialogDescription>
           </DialogHeader>
           <EvidenceUploadForm
             onSuccess={handleUploadSuccess}
-            onCancel={() => setShowUploadDialog(false)}
+            onCancel={() => {
+              setShowUploadDialog(false);
+              setUploadMode('create');
+              setUploadEvidenceId(undefined);
+            }}
+            evidenceId={uploadEvidenceId}
+            mode={uploadMode}
           />
         </DialogContent>
       </Dialog>

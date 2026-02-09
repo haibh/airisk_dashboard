@@ -19,6 +19,8 @@ import { toast } from 'sonner';
 interface EvidenceUploadFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
+  evidenceId?: string;
+  mode?: 'create' | 'new-version';
 }
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -31,18 +33,21 @@ const ALLOWED_TYPES = [
   'video/mp4',
 ];
 
-export function EvidenceUploadForm({ onSuccess, onCancel }: EvidenceUploadFormProps) {
+export function EvidenceUploadForm({ onSuccess, onCancel, evidenceId, mode = 'create' }: EvidenceUploadFormProps) {
   const t = useTranslations('evidence');
   const tCommon = useTranslations('common');
 
   const [file, setFile] = useState<File | null>(null);
   const [description, setDescription] = useState('');
+  const [changeNote, setChangeNote] = useState('');
   const [entityType, setEntityType] = useState<string>('');
   const [entityId, setEntityId] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
+
+  const isNewVersion = mode === 'new-version';
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -100,14 +105,22 @@ export function EvidenceUploadForm({ onSuccess, onCancel }: EvidenceUploadFormPr
     try {
       const formData = new FormData();
       formData.append('file', file);
-      if (description) formData.append('description', description);
-      if (entityType) formData.append('entityType', entityType);
-      if (entityId) formData.append('entityId', entityId);
-      if (validUntil) formData.append('validUntil', validUntil);
+
+      // For new version mode, only include file and changeNote
+      if (isNewVersion) {
+        if (changeNote) formData.append('changeNote', changeNote);
+      } else {
+        // For create mode, include all metadata
+        if (description) formData.append('description', description);
+        if (entityType) formData.append('entityType', entityType);
+        if (entityId) formData.append('entityId', entityId);
+        if (validUntil) formData.append('validUntil', validUntil);
+      }
 
       setUploadProgress(30);
 
-      const response = await fetch('/api/evidence', {
+      const url = isNewVersion ? `/api/evidence/${evidenceId}/versions` : '/api/evidence';
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
       });
@@ -126,6 +139,7 @@ export function EvidenceUploadForm({ onSuccess, onCancel }: EvidenceUploadFormPr
       // Reset form
       setFile(null);
       setDescription('');
+      setChangeNote('');
       setEntityType('');
       setEntityId('');
       setValidUntil('');
@@ -228,20 +242,35 @@ export function EvidenceUploadForm({ onSuccess, onCancel }: EvidenceUploadFormPr
         </div>
       )}
 
-      {/* Description */}
-      <div className="space-y-2">
-        <Label htmlFor="description">{t('form.description')}</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder={t('form.descriptionPlaceholder')}
-          rows={3}
-          disabled={uploading}
-        />
-      </div>
+      {/* Change Note (for new version) or Description (for create) */}
+      {isNewVersion ? (
+        <div className="space-y-2">
+          <Label htmlFor="changeNote">{t('versions.changeNoteLabel')}</Label>
+          <Textarea
+            id="changeNote"
+            value={changeNote}
+            onChange={(e) => setChangeNote(e.target.value)}
+            placeholder={t('versions.changeNotePlaceholder')}
+            rows={3}
+            disabled={uploading}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">{t('form.description')}</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={t('form.descriptionPlaceholder')}
+              rows={3}
+              disabled={uploading}
+            />
+          </div>
 
-      {/* Entity Linking (Optional) */}
+          {/* Entity Linking (Optional) */}
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="entityType">{t('form.linkTo')} ({tCommon('optional')})</Label>
@@ -276,20 +305,22 @@ export function EvidenceUploadForm({ onSuccess, onCancel }: EvidenceUploadFormPr
         )}
       </div>
 
-      {/* Valid Until (Optional) */}
-      <div className="space-y-2">
-        <Label htmlFor="validUntil">
-          {t('form.validUntil')} ({tCommon('optional')})
-        </Label>
-        <Input
-          type="date"
-          id="validUntil"
-          value={validUntil}
-          onChange={(e) => setValidUntil(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
-          disabled={uploading}
-        />
-      </div>
+          {/* Valid Until (Optional) */}
+          <div className="space-y-2">
+            <Label htmlFor="validUntil">
+              {t('form.validUntil')} ({tCommon('optional')})
+            </Label>
+            <Input
+              type="date"
+              id="validUntil"
+              value={validUntil}
+              onChange={(e) => setValidUntil(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              disabled={uploading}
+            />
+          </div>
+        </>
+      )}
 
       {/* Form Actions */}
       <div className="flex justify-end gap-3">

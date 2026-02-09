@@ -15,6 +15,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { EvidenceVersionHistoryPanel } from './evidence-version-history-panel';
 
 interface Evidence {
   id: string;
@@ -27,6 +29,7 @@ interface Evidence {
   description: string | null;
   reviewStatus: 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
   validUntil: string | null;
+  versionNumber?: number;
   createdAt: string;
   updatedAt: string;
   uploadedBy: {
@@ -128,7 +131,17 @@ export function EvidenceDetailModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="details" className="flex-1">
+              {t('versions.detailsTab')}
+            </TabsTrigger>
+            <TabsTrigger value="versions" className="flex-1">
+              {t('versions.tab')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details" className="space-y-6 mt-6">
           {/* File Information */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold">{t('detail.fileInfo')}</h3>
@@ -239,7 +252,15 @@ export function EvidenceDetailModal({
               </div>
             </>
           )}
-        </div>
+          </TabsContent>
+
+          <TabsContent value="versions" className="mt-6">
+            <EvidenceVersionHistoryPanel
+              evidenceId={evidence.id}
+              currentVersion={evidence.versionNumber || 1}
+            />
+          </TabsContent>
+        </Tabs>
 
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <div className="flex gap-2 flex-1">

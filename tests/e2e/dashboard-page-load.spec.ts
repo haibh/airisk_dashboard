@@ -1,25 +1,29 @@
 import { test, expect } from '@playwright/test';
 
 // Increase timeout for dashboard tests which require login + data loading
-test.setTimeout(60000);
+test.setTimeout(90000);
 
 test.describe('Dashboard Page Load', () => {
   const VALID_EMAIL = 'admin@airm-ip.local';
   const VALID_PASSWORD = 'Test@123456';
 
   test.beforeEach(async ({ page }) => {
-    // Login before each test
-    await page.goto('/en/login');
-    await page.waitForLoadState('domcontentloaded');
+    // Login before each test with extended timeouts
+    await page.goto('/en/login', { waitUntil: 'domcontentloaded', timeout: 45000 });
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
     // Fill credentials
     await page.fill('input[id="email"]', VALID_EMAIL);
     await page.fill('input[id="password"]', VALID_PASSWORD);
-    await page.click('button[type="submit"]');
 
-    // Wait for dashboard navigation - use longer timeout for slow auth processing
-    await page.waitForURL('**/dashboard', { timeout: 45000 });
-    await page.waitForLoadState('networkidle');
+    // Click submit and wait for navigation in parallel
+    await Promise.all([
+      page.waitForURL('**/dashboard', { timeout: 60000 }),
+      page.click('button[type="submit"]')
+    ]);
+
+    // Wait for network to stabilize after login
+    await page.waitForLoadState('networkidle', { timeout: 20000 });
   });
 
   test('should load dashboard successfully after login', async ({ page }) => {

@@ -34,6 +34,7 @@
     "gapAnalysis": "Gap Analysis",
     "evidence": "Evidence",
     "reports": "Reports",
+    "tasks": "Tasks",
     "settings": "Settings",
     "profile": "Profile",
     "logout": "Logout",
@@ -303,6 +304,27 @@
       "noFile": "Please select a file to upload",
       "uploadFailed": "Failed to upload file",
       "fetchFailed": "Failed to load evidence files"
+    },
+    "versions": {
+      "title": "Version History",
+      "tab": "Versions",
+      "detailsTab": "Details",
+      "current": "Current",
+      "version": "Version",
+      "uploadedBy": "Uploaded by",
+      "changeNote": "Change Note",
+      "noVersions": "No version history available",
+      "uploadNewVersion": "Upload New Version",
+      "changeNoteLabel": "Change Note",
+      "changeNotePlaceholder": "Describe what changed in this version..."
+    },
+    "storage": {
+      "title": "Storage Usage",
+      "used": "Used",
+      "of": "of",
+      "percentage": "{{percentage}}% used",
+      "warning": "Storage is running low",
+      "full": "Storage quota exceeded"
     }
   },
   "auth": {
@@ -812,5 +834,141 @@
     "resetLayout": "Reset to Default",
     "widgetLibrary": "Widget Library",
     "dragToReorder": "Drag to reorder widgets"
+  },
+  "tasks": {
+    "title": "Task Management",
+    "description": "Track and manage remediation tasks",
+    "createTask": "Create Task",
+    "noTasks": "No tasks found",
+    "table": {
+      "title": "Title",
+      "status": "Status",
+      "priority": "Priority",
+      "assignee": "Assignee",
+      "dueDate": "Due Date",
+      "risk": "Related Risk",
+      "actions": "Actions",
+      "unassigned": "Unassigned",
+      "noDueDate": "No due date"
+    },
+    "status": {
+      "open": "Open",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "detail": {
+      "title": "Task Details",
+      "description": "Description",
+      "linkedRisk": "Linked Risk",
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "completedAt": "Completed At",
+      "updateStatus": "Update Status",
+      "updatePriority": "Update Priority",
+      "deleteTask": "Delete Task",
+      "deleteConfirm": "Are you sure you want to delete this task?",
+      "deleteSuccess": "Task deleted successfully",
+      "updateSuccess": "Task updated successfully"
+    },
+    "create": {
+      "title": "Create New Task",
+      "description": "Create a remediation task linked to a risk",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter task title...",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe the task...",
+      "riskLabel": "Related Risk",
+      "riskPlaceholder": "Select a risk...",
+      "assigneeLabel": "Assignee",
+      "assigneePlaceholder": "Select assignee...",
+      "priorityLabel": "Priority",
+      "dueDateLabel": "Due Date",
+      "success": "Task created successfully"
+    },
+    "comments": {
+      "title": "Comments",
+      "noComments": "No comments yet",
+      "placeholder": "Add a comment...",
+      "submit": "Post Comment",
+      "success": "Comment added"
+    }
+  },
+  "import": {
+    "title": "Import Risks",
+    "description": "Import risks from CSV or Excel files",
+    "step1": "Upload File",
+    "step2": "Preview & Validate",
+    "step3": "Import",
+    "selectAssessment": "Select Assessment",
+    "assessmentPlaceholder": "Choose an assessment...",
+    "dragDrop": "Drag and drop a file here, or click to browse",
+    "supportedFormats": "Supported formats: CSV, XLSX",
+    "uploading": "Uploading...",
+    "validating": "Validating...",
+    "importing": "Importing...",
+    "preview": {
+      "title": "Preview",
+      "totalRows": "Total Rows",
+      "validRows": "Valid Rows",
+      "invalidRows": "Invalid Rows",
+      "row": "Row",
+      "field": "Field",
+      "error": "Error"
+    },
+    "result": {
+      "title": "Import Complete",
+      "imported": "Successfully imported",
+      "failed": "Failed to import",
+      "risks": "risks"
+    },
+    "errors": {
+      "noFile": "Please select a file",
+      "noAssessment": "Please select an assessment",
+      "uploadFailed": "File upload failed",
+      "importFailed": "Import failed"
+    }
+  },
+  "reportTemplates": {
+    "title": "Report Templates",
+    "description": "Create and manage custom report templates",
+    "createTemplate": "Create Template",
+    "noTemplates": "No templates created yet",
+    "complianceTab": "Compliance",
+    "templatesTab": "Templates",
+    "form": {
+      "name": "Template Name",
+      "namePlaceholder": "Enter template name...",
+      "dataSource": "Data Source",
+      "dataSourcePlaceholder": "Select data source...",
+      "columns": "Columns",
+      "columnsPlaceholder": "Enter column names separated by commas...",
+      "format": "Output Format",
+      "groupBy": "Group By",
+      "groupByPlaceholder": "Field to group by...",
+      "sortBy": "Sort By",
+      "sortByPlaceholder": "Field to sort by..."
+    },
+    "dataSources": {
+      "risks": "Risks",
+      "assessments": "Assessments",
+      "compliance": "Compliance",
+      "evidence": "Evidence",
+      "ai-systems": "AI Systems"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this template?",
+      "createSuccess": "Template created",
+      "updateSuccess": "Template updated",
+      "deleteSuccess": "Template deleted"
+    }
   }
 }

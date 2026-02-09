@@ -19,6 +19,7 @@ import {
   ScrollText,
   Users,
   Calculator,
+  CheckSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -32,6 +33,7 @@ const navItems = [
   { href: '/gap-analysis', icon: GitCompare, labelKey: 'nav.gapAnalysis' },
   { href: '/evidence', icon: Folder, labelKey: 'nav.evidence' },
   { href: '/reports', icon: BarChart3, labelKey: 'nav.reports' },
+  { href: '/tasks', icon: CheckSquare, labelKey: 'nav.tasks' },
   { href: '/supply-chain', icon: Network, labelKey: 'nav.supplyChain' },
   { href: '/regulatory', icon: ScrollText, labelKey: 'nav.regulatory' },
   { href: '/benchmarking', icon: Users, labelKey: 'nav.benchmarking' },
