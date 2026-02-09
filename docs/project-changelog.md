@@ -1,10 +1,54 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-09 | **Current Version:** 2.6.0 (MVP5 Complete + Frontend Phases 16-18)
+**Last Updated:** 2026-02-09 | **Current Version:** 2.6.1 (Security & Code Quality Improvements)
 
 ---
 
 ## Version History
+
+### 2.6.1 — Security Headers & API Quality Improvements (2026-02-09)
+**Date:** 2026-02-09
+**Impact:** Medium-priority security and code quality enhancements (MEDIUM findings)
+
+**Security Enhancements:**
+- **Configurable CORS:** Replace wildcard `*` with environment-based origin list
+  - New env var: `ALLOWED_ORIGINS` (comma-separated)
+  - Supports multiple trusted origins for production
+  - Backward compatible (defaults to `*` if not configured)
+
+- **Enhanced Security Headers:**
+  - `Content-Security-Policy` — Restrict resource loading to trusted sources
+  - `Permissions-Policy` — Disable camera/microphone/geolocation
+  - `Strict-Transport-Security` — Force HTTPS with 1-year max-age
+  - `X-Correlation-ID` added to CORS allowed headers
+
+**API Improvements:**
+- **API Versioning:** All API responses include `X-API-Version` header (default: 1.0.0)
+- **Correlation ID Propagation:** Error responses now include correlation ID from request headers
+  - Updated all error helpers: `handleApiError`, `validationError`, `notFoundError`, etc.
+  - Improved debugging with request-to-error traceability
+
+**Health Check Enhancement:**
+- PostgreSQL version detection added to `/api/health`
+- Response now includes `services.database.version` field (e.g., "15.3")
+
+**Files Modified:** 4 files (+96 lines)
+- `.env.example` — Added CORS/API version config
+- `next.config.ts` — Enhanced security headers
+- `src/lib/api-error-handler.ts` — Correlation ID support
+- `src/app/api/health/route.ts` — DB version detection
+
+**Tests:** 833/833 passing (100%) — No regression
+**Type Safety:** 0 TypeScript errors
+**Breaking Changes:** None (all backward compatible)
+
+**Environment Variables Added:**
+```bash
+ALLOWED_ORIGINS="https://app.example.com,https://admin.example.com"
+API_VERSION="1.0.0"
+```
+
+---
 
 ### 2.6.0 — Frontend UI Implementation (2026-02-09)
 **Date:** 2026-02-09
