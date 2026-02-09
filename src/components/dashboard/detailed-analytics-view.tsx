@@ -7,6 +7,7 @@ import { RiskHeatmapEnhanced } from '@/components/dashboard/risk-heatmap-enhance
 import { TopRisksListCard } from '@/components/dashboard/top-risks-list-card';
 import { ActivityFeedCompact } from '@/components/dashboard/activity-feed-compact';
 import { FrameworkCoverageBars } from '@/components/dashboard/framework-coverage-bars';
+import { ControlRiskSankeyDiagramChart } from '@/components/dashboard/widgets/control-risk-sankey-diagram-chart';
 
 interface DetailedAnalyticsViewProps {
   stats: DashboardStats | null;
@@ -55,6 +56,26 @@ export function DetailedAnalyticsView({
         {/* Activity feed — 2 cols */}
         <div className="md:col-span-2 lg:col-span-2">
           <ActivityFeedCompact activities={activities} isLoading={isLoading} />
+        </div>
+
+        {/* Control-Risk Sankey — 4 cols (full width) */}
+        <div className="md:col-span-2 lg:col-span-4">
+          <ControlRiskSankeyDiagramChart
+            frameworkOptions={frameworks.map((f) => ({
+              id: f.frameworkId,
+              name: f.framework,
+            }))}
+            categoryOptions={[
+              'BIAS_FAIRNESS',
+              'PRIVACY',
+              'SECURITY',
+              'RELIABILITY',
+              'TRANSPARENCY',
+              'ACCOUNTABILITY',
+              'SAFETY',
+              'OTHER',
+            ]}
+          />
         </div>
       </div>
     </div>

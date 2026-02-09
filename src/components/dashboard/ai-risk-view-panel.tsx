@@ -8,6 +8,7 @@ import { ModelLifecycleIndicators } from '@/components/ai-risk-view/model-lifecy
 import { FrameworkCoverageTreemap } from '@/components/ai-risk-view/framework-coverage-treemap';
 import { CrossFrameworkMappingViz } from '@/components/ai-risk-view/cross-framework-mapping-viz';
 import { BiasDriftMetricsPlaceholder } from '@/components/ai-risk-view/bias-drift-metrics-placeholder';
+import { AIModelRiskRadarChart } from '@/components/ai-risk-view/ai-model-risk-radar-chart';
 
 interface AIRiskViewPanelProps {
   frameworks: ComplianceFramework[];
@@ -61,6 +62,11 @@ export function AIRiskViewPanel({ frameworks, isLoading }: AIRiskViewPanelProps)
       </div>
       <div className="lg:col-span-2 space-y-4">
         <ModelRiskCard system={selectedSystem} isLoading={aiLoading} />
+        <AIModelRiskRadarChart
+          systemId={selectedId}
+          systemName={selectedSystem?.name}
+          showTarget={true}
+        />
         <ModelLifecycleIndicators
           currentStage={selectedSystem?.lifecycleStatus || null}
           isLoading={aiLoading}

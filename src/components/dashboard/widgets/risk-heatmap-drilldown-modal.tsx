@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ExternalLink, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import type { HeatmapCellRisk } from '@/types/dashboard';
+import { RiskVelocityIndicatorCompact } from './risk-velocity-compact-indicator';
 
 interface RiskHeatmapDrilldownModalProps {
   open: boolean;
@@ -73,7 +74,7 @@ export function RiskHeatmapDrilldownModal({
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/dashboard/risk-heatmap/cell?likelihood=${likelihood}&impact=${impact}`
+          `/api/dashboard/risk-heatmap/cell?likelihood=${likelihood}&impact=${impact}&includeVelocity=true`
         );
         if (res.ok) {
           const data = await res.json();
@@ -172,6 +173,13 @@ export function RiskHeatmapDrilldownModal({
                     >
                       {risk.treatmentStatus}
                     </Badge>
+                    {(risk as any).velocity && (
+                      <RiskVelocityIndicatorCompact
+                        trend={(risk as any).velocity.trend}
+                        changePerDay={(risk as any).velocity.residualChange}
+                        periodDays={(risk as any).velocity.periodDays}
+                      />
+                    )}
                     <span className="text-xs text-muted-foreground ml-auto font-medium">
                       Residual: {risk.residualScore.toFixed(1)}
                     </span>

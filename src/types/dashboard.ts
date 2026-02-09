@@ -85,6 +85,12 @@ export interface HeatmapCellRisk {
   treatmentStatus: string;
   assessmentTitle: string;
   aiSystemName: string;
+  velocity?: {
+    inherentChange: number;
+    residualChange: number;
+    trend: 'improving' | 'worsening' | 'stable';
+    periodDays: number;
+  };
 }
 
 // Sankey Diagram Types
