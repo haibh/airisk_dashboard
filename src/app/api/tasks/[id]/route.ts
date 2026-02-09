@@ -145,10 +145,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (description !== undefined) updateData.description = description;
     if (status !== undefined) {
       updateData.status = status;
-      // Set completedAt when status is COMPLETED
       if (status === TaskStatus.COMPLETED) {
         updateData.completedAt = new Date();
-      } else {
+      } else if (task.status === TaskStatus.COMPLETED) {
+        // Only clear completedAt when transitioning away from COMPLETED
         updateData.completedAt = null;
       }
     }

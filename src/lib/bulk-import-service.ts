@@ -48,6 +48,8 @@ const aiSystemImportSchema = z.object({
 
 type AISystemImportInput = z.infer<typeof aiSystemImportSchema>;
 
+const MAX_IMPORT_ROWS = 10000;
+
 /**
  * Parse Excel file from buffer
  */
@@ -56,6 +58,11 @@ export async function parseExcelFile(buffer: Buffer): Promise<Record<string, unk
   await workbook.xlsx.load(buffer as any);
   const sheet = workbook.worksheets[0];
   if (!sheet) throw new Error('No worksheet found in Excel file');
+
+  // Prevent memory exhaustion from very large files
+  if (sheet.rowCount > MAX_IMPORT_ROWS + 1) {
+    throw new Error(`Excel file exceeds maximum ${MAX_IMPORT_ROWS} data rows (found ${sheet.rowCount - 1})`);
+  }
 
   const headers: string[] = [];
   const rows: Record<string, unknown>[] = [];
@@ -92,6 +99,11 @@ export async function parseCsvFile(buffer: Buffer): Promise<Record<string, unkno
 
   if (lines.length < 2) {
     throw new Error('CSV must have header row and at least one data row');
+  }
+
+  // Prevent memory exhaustion from very large files
+  if (lines.length > MAX_IMPORT_ROWS + 1) {
+    throw new Error(`CSV file exceeds maximum ${MAX_IMPORT_ROWS} data rows (found ${lines.length - 1})`);
   }
 
   const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
