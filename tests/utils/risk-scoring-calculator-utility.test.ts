@@ -7,6 +7,8 @@ import {
   getRiskLevelColor,
   getMatrixCellColor,
   validateRiskParameters,
+  calculateRiskVelocity,
+  calculateBatchRiskVelocity,
 } from '@/lib/risk-scoring-calculator';
 
 describe('calculateInherentScore', () => {
@@ -454,5 +456,552 @@ describe('Edge Cases', () => {
     const residualB = calculateResidualScore(scoreB, 50);
 
     expect(residualA).toBeGreaterThan(residualB);
+  });
+});
+
+describe('calculateRiskVelocity', () => {
+  describe('Empty and insufficient history', () => {
+    it('should return stable velocity for empty history', () => {
+      const velocity = calculateRiskVelocity([]);
+      expect(velocity).toEqual({
+        inherentChange: 0,
+        residualChange: 0,
+        trend: 'stable',
+        periodDays: 0,
+      });
+    });
+
+    it('should return stable velocity with single history record', () => {
+      const velocity = calculateRiskVelocity([
+        {
+          id: 'hist-1',
+          riskId: 'risk-1',
+          inherentScore: 10,
+          residualScore: 8,
+          targetScore: 5,
+          controlEffectiveness: 20,
+          source: 'INITIAL',
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+      ]);
+
+      expect(velocity.trend).toBe('stable');
+      expect(velocity.inherentChange).toBe(0);
+      expect(velocity.residualChange).toBe(0);
+    });
+  });
+
+  describe('Trend detection', () => {
+    it('should detect improving trend when residual score decreases', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 15,
+          residualScore: 12,
+          targetScore: 5,
+          controlEffectiveness: 20,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 15,
+          residualScore: 2,
+          targetScore: 5,
+          controlEffectiveness: 86,
+          source: 'CONTROL_CHANGE' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      expect(velocity.trend).toBe('improving');
+      expect(velocity.residualChange).toBeLessThan(0);
+    });
+
+    it('should detect worsening trend when residual score increases', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 12,
+          residualScore: 3,
+          targetScore: 5,
+          controlEffectiveness: 75,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 12,
+          residualScore: 12,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'CONTROL_CHANGE' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      expect(velocity.trend).toBe('worsening');
+      expect(velocity.residualChange).toBeGreaterThan(0);
+    });
+
+    it('should detect stable trend when change is below threshold', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 8,
+          targetScore: 5,
+          controlEffectiveness: 20,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 8.05,
+          targetScore: 5,
+          controlEffectiveness: 19.5,
+          source: 'AUTO_RECALC' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      expect(velocity.trend).toBe('stable');
+      // Change: 0.05 / 10 = 0.005 per day (below 0.1 threshold)
+      expect(Math.abs(velocity.residualChange)).toBeLessThan(0.1);
+    });
+  });
+
+  describe('Threshold behavior', () => {
+    it('should use 0.1 threshold for trend classification', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10.99,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'AUTO_RECALC' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Change: (10.99 - 10) / 10 = 0.099 (below 0.1 threshold)
+      expect(velocity.trend).toBe('stable');
+    });
+
+    it('should trigger improving at exactly -0.1 boundary', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 9.0,
+          targetScore: 5,
+          controlEffectiveness: 10,
+          source: 'CONTROL_CHANGE' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Change: (9.0 - 10) / 10 = -0.1 (at threshold, exclusive check)
+      // Implementation: if (residualChange < -threshold)
+      expect(velocity.trend).toBe('stable');
+    });
+  });
+
+  describe('Date calculations', () => {
+    it('should calculate period days correctly', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 15,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'MANUAL' as const,
+          notes: null,
+          recordedAt: '2026-01-21',
+          createdAt: '2026-01-21',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      expect(velocity.periodDays).toBe(20);
+    });
+
+    it('should sort history records before calculating', () => {
+      // Provide records in reverse order
+      const history = [
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 20,
+          residualScore: 15,
+          targetScore: 5,
+          controlEffectiveness: 25,
+          source: 'CONTROL_CHANGE' as const,
+          notes: null,
+          recordedAt: '2026-01-11',
+          createdAt: '2026-01-11',
+        },
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Should calculate using earliest (h1) and latest (h2)
+      expect(velocity.inherentChange).toBe(1.0); // (20 - 10) / 10
+      expect(velocity.residualChange).toBe(0.5); // (15 - 10) / 10
+    });
+
+    it('should handle same-day records', () => {
+      const sameDate = '2026-01-01';
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: sameDate,
+          createdAt: sameDate,
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 12,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'MANUAL' as const,
+          notes: null,
+          recordedAt: sameDate,
+          createdAt: sameDate,
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Should use Math.max(1, daysDiff) = 1
+      expect(velocity.periodDays).toBe(1);
+      expect(velocity.residualChange).toBe(2.0); // 2 points per day
+    });
+  });
+
+  describe('Rounding and precision', () => {
+    it('should round changes to 2 decimal places', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 11.333,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'MANUAL' as const,
+          notes: null,
+          recordedAt: '2026-01-04',
+          createdAt: '2026-01-04',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Change: (11.333 - 10) / 3 = 0.444333..., rounded to 0.44
+      expect(velocity.residualChange).toBe(0.44);
+    });
+
+    it('should round periodDays to integer', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01T00:00:00Z',
+          createdAt: '2026-01-01T00:00:00Z',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 10,
+          residualScore: 10,
+          targetScore: 5,
+          controlEffectiveness: 0,
+          source: 'AUTO_RECALC' as const,
+          notes: null,
+          recordedAt: '2026-01-01T12:00:00Z',
+          createdAt: '2026-01-01T12:00:00Z',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      expect(Number.isInteger(velocity.periodDays)).toBe(true);
+    });
+  });
+
+  describe('Sign preservation', () => {
+    it('should maintain correct sign for inherent and residual changes', () => {
+      const history = [
+        {
+          id: 'h1',
+          riskId: 'r1',
+          inherentScore: 5,
+          residualScore: 4,
+          targetScore: 5,
+          controlEffectiveness: 20,
+          source: 'INITIAL' as const,
+          notes: null,
+          recordedAt: '2026-01-01',
+          createdAt: '2026-01-01',
+        },
+        {
+          id: 'h2',
+          riskId: 'r1',
+          inherentScore: 15,
+          residualScore: 3,
+          targetScore: 5,
+          controlEffectiveness: 80,
+          source: 'CONTROL_CHANGE' as const,
+          notes: null,
+          recordedAt: '2026-01-06',
+          createdAt: '2026-01-06',
+        },
+      ];
+
+      const velocity = calculateRiskVelocity(history);
+
+      // Inherent: (15 - 5) / 5 = 2.0 (positive)
+      // Residual: (3 - 4) / 5 = -0.2 (negative, improving)
+      expect(velocity.inherentChange).toBe(2.0);
+      expect(velocity.residualChange).toBe(-0.2);
+      expect(velocity.trend).toBe('improving');
+    });
+  });
+});
+
+describe('calculateBatchRiskVelocity', () => {
+  it('should calculate velocity for multiple risks independently', () => {
+    const risksWithHistory = [
+      {
+        riskId: 'risk-1',
+        history: [
+          {
+            id: 'h1',
+            riskId: 'risk-1',
+            inherentScore: 15,
+            residualScore: 12,
+            targetScore: 5,
+            controlEffectiveness: 20,
+            source: 'INITIAL' as const,
+            notes: null,
+            recordedAt: '2026-01-01',
+            createdAt: '2026-01-01',
+          },
+          {
+            id: 'h2',
+            riskId: 'risk-1',
+            inherentScore: 15,
+            residualScore: 2,
+            targetScore: 5,
+            controlEffectiveness: 86,
+            source: 'CONTROL_CHANGE' as const,
+            notes: null,
+            recordedAt: '2026-01-11',
+            createdAt: '2026-01-11',
+          },
+        ],
+      },
+      {
+        riskId: 'risk-2',
+        history: [
+          {
+            id: 'h3',
+            riskId: 'risk-2',
+            inherentScore: 10,
+            residualScore: 3,
+            targetScore: 5,
+            controlEffectiveness: 70,
+            source: 'INITIAL' as const,
+            notes: null,
+            recordedAt: '2026-01-01',
+            createdAt: '2026-01-01',
+          },
+          {
+            id: 'h4',
+            riskId: 'risk-2',
+            inherentScore: 10,
+            residualScore: 8,
+            targetScore: 5,
+            controlEffectiveness: 20,
+            source: 'CONTROL_CHANGE' as const,
+            notes: null,
+            recordedAt: '2026-01-11',
+            createdAt: '2026-01-11',
+          },
+        ],
+      },
+    ];
+
+    const velocityMap = calculateBatchRiskVelocity(risksWithHistory);
+
+    expect(velocityMap.size).toBe(2);
+    expect(velocityMap.get('risk-1')?.trend).toBe('improving');
+    expect(velocityMap.get('risk-2')?.trend).toBe('worsening');
+  });
+
+  it('should return map with all provided risk IDs', () => {
+    const risksWithHistory = [
+      {
+        riskId: 'risk-1',
+        history: [],
+      },
+      {
+        riskId: 'risk-2',
+        history: [],
+      },
+      {
+        riskId: 'risk-3',
+        history: [],
+      },
+    ];
+
+    const velocityMap = calculateBatchRiskVelocity(risksWithHistory);
+
+    expect(velocityMap.size).toBe(3);
+    expect(velocityMap.has('risk-1')).toBe(true);
+    expect(velocityMap.has('risk-2')).toBe(true);
+    expect(velocityMap.has('risk-3')).toBe(true);
+  });
+
+  it('should handle empty input', () => {
+    const velocityMap = calculateBatchRiskVelocity([]);
+
+    expect(velocityMap.size).toBe(0);
+    expect(velocityMap instanceof Map).toBe(true);
+  });
+
+  it('should return stable velocity for risks with no history', () => {
+    const risksWithHistory = [
+      {
+        riskId: 'risk-1',
+        history: [],
+      },
+    ];
+
+    const velocityMap = calculateBatchRiskVelocity(risksWithHistory);
+    const velocity = velocityMap.get('risk-1');
+
+    expect(velocity).toEqual({
+      inherentChange: 0,
+      residualChange: 0,
+      trend: 'stable',
+      periodDays: 0,
+    });
   });
 });

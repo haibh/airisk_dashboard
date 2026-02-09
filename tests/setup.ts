@@ -191,6 +191,15 @@ const createPrismaMock = () => ({
     delete: vi.fn(),
     count: vi.fn(),
   },
+  riskScoreHistory: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+  },
   $transaction: vi.fn((callback) => callback(createPrismaMock())),
   $connect: vi.fn(),
   $disconnect: vi.fn(),
@@ -267,6 +276,17 @@ vi.mock('@/lib/notification-service', () => ({
 // Mock webhook-event-dispatcher to prevent side effects in tests
 vi.mock('@/lib/webhook-event-dispatcher', () => ({
   emitWebhookEvent: vi.fn(async () => {}),
+}));
+
+// Mock risk-velocity-batch-calculator
+vi.mock('@/lib/risk-velocity-batch-calculator', () => ({
+  calculateBatchVelocity: vi.fn(async () => new Map()),
+  calculateSingleVelocity: vi.fn(async () => ({
+    inherentChange: 0,
+    residualChange: 0,
+    trend: 'stable',
+    periodDays: 0,
+  })),
 }));
 
 // Export mocks for use in tests
