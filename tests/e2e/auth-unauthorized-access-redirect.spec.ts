@@ -11,8 +11,8 @@ test.describe('Authentication - Unauthorized Access Redirect', () => {
     // Try to access dashboard directly with extended timeout
     await page.goto('/en/dashboard', { waitUntil: 'domcontentloaded', timeout: 45000 });
 
-    // Wait for potential redirect
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    // Wait for redirect to complete — login form appears
+    await page.waitForSelector('input[id="email"]', { timeout: 30000 });
 
     // Verify redirect to login page
     expect(page.url()).toContain('/en/login');
@@ -27,8 +27,8 @@ test.describe('Authentication - Unauthorized Access Redirect', () => {
     // Attempt direct dashboard navigation with extended timeout
     await page.goto('/en/dashboard', { waitUntil: 'domcontentloaded', timeout: 45000 });
 
-    // Wait for potential redirect
-    await page.waitForLoadState('networkidle', { timeout: 15000 });
+    // Wait for redirect to complete — login form appears
+    await page.waitForSelector('input[id="email"]', { timeout: 30000 });
 
     // Should be redirected to login
     expect(page.url()).toContain('/en/login');
