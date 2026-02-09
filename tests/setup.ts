@@ -236,6 +236,36 @@ const createPrismaMock = () => ({
     delete: vi.fn(),
     count: vi.fn(),
   },
+  activeSession: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    updateMany: vi.fn(),
+    delete: vi.fn(),
+    deleteMany: vi.fn(),
+    count: vi.fn(),
+  },
+  iPAllowlistEntry: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+  },
+  sSOConnection: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    upsert: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+  },
   $transaction: vi.fn((callback) => callback(createPrismaMock())),
   $connect: vi.fn(),
   $disconnect: vi.fn(),
@@ -341,6 +371,53 @@ vi.mock('@/lib/organization-storage-quota-service', () => ({
   })),
   checkQuota: vi.fn(async () => ({ allowed: true, remaining: 5368709120 })),
   updateUsage: vi.fn(async () => {}),
+}));
+
+// Mock active-session-tracker-service
+vi.mock('@/lib/active-session-tracker-service', () => ({
+  createSession: vi.fn(async () => 'mock-session-id-123'),
+  revokeSession: vi.fn(async () => {}),
+  revokeAllUserSessions: vi.fn(async () => 2),
+  getActiveSessions: vi.fn(async () => ({ sessions: [], total: 0 })),
+  getUserSessions: vi.fn(async () => []),
+  isSessionValid: vi.fn(async () => true),
+  updateLastActivity: vi.fn(async () => {}),
+  cleanupExpiredSessions: vi.fn(async () => 0),
+}));
+
+// Mock ip-allowlist-checker-service
+vi.mock('@/lib/ip-allowlist-checker-service', () => ({
+  isIPAllowed: vi.fn(async () => true),
+  isValidCIDR: vi.fn(() => true),
+  invalidateAllowlistCache: vi.fn(),
+}));
+
+// Mock saml-jackson-service
+vi.mock('@/lib/saml-jackson-service', () => ({
+  getJacksonInstance: vi.fn(async () => ({})),
+  getSAMLController: vi.fn(async () => ({
+    samlResponse: vi.fn(async () => ({ email: 'test@example.com', id: 'saml-id' })),
+  })),
+  getSCIMController: vi.fn(async () => ({})),
+  getConnectionAPIController: vi.fn(async () => ({
+    createSAMLConnection: vi.fn(async () => ({})),
+    getSAMLConnections: vi.fn(async () => []),
+    deleteSAMLConnection: vi.fn(async () => {}),
+  })),
+}));
+
+// Mock sso-jit-provisioning-service
+vi.mock('@/lib/sso-jit-provisioning-service', () => ({
+  jitProvisionUser: vi.fn(async () => ({
+    userId: 'user-1',
+    user: { email: 'test@example.com' },
+    isNewUser: false,
+  })),
+}));
+
+// Mock audit-log-export-csv-generator
+vi.mock('@/lib/audit-log-export-csv-generator', () => ({
+  generateAuditLogCSV: vi.fn(async () => Buffer.from('Date,User,Action\n2026-01-01,admin,LOGIN')),
 }));
 
 // Mock storage-service
