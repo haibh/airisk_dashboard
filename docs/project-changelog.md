@@ -1,10 +1,63 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-06 | **Current Version:** 2.0.0 (MVP4.5)
+**Last Updated:** 2026-02-09 | **Current Version:** 2.0.0 (MVP4.5)
 
 ---
 
 ## Version History
+
+### 2.0.1 — Risk Visualization Enhancement (2026-02-08)
+
+#### Risk Visualization Enhancement - Phases 4-6
+**Date:** 2026-02-08
+**Impact:** Advanced risk analytics with trajectory tracking, drill-down, and velocity indicators
+
+**Features Delivered:**
+
+**Phase 4: Risk Velocity Indicators**
+- Batch velocity calculator with 30-day lookback window
+- Compact velocity badges (↑ increasing, → stable, ↓ decreasing)
+- API endpoint `/api/risks?includeVelocity=true` for velocity data
+- Integration into risk heatmap drill-down modal
+- Z-score normalization for trend classification
+
+**Phase 5: Control-Risk Sankey Diagram**
+- Full-width Sankey visualization in Detailed Analytics view
+- Control → Risk mitigation flow visualization
+- Link thickness proportional to number of risk-control mappings
+- Interactive nodes with risk details on hover
+- Responsive design for mobile and desktop
+
+**Phase 6: AI Model Risk Radar Chart**
+- 6-axis radar chart for AI model risk profiles
+- Axes: Bias, Privacy, Security, Reliability, Transparency, Accountability
+- Score range 0-100 per dimension
+- Aggregation across all risks per AI system
+- Integration into AI Risk View panel
+
+**New Components:**
+- `risk-velocity-compact-indicator.tsx` — Velocity badge component
+- `risk-velocity-batch-calculator.ts` — Batch calculator utility (supports up to 50 risks)
+
+**API Enhancements:**
+- `/api/risks` — Optional `includeVelocity=true` parameter
+- Batch velocity calculation for performance optimization
+- Supports filtering by organizationId, aiSystemId, category, level
+
+**Infrastructure:**
+- 285 new tests added (375 → 660 total)
+- Coverage expanded across API routes, utilities, and components
+- All tests passing (100%)
+
+**Test Coverage Expansion:**
+- **New test files (Feb 8):** risk-velocity-batch-calculator, risk-history-endpoint, heatmap-cell-endpoint, risks-endpoint, ai-systems-detail, assessments-detail, risks-detail, frameworks-detail, reports, cache-advanced, logger, utils
+- **Total tests:** 660/660 passing (100%)
+- **Coverage:** Stmts 29.7%, Branches 30.48%, Functions 24.88%, Lines 30.36%
+
+**Build Status:** Production-ready
+**TypeScript:** 0 errors
+
+---
 
 ### 2.0.0 — Dashboard Features & UI/UX Upgrade (2026-02-06)
 
@@ -796,9 +849,9 @@ See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
 
 ---
 
-**Document Version:** 2.2
-**Last Updated:** 2026-02-05 (Phase 15 Security Hardening - In Progress)
+**Document Version:** 2.3
+**Last Updated:** 2026-02-09 (Risk Visualization + Test Expansion)
 **Maintained By:** docs-manager agent
-**Total Commits:** 52+ since project start
-**Total Tests:** 262 (100% passing)
-**Production Ready:** In Progress (Phase 15 security fixes underway)
+**Total Commits:** 54+ since project start
+**Total Tests:** 660 (100% passing)
+**Production Ready:** ✅ Ready

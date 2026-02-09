@@ -1,6 +1,6 @@
 # AIRisk Dashboard - Development Roadmap
 
-**Version:** 2.1 | **Date:** 2026-02-04 | **Last Updated:** Framework UI grouping + SCF v2025.4
+**Version:** 2.5 | **Date:** 2026-02-04 | **Last Updated:** 2026-02-09 (Risk Visualization + Test Expansion)
 
 ---
 
@@ -200,12 +200,31 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 
 ---
 
+### Risk Visualization Enhancement (COMPLETE)
+**Status:** ✅ Delivered | **Timeline:** 2026-02-08
+**Progress:** 100% (6 phases implemented)
+
+**Enhancements Delivered:**
+1. ✅ Database & Data Layer — RiskScoreHistory model for tracking score changes
+2. ✅ Risk Trajectory Timeline — Recharts timeline with selectable date range
+3. ✅ Heatmap Drill-down — Clickable cells, modal with risk list and details
+4. ✅ Risk Velocity Indicators — Batch calculator, compact badges (↑↓→ trends)
+5. ✅ Control-Risk Sankey — Full-width Sankey in Detailed Analytics view
+6. ✅ AI Model Risk Radar — 6-axis radar chart in AI Risk View panel
+
+**New Components:** risk-velocity-compact-indicator, risk-velocity-batch-calculator
+**New API:** /api/risks with optional velocity calculation
+**Integration:** Heatmap drill-down modal shows velocity badges per risk
+
+---
+
 ## Current Status Summary
 
 **Completed Features:** 87/87 (100%)
 - ✅ All MVP1-4 requirements
 - ✅ Phase 15 security hardening (XSS & CSV injection prevention)
 - ✅ Phase 21: Dashboard Features & UI/UX Upgrade (9 advanced features)
+- ✅ Risk Visualization Enhancement (velocity, Sankey, radar, drill-down)
 - ✅ Multi-tenant architecture with API keys & webhooks
 - ✅ Enterprise audit logging & notifications
 - ✅ Risk Supply Chain Mapping with React Flow
@@ -222,7 +241,7 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 - ✅ Landing page content sections
 - ✅ 23 compliance frameworks with 1,323 controls
 
-**Test Coverage:** 375/375 tests passing (100%)
+**Test Coverage:** 660/660 tests passing (100%)
 **Type Safety:** 100% (strict mode, zero `any`)
 **Build Status:** ✅ Production-ready
 
@@ -316,17 +335,17 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 ## Known Issues Tracker
 
 ### Critical (Blocking Production - Phase 15)
-- [ ] Fix console.error in auth route
-- [ ] Add auth to framework controls endpoint
-- [ ] Fix rate limit header bug
-- [ ] Fix middleware path matching
+- [x] Fix console.error in auth route ✅ Fixed (Phase 15)
+- [x] Add auth to framework controls endpoint ✅ Fixed (Phase 15)
+- [x] Fix rate limit header bug ✅ Fixed (Phase 15)
+- [x] Fix middleware path matching ✅ Fixed (Phase 15)
 
 ### High Priority (Before Next Release - Phase 15)
-- [ ] Add XSS sanitization
-- [ ] Implement stricter login rate limiting
-- [ ] Wrap token verification in try-catch
-- [ ] Add password complexity
-- [ ] Configure Prisma connection pool
+- [x] Add XSS sanitization ✅ Fixed (Phase 15)
+- [x] Implement stricter login rate limiting ✅ Fixed (Phase 15)
+- [x] Wrap token verification in try-catch ✅ Fixed (Phase 15)
+- [x] Add password complexity ✅ Fixed (Phase 15)
+- [x] Configure Prisma connection pool ✅ Fixed (Phase 15)
 
 ### Medium Priority (Phase 16-17)
 - [ ] Add CORS configuration
@@ -487,15 +506,15 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 ## Success Metrics
 
 ### MVP4 (Current Status)
-- ✅ Test coverage: 262/262 passing (100%)
+- ✅ Test coverage: 660/660 passing (100%)
 - ✅ Type safety: 100% (strict mode)
 - ✅ Build status: Production-ready
 - ✅ Accessibility: WCAG 2.1 AA compliant
 - ✅ Documentation: Complete for all modules
-- ⚠️ Security: 15 issues identified, 4 critical
+- ✅ Security: All critical issues resolved (Phase 15)
 
 ### MVP5 Targets
-- 300+ tests passing
+- 700+ tests passing
 - <400KB bundle size gzip
 - <200ms P95 API response
 - Zero critical security issues
@@ -531,13 +550,15 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 | Widget System (Phase 14.5) | 2026-02-06 | ✅ Complete |
 | Security Hardening (Phase 15) | 2026-02-06 | ✅ Complete |
 | Dashboard Features & UI/UX (Phase 21) | 2026-02-06 | ✅ Complete |
+| Risk Visualization Enhancement | 2026-02-08 | ✅ Complete |
+| Test Coverage 660 Tests | 2026-02-08 | ✅ Complete |
 | MVP5 Beta (File Storage - Phase 16) | 2026-03-01 | 📋 Planned |
 | Production Release | 2026-03-15 | 📋 Planned |
 | Enterprise Features (MVP6 - Phase 18) | 2026-04-30 | 📋 Planned |
 
 ---
 
-**Document Version:** 2.4
-**Last Updated:** 2026-02-06 (Phase 21 Complete - Dashboard Features & UI/UX Upgrade)
+**Document Version:** 2.5
+**Last Updated:** 2026-02-09 (Risk Visualization + Test Expansion)
 **Maintained By:** docs-manager agent
 **Next Review:** 2026-03-01 (MVP5 File Storage Phase)
