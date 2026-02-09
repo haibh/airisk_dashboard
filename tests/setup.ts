@@ -218,6 +218,24 @@ const createPrismaMock = () => ({
     delete: vi.fn(),
     count: vi.fn(),
   },
+  taskComment: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+  },
+  reportTemplate: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+  },
   $transaction: vi.fn((callback) => callback(createPrismaMock())),
   $connect: vi.fn(),
   $disconnect: vi.fn(),
@@ -323,6 +341,22 @@ vi.mock('@/lib/organization-storage-quota-service', () => ({
   })),
   checkQuota: vi.fn(async () => ({ allowed: true, remaining: 5368709120 })),
   updateUsage: vi.fn(async () => {}),
+}));
+
+// Mock storage-service
+vi.mock('@/lib/storage-service', () => ({
+  uploadFile: vi.fn(async () => ({
+    url: 'https://storage.example.com/test-file.pdf',
+    key: 'evidence/test-file.pdf',
+  })),
+  validateFile: vi.fn((filename: string, size: number, mimetype: string) => ({
+    valid: true,
+    error: null,
+  })),
+  calculateSha256: vi.fn(() => 'abc123def456'),
+  deleteFile: vi.fn(async () => {}),
+  getFileUrl: vi.fn((key: string) => `https://storage.example.com/${key}`),
+  getSignedUrl: vi.fn(async (key: string) => `https://storage.example.com/signed/${key}`),
 }));
 
 // Export mocks for use in tests

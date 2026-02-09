@@ -1,10 +1,11 @@
 # AIRisk Dashboard - Codebase Summary
 
-**Generated:** 2026-02-06
-**Codebase Status:** MVP4.5 Phase 15 (Dashboard Widgets & Security Hardening) + Phase 21 (Dashboard Features & UI/UX Upgrade) - Complete
-**Total Files:** 350+ files (including tests, migrations, seeds)
-**Total Lines:** ~65,000+ lines of TypeScript/TSX/SQL
-**Codebase Size:** 480,000+ tokens, 1,900,000+ chars
+**Generated:** 2026-02-09
+**Codebase Status:** MVP5 Complete - Phases 16-18 Backend Implementation
+**Total Files:** 380+ files (including tests, migrations, seeds)
+**Total Lines:** ~68,000+ lines of TypeScript/TSX/SQL
+**Codebase Size:** 520,000+ tokens, 2,050,000+ chars
+**Latest Additions:** Phase 16 (evidence versioning, virus scanning, quotas), Phase 17 (reports, email, cron), Phase 18 (bulk import, task management)
 
 ---
 
@@ -106,7 +107,7 @@ AIRisk_Dashboard/
 │   │   ├── audit-log/          # Audit log viewer with filters
 │   │   ├── search/             # Global multi-entity search
 │   │   └── providers/          # NextAuth, Theme providers
-│   ├── lib/                    # 28 files, 6.2K LOC
+│   ├── lib/                    # 35 files, 8.7K LOC (+ Phase 16-18 modules)
 │   │   ├── auth-helpers.ts     # RBAC, role checking, hasMinimumRole()
 │   │   ├── db.ts               # Prisma client initialization
 │   │   ├── risk-scoring-calculator.ts # Inherent/residual risk math
@@ -125,6 +126,14 @@ AIRisk_Dashboard/
 │   │   ├── global-search-service.ts # Multi-entity search
 │   │   ├── import-parser.ts    # CSV/Excel import
 │   │   ├── export-generator.ts # CSV/Excel export with streaming
+│   │   ├── email-service.ts    # SMTP email with templates (NEW Phase 17)
+│   │   ├── virus-scanner.ts    # ClamAV integration (NEW Phase 16)
+│   │   ├── storage-quota-service.ts # Quota enforcement (NEW Phase 16)
+│   │   ├── evidence-version-service.ts # Version tracking (NEW Phase 16)
+│   │   ├── bulk-upload-service.ts # Batch processing (NEW Phase 16)
+│   │   ├── excel-report-generator.ts # Multi-sheet workbooks (NEW Phase 17)
+│   │   ├── pdf-report-generator.ts # HTML-to-PDF (NEW Phase 17)
+│   │   ├── file-report-manager.ts # S3 file lifecycle (NEW Phase 17)
 │   │   └── utils.ts            # General utilities
 │   ├── store/                  # Zustand state management
 │   ├── types/                  # TypeScript type definitions
@@ -877,9 +886,9 @@ All API endpoints follow this response format:
 
 ## Database Schema Overview
 
-### 36 Core Models + 15 Enums
+### 42 Core Models + 15 Enums (Phases 1-18)
 
-**Core Models (1-22):**
+**Core Models (1-22) — MVP1-4:**
 1. **Organization** - Root tenant
 2. **User** - System users (5 roles, active/inactive, lastLoginAt)
 3. **Account** - OAuth provider accounts
@@ -903,24 +912,27 @@ All API endpoints follow this response format:
 21. **APIKey** - API keys (SHA-256 hashed, permissions)
 22. **Webhook** - Webhook endpoints (SSRF protected)
 
-**Enterprise Features (23-36 - Phase 21):**
-23. **WebhookDelivery** - Delivery logs with retry tracking
-24. **Notification** - User notifications (7 types)
-25. **Vendor** - Vendor registry for supply chain
-26. **VendorRiskPath** - Risk propagation paths
-27. **RegulatoryChange** - Regulatory change events
-28. **FrameworkChange** - Framework version changes
-29. **ChangeImpact** - Impact assessment on controls
-30. **BenchmarkSnapshot** - Point-in-time org metrics
-31. **BenchmarkResult** - Anonymized peer comparison
-32. **RiskCostProfile** - Cost parameters per risk
-33. **MitigationInvestment** - Mitigation cost tracking
-34. **ROSICalculation** - ROSI metrics and scenarios
-35. **InsightTemplate** - Narrative insight templates
-36. **GeneratedInsight** - AI-generated insights
-37. **AnomalyEvent** - Z-score anomalies
-38. **DashboardLayout** - User layout preferences
-39. **ComplianceChain** - Requirement→Control→Evidence chain
+**Enterprise Features (23-42) — Phases 12-18:**
+23. **WebhookDelivery** - Delivery logs with retry tracking (Phase 12)
+24. **Notification** - User notifications (7 types) (Phase 13)
+25. **Vendor** - Vendor registry for supply chain (Phase 21)
+26. **VendorRiskPath** - Risk propagation paths (Phase 21)
+27. **RegulatoryChange** - Regulatory change events (Phase 21)
+28. **FrameworkChange** - Framework version changes (Phase 21)
+29. **ChangeImpact** - Impact assessment on controls (Phase 21)
+30. **BenchmarkSnapshot** - Point-in-time org metrics (Phase 21)
+31. **BenchmarkResult** - Anonymized peer comparison (Phase 21)
+32. **RiskCostProfile** - Cost parameters per risk (Phase 21)
+33. **MitigationInvestment** - Mitigation cost tracking (Phase 21)
+34. **ROSICalculation** - ROSI metrics and scenarios (Phase 21)
+35. **InsightTemplate** - Narrative insight templates (Phase 21)
+36. **GeneratedInsight** - AI-generated insights (Phase 21)
+37. **AnomalyEvent** - Z-score anomalies (Phase 21)
+38. **DashboardLayout** - User layout preferences (Phase 21)
+39. **ComplianceChain** - Requirement→Control→Evidence chain (Phase 21)
+40. **EvidenceVersion** - Evidence versioning with checksums (Phase 16)
+41. **ReportTemplate** - Custom report templates (Phase 17)
+42. **ImportJob** - Bulk import tracking and status (Phase 18)
 
 **Enums (15):**
 UserRole, AISystemType, DataClassification, LifecycleStatus, AssessmentStatus, RiskCategory, TreatmentStatus, TaskPriority, TaskStatus, EvidenceStatus, NotificationType, RiskLevel, VendorRiskLevel, InsightCategory, ComplianceChainType
@@ -1019,11 +1031,17 @@ npm run analyze             # Analyze bundle size
 
 ## Feature Completeness Summary
 
-**MVP4.5 Completed (Phases 1-15 + 21):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 375 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering, **Phase 21 New Features:** risk supply chain mapping (React Flow vendor graph), regulatory change tracker (timeline + impact assessment), peer benchmarking (differential privacy + anonymized comparison), ROI calculator (ALE/ROSI formulas), remediation burndown charts (Recharts), framework control overlap (Sankey + matrix), bento grid layouts (3 presets with customization), data storytelling (anomaly detection + narrative insights), compliance chain graph (requirement→control→evidence visualization).
+**MVP5 Complete (Phases 1-18 + 21):**
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 660 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering,
 
-**MVP5+ Planned:**
-S3/Blob file storage, scheduled reports, SSO/SAML integration, mobile app, advanced SIEM integrations.
+**Phase 21 Features:** risk supply chain mapping (React Flow vendor graph), regulatory change tracker (timeline + impact assessment), peer benchmarking (differential privacy + anonymized comparison), ROI calculator (ALE/ROSI formulas), remediation burndown charts (Recharts), framework control overlap (Sankey + matrix), bento grid layouts (3 presets with customization), data storytelling (anomaly detection + narrative insights), compliance chain graph (requirement→control→evidence visualization),
+
+**Phase 16-18 Features:** Evidence file versioning (SHA-256 checksums), virus scanning (ClamAV), storage quota management (org-level), bulk file upload, SMTP email service, scheduled report generation (PDF/Excel), Handlebars/Markdown templates, cron job management, recurring assessments, report file lifecycle management, bulk import service (CSV/Excel with Zod validation), task management CRUD, task comments and discussion threads, conflict detection and resolution, import job tracking with progress monitoring.
+
+**Infrastructure:** 42 database models, 15 enums, 35 lib modules, 50+ API endpoints, 660 unit tests, 28+ E2E tests, 100% TypeScript strict mode, production-ready build.
+
+**MVP6+ Planned:**
+Enterprise SSO/SAML integration, mobile app, real-time collaboration, advanced SIEM analytics, machine learning anomaly detection, multi-region deployment.
 
 ---
 
@@ -1100,5 +1118,5 @@ S3/Blob file storage, scheduled reports, SSO/SAML integration, mobile app, advan
 ---
 
 **Codebase Summary Generated:** 2026-02-06
-**Last Updated:** 2026-02-06 (Phase 21: Dashboard Features & UI/UX Upgrade + Phase 15: Security Hardening Complete)
+**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend Implementation)
 **Maintained By:** docs-manager agent

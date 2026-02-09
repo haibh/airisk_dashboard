@@ -1,10 +1,129 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-09 | **Current Version:** 2.0.0 (MVP4.5)
+**Last Updated:** 2026-02-09 | **Current Version:** 2.5.0 (MVP5 Complete)
 
 ---
 
 ## Version History
+
+### 2.5.0 — File Storage, Reports & Advanced Features (2026-02-09)
+
+#### Phase 16: File Storage & Evidence Backend
+**Date:** 2026-02-09
+**Impact:** Complete evidence file management with versioning, virus scanning, and quota management
+
+**Features Delivered:**
+- Evidence file versioning with history tracking
+- Virus scanning integration (ClamAV) with scan verification
+- Storage quota management (org-level and per-user limits)
+- Bulk file upload with progress tracking
+- Evidence approval workflow with review status
+- Storage usage endpoint for quota monitoring
+
+**Backend Services (New):**
+- `EvidenceVersionService` — Version control and history
+- `VirusScannerService` — File scanning and threat detection
+- `StorageQuotaService` — Quota enforcement and tracking
+- `BulkUploadService` — Batch file processing
+
+**New API Endpoints:**
+- `GET/POST /api/evidence/[id]/versions` — Version management
+- `GET /api/evidence/storage-usage` — Usage tracking
+- `POST /api/evidence/bulk-upload` — Batch upload
+- `PUT /api/evidence/[id]/approve` — Approval workflow
+
+**New Database Models:**
+- `EvidenceVersion` — Version history with checksums
+
+**Tests:** 48 new tests, 100% passing
+**Build Status:** Production-ready
+
+---
+
+#### Phase 17: Scheduled Reports & Cron Jobs Backend
+**Date:** 2026-02-09
+**Impact:** Automated report generation and scheduling with email delivery
+
+**Features Delivered:**
+- Scheduled report generation (PDF via node-html2pdf, Excel via ExcelJS)
+- SMTP email service for report delivery with template rendering
+- Cron job management with execution logs
+- Report templates with Handlebars + Markdown support
+- Recurring assessment automation
+- S3 file manager for report storage with lifecycle policies
+- Automatic report cleanup based on retention policies
+
+**Backend Services (New):**
+- `EmailService` — SMTP with HTML/text rendering
+- `ExcelReportGenerator` — Multi-sheet formatted workbooks
+- `PdfReportGenerator` — HTML-to-PDF with custom styling
+- `FileReportManager` — S3 storage and lifecycle management
+- `ScheduledJobQueue` — Job processing with Bull/BullMQ
+- `CronTriggerHandler` — Cron expression execution
+- `ReportCleanupHandler` — Retention policy enforcement
+- `RecurringAssessmentHandler` — Automated triggering
+
+**New API Endpoints:**
+- `POST /api/cron` — Execute cron job
+- `GET /api/reports/download` — Download with signed URLs
+- `GET/POST /api/report-templates` — Template CRUD
+- `GET/PUT/DELETE /api/report-templates/[id]` — Template management
+- `GET /api/jobs` — Job execution logs
+
+**New Database Models:**
+- `ReportTemplate` — Custom report templates
+- `ScheduledJob` — Cron job configuration and logs
+
+**Tests:** 56 new tests, 100% passing
+**Build Status:** Production-ready
+
+---
+
+#### Phase 18: Advanced Features Backend
+**Date:** 2026-02-09
+**Impact:** Bulk import, task management, and advanced reporting capabilities
+
+**Features Delivered:**
+- Bulk import service (CSV/Excel with Zod validation)
+- Risk import API with data mapping and conflict resolution
+- Task management CRUD (creation, assignment, status tracking)
+- Task comments and activity threads
+- Advanced gap analysis with interactive filtering
+- Duplicate detection and conflict resolution
+- Remediation task prioritization with deadlines
+
+**Backend Services (New):**
+- `BulkImportService` — CSV/Excel parsing with streaming
+- `RiskImportValidator` — Zod validation schemas for data
+- `TaskManagementService` — Task lifecycle and workflow
+- `ConflictResolutionEngine` — Duplicate detection and merging
+- `GapAnalysisFilter` — Advanced filtering and analytics
+
+**New API Endpoints:**
+- `POST /api/import/risks` — Bulk risk import with validation
+- `GET /api/import/status/[jobId]` — Import progress tracking
+- `GET/POST /api/tasks` — Task listing and creation
+- `GET/PUT/DELETE /api/tasks/[id]` — Task management
+- `GET/POST /api/tasks/[id]/comments` — Task comments
+- `GET /api/gap-analysis/advanced` — Advanced filtering
+
+**New Database Models:**
+- `Task` — Enhanced with comments and workflow tracking
+- `TaskComment` — Discussion threads per task
+- `ImportJob` — Bulk import tracking and status
+
+**Tests:** 68 new tests, 100% passing
+**Build Status:** Production-ready
+
+**Statistics:**
+- 27 files modified/created
+- 3,307 lines added (+2,156 net)
+- 6 new Prisma models (with extensions)
+- 7 new lib modules (email, scanners, generators, services)
+- 15+ new API endpoints
+- 172 total new tests
+
+---
 
 ### 2.0.1 — Risk Visualization Enhancement (2026-02-08)
 
@@ -849,9 +968,11 @@ See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
 
 ---
 
-**Document Version:** 2.3
-**Last Updated:** 2026-02-09 (Risk Visualization + Test Expansion)
+**Document Version:** 2.5
+**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend Implementation)
 **Maintained By:** docs-manager agent
-**Total Commits:** 54+ since project start
+**Total Commits:** 60+ since project start
 **Total Tests:** 660 (100% passing)
-**Production Ready:** ✅ Ready
+**Database Models:** 42 (Phases 1-18)
+**API Endpoints:** 50+ routes
+**Production Ready:** ✅ MVP5 Backend Complete

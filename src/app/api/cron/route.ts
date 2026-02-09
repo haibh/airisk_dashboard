@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { processScheduledJobs } from '@/lib/scheduled-job-runner';
 import { logger } from '@/lib/logger';
 
@@ -23,7 +24,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    const expected = `Bearer ${cronSecret}`;
+    const provided = authHeader || '';
+    const isValid =
+      expected.length === provided.length &&
+      timingSafeEqual(Buffer.from(expected), Buffer.from(provided));
+
+    if (!isValid) {
       logger.warn('Unauthorized cron request attempt', {
         data: {
           ip: request.headers.get('x-forwarded-for') || 'unknown',

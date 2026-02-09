@@ -95,7 +95,7 @@ Validation: Zod 4.3 (input schemas, API validation)
 ├── /risks/[id]/               # Risk operations
 ├── /frameworks/               # Get frameworks + controls + mappings
 ├── /dashboard/                # /stats, /risk-heatmap, /compliance, /activity
-├── /reports/                  # /risk-register, /assessment-summary, /compliance
+├── /reports/                  # /risk-register, /assessment-summary, /compliance (Phase 21)
 ├── /organizations/            # GET, PUT org profile
 ├── /users/                    # CRUD users with pagination
 ├── /invitations/              # CRUD invitations + /[id]/accept (public)
@@ -103,10 +103,22 @@ Validation: Zod 4.3 (input schemas, API validation)
 ├── /webhooks/                 # CRUD webhooks + /[id]/test + /[id]/deliveries
 ├── /notifications/            # GET list + /unread-count + /mark-read
 ├── /audit-logs/               # GET paginated + filters + /export (CSV)
-├── /supply-chain/             # NEW Phase 21: /vendors (CRUD), /risk-paths
-├── /regulatory/               # NEW Phase 21: /changes (CRUD), /impacts
-├── /benchmarking/             # NEW Phase 21: /snapshots (CRUD), /comparison, /percentiles
-└── /roi/                      # NEW Phase 21: POST /calculate, /scenarios (CRUD)
+├── /evidence/                 # File operations
+│   ├── /[id]/versions         # NEW Phase 16: GET version history, POST new version
+│   └── /storage-usage         # NEW Phase 16: GET org quota and usage
+├── /cron/                     # NEW Phase 17: POST trigger job execution
+├── /report-templates/         # NEW Phase 17: GET/POST templates, /[id] GET/PUT/DELETE
+├── /import/                   # NEW Phase 18: Bulk operations
+│   ├── /risks                 # POST bulk import with validation
+│   └── /status/[jobId]        # GET import progress
+├── /tasks/                    # NEW Phase 18: Task management
+│   ├── /                      # GET list, POST create
+│   ├── /[id]                  # GET, PUT, DELETE
+│   └── /[id]/comments         # GET list, POST comment
+├── /supply-chain/             # Phase 21: /vendors (CRUD), /risk-paths
+├── /regulatory/               # Phase 21: /changes (CRUD), /impacts
+├── /benchmarking/             # Phase 21: /snapshots (CRUD), /comparison, /percentiles
+└── /roi/                      # Phase 21: POST /calculate, /scenarios (CRUD)
 ```
 
 **Standards:**
@@ -141,7 +153,12 @@ Validation: Zod 4.3 (input schemas, API validation)
 | **WebhookDelivery** | Delivery logs (status: PENDING/SUCCESS/FAILED, response code, retry count) |
 | **Notification** | User notifications (7 types: ASSESSMENT_APPROVED, RISK_ESCALATED, etc.) |
 | **SavedFilter** | Per-user dashboard filters (search, sort, date range) |
-| **ScheduledJob** | Cron-based tasks (execution logs, retry tracking) |
+| **ScheduledJob** | Cron-based tasks (execution logs, retry tracking) (Phase 17) |
+| **EvidenceVersion** | Evidence file versions with history tracking and checksums (Phase 16) |
+| **ReportTemplate** | Custom report templates with Handlebars/Markdown (Phase 17) |
+| **Task** | Remediation tasks (assignment, status, deadlines) (Phase 18) |
+| **TaskComment** | Task discussion threads and activity tracking (Phase 18) |
+| **ImportJob** | Bulk import tracking with progress and error logs (Phase 18) |
 | **Vendor** | Vendor registry with risk profiles (Phase 21) |
 | **VendorRiskPath** | Risk propagation paths through supply chain (Phase 21) |
 | **RegulatoryChange** | Regulatory change events with effective dates (Phase 21) |
@@ -706,12 +723,137 @@ Response: { database: ok, redis: ok, application: ok }
 
 ---
 
-## Future Roadmap
+## MVP5 Backend Implementation (Phases 16-18)
 
-**MVP5 (Phase 22):** File storage integration (S3/Blob), evidence file versioning, storage quota management
-**MVP6 (Phase 23):** Scheduled reports & cron jobs, email delivery, report templates
-**MVP7+ (Phase 24+):** Mobile app, real-time collaboration, SSO/SAML integrations, advanced SIEM analytics
+### Phase 16: File Storage & Evidence
+**Status:** ✅ Complete | **Date:** 2026-02-09
+
+**Architecture:**
+```
+Evidence Files
+    ↓
+Virus Scanner (ClamAV)
+    ↓
+S3/Blob Storage
+    ↓
+EvidenceVersion Tracking
+    ↓
+Storage Quota Management
+
+Components:
+├─ VirusScannerService — Scan with threat detection
+├─ StorageQuotaService — Enforce org and user limits
+├─ BulkUploadService — Batch processing
+└─ EvidenceVersionService — History and rollback
+
+Database:
+├─ Evidence — Original (enhanced)
+├─ EvidenceVersion — New for versioning
+└─ StorageQuota — New for limit tracking
+```
+
+**Key Features:**
+- ClamAV integration with automatic scanning
+- Version history with diff tracking
+- Org-level quotas (10GB default) and per-user limits (100MB)
+- Bulk upload with progress tracking
+- Signed URLs for secure downloads
+
+### Phase 17: Scheduled Reports & Cron Jobs
+**Status:** ✅ Complete | **Date:** 2026-02-09
+
+**Architecture:**
+```
+Schedule Event
+    ↓
+Cron Parser (node-cron)
+    ↓
+Job Queue (Bull/BullMQ)
+    ↓
+Report Generator
+├─ PDF (node-html2pdf)
+├─ Excel (ExcelJS)
+└─ Template (Handlebars)
+    ↓
+Email Delivery (SMTP/Nodemailer)
+    ↓
+S3 Storage
+    ↓
+Cleanup Job (Retention Policy)
+
+Components:
+├─ ScheduledJobQueue — Job processing
+├─ CronTriggerHandler — Execution logic
+├─ EmailService — SMTP with templates
+├─ ExcelReportGenerator — Multi-sheet workbooks
+├─ PdfReportGenerator — HTML-to-PDF
+├─ FileReportManager — S3 + lifecycle
+└─ ReportCleanupHandler — Retention enforcement
+
+Database:
+├─ ReportTemplate — Template definitions
+├─ ScheduledJob — Job config and logs
+└─ JobExecution — Run history
+```
+
+**Key Features:**
+- Cron expressions (standard format)
+- Multiple report formats (PDF, Excel, HTML)
+- HTML email with Handlebars templating
+- S3 storage with signed URLs (7-day expiry)
+- Automatic cleanup after 90 days (configurable)
+- Recurring assessment automation
+
+### Phase 18: Advanced Features
+**Status:** ✅ Complete | **Date:** 2026-02-09
+
+**Architecture:**
+```
+Bulk Import (CSV/Excel)
+    ↓
+Data Validation (Zod)
+    ↓
+Conflict Detection
+├─ Duplicate risks
+├─ Framework mapping conflicts
+└─ Control conflicts
+    ↓
+Import Job Queue
+    ↓
+Database Transaction
+    ↓
+Task Creation
+
+Components:
+├─ BulkImportService — CSV/Excel parsing
+├─ RiskImportValidator — Zod schemas
+├─ ConflictResolutionEngine — Merging
+├─ TaskManagementService — Task CRUD
+└─ GapAnalysisFilter — Advanced queries
+
+Database:
+├─ Task — Enhanced with workflow
+├─ TaskComment — Discussion threads
+├─ ImportJob — Bulk import tracking
+└─ ImportLog — Error/warning logs
+```
+
+**Key Features:**
+- CSV/Excel import with streaming for large files
+- Zod validation with detailed error messages
+- Duplicate detection by risk name + framework
+- Conflict resolution with merge suggestions
+- Task assignment and deadline management
+- Task comments with mention support
+- Import job status tracking and error logs
 
 ---
 
-**Architecture Version:** 3.2 | **Last Updated:** 2026-02-06 | **Maintained By:** docs-manager agent
+## Future Roadmap
+
+**MVP6 (Phase 19+):** Enterprise SSO/SAML, mobile app, real-time collaboration, advanced SIEM analytics, machine learning anomaly detection
+**MVP7+ (Phase 25+):** Multi-region deployment, managed SaaS hosting, partner marketplace, custom integrations
+
+---
+
+**Architecture Version:** 3.5 | **Last Updated:** 2026-02-09 | **Maintained By:** docs-manager agent

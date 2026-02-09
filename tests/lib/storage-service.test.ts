@@ -3,6 +3,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Unmock storage-service to test actual implementation
+vi.unmock('@/lib/storage-service');
 import { calculateSha256, validateFile, ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@/lib/storage-service';
 
 describe('Storage Service - Utility Functions', () => {
