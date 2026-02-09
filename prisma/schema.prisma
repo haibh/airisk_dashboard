@@ -43,6 +43,12 @@ model Organization {
   complianceChains  ComplianceChain[]
   reportTemplates   ReportTemplate[]
   ssoConnection     SSOConnection?
+  activeSessions    ActiveSession[]
+  ipAllowlist       IPAllowlistEntry[]
+
+  // Enterprise features
+  brandingConfig    Json?  // { logoUrl, primaryColor, accentColor, faviconUrl, loginMessage }
+  ipAllowlistEnabled Boolean @default(false)
 
   @@map("organizations")
 }
@@ -87,6 +93,7 @@ model User {
   dashboardLayouts   DashboardLayout[] @relation("UserDashboardLayouts")
   reportTemplates    ReportTemplate[]  @relation("ReportTemplateCreator")
   taskComments       TaskComment[]     @relation("TaskCommenter")
+  activeSessions     ActiveSession[]   @relation("UserActiveSessions")
 
   // NextAuth relations
   accounts Account[]
@@ -1236,4 +1243,52 @@ model SSOConnection {
   updatedAt       DateTime @updatedAt
 
   @@map("sso_connections")
+}
+
+// ============================================================================
+// ENTERPRISE SESSION MANAGEMENT
+// ============================================================================
+
+model ActiveSession {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation("UserActiveSessions", fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  sessionToken  String   @unique  // Matches JWT jti claim
+  ipAddress     String?
+  userAgent     String?
+  deviceInfo    String?  // Parsed from userAgent (browser, OS)
+  lastActivityAt DateTime @default(now())
+  expiresAt     DateTime
+  isRevoked     Boolean  @default(false)
+  revokedAt     DateTime?
+  revokedBy     String?  // Admin who forced logout
+
+  createdAt     DateTime @default(now())
+
+  @@index([userId, isRevoked])
+  @@index([organizationId])
+  @@index([sessionToken])
+  @@map("active_sessions")
+}
+
+// ============================================================================
+// IP ALLOWLIST
+// ============================================================================
+
+model IPAllowlistEntry {
+  id              String   @id @default(cuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  cidr            String   // IP or CIDR notation (e.g., "192.168.1.0/24" or "10.0.0.1")
+  description     String?  // Label for the entry (e.g., "Office VPN")
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, isActive])
+  @@map("ip_allowlist_entries")
 }

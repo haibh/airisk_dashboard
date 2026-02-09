@@ -303,3 +303,65 @@ export const scimTokenSchema = z.object({
 export type SSOConnectionInput = z.infer<typeof ssoConnectionSchema>;
 export type UpdateSSOConnectionInput = z.infer<typeof updateSSOConnectionSchema>;
 export type SCIMTokenInput = z.infer<typeof scimTokenSchema>;
+
+// ============================================
+// Audit Log Export Schemas
+// ============================================
+
+export const auditLogExportSchema = z.object({
+  format: z.enum(['csv', 'pdf'], { message: 'Format must be csv or pdf' }),
+  entityType: z.string().max(50).optional(),
+  action: z.string().max(50).optional(),
+  userId: z.string().optional(),
+  dateFrom: z.string().datetime().optional(),
+  dateTo: z.string().datetime().optional(),
+  search: z.string().max(255).optional(),
+});
+
+export type AuditLogExportInput = z.infer<typeof auditLogExportSchema>;
+
+// ============================================
+// IP Allowlist Schemas
+// ============================================
+
+const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
+
+export const ipAllowlistEntrySchema = z.object({
+  cidr: z.string().regex(cidrRegex, 'Invalid CIDR notation (e.g., "192.168.1.0/24" or "10.0.0.1")'),
+  description: z.string().max(255).optional().nullable(),
+  isActive: z.boolean().optional().default(true),
+});
+
+export const updateIPAllowlistEntrySchema = z.object({
+  description: z.string().max(255).optional().nullable(),
+  isActive: z.boolean().optional(),
+});
+
+export type IPAllowlistEntryInput = z.infer<typeof ipAllowlistEntrySchema>;
+export type UpdateIPAllowlistEntryInput = z.infer<typeof updateIPAllowlistEntrySchema>;
+
+// ============================================
+// Branding Schemas
+// ============================================
+
+const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+
+export const brandingConfigSchema = z.object({
+  logoUrl: z.string().url().max(500).optional().nullable(),
+  primaryColor: z.string().regex(hexColorRegex, 'Invalid hex color (e.g., "#1a73e8")').optional().nullable(),
+  accentColor: z.string().regex(hexColorRegex, 'Invalid hex color (e.g., "#e8453c")').optional().nullable(),
+  faviconUrl: z.string().url().max(500).optional().nullable(),
+  loginMessage: z.string().max(500).optional().nullable(),
+});
+
+export type BrandingConfigInput = z.infer<typeof brandingConfigSchema>;
+
+// ============================================
+// Session Management Schemas
+// ============================================
+
+export const sessionRevokeSchema = z.object({
+  sessionId: z.string().min(1, 'Session ID is required'),
+});
+
+export type SessionRevokeInput = z.infer<typeof sessionRevokeSchema>;
