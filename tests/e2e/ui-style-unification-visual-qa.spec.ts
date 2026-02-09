@@ -16,7 +16,8 @@ async function screenshotAtViewport(
   suffix = ''
 ) {
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
-  await page.waitForTimeout(500); // let layout settle
+  // Wait for layout to stabilize after viewport change
+  await page.waitForLoadState('networkidle');
   const filename = `${pageName}-${viewport.name}${suffix}.png`;
   await page.screenshot({ path: `${SCREENSHOT_DIR}/${filename}`, fullPage: true });
   return filename;
@@ -78,7 +79,10 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
         await page.goto('/en/dashboard');
         await page.waitForLoadState('networkidle');
       }
-      await page.waitForTimeout(1000);
+
+      // Wait for first card to be visible (data loaded)
+      const firstCard = page.locator('[class*="card"]').first();
+      await expect(firstCard).toBeVisible({ timeout: 5000 });
 
       await screenshotAtViewport(page, 'dashboard', vp);
     });
@@ -91,10 +95,13 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(1000);
 
     // Find cards with data-slot="card"
     const cards = page.locator('[data-slot="card"]');
+
+    // Wait for at least one card to be visible
+    await expect(cards.first()).toBeVisible({ timeout: 5000 });
+
     const cardCount = await cards.count();
 
     // Verify data-slot attribute exists
@@ -104,7 +111,8 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
     if (cardCount > 0) {
       const firstCard = cards.first();
       await firstCard.hover();
-      await page.waitForTimeout(300);
+      // Wait for hover transition to complete
+      await page.waitForLoadState('networkidle');
       await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-card-hover.png`, fullPage: false });
     }
   });
@@ -116,13 +124,10 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(500);
 
-    // Check sidebar has internal-sidebar class
-    const sidebar = page.locator('aside.internal-sidebar, aside[class*="internal-sidebar"]');
-    // If class-based selector doesn't work, check CSS computed style
+    // Wait for sidebar to be visible
     const sidebarAny = page.locator('aside').first();
-    await expect(sidebarAny).toBeVisible();
+    await expect(sidebarAny).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-sidebar.png`, fullPage: false });
   });
@@ -134,12 +139,10 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(500);
 
-    // Check header has internal-header class
-    const header = page.locator('header.internal-header, header[class*="internal-header"]');
+    // Wait for header to be visible
     const headerAny = page.locator('header').first();
-    await expect(headerAny).toBeVisible();
+    await expect(headerAny).toBeVisible({ timeout: 5000 });
 
     await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-header.png`, fullPage: false });
   });
@@ -151,12 +154,11 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(500);
 
     // Check tabs list has internal-tabs-list class
     const tabsList = page.locator('.internal-tabs-list, [class*="internal-tabs-list"]');
     if ((await tabsList.count()) > 0) {
-      await expect(tabsList.first()).toBeVisible();
+      await expect(tabsList.first()).toBeVisible({ timeout: 5000 });
     }
 
     await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-tabs.png`, fullPage: false });
@@ -169,13 +171,13 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(500);
 
     // Toggle dark mode via the theme button
     const themeToggle = page.locator('button:has(> .lucide-sun), button:has(> .lucide-moon)').first();
     if (await themeToggle.isVisible()) {
       await themeToggle.click();
-      await page.waitForTimeout(800);
+      // Wait for theme transition to complete by checking for dark class
+      await page.waitForFunction(() => document.documentElement.classList.contains('dark'), { timeout: 3000 });
     }
 
     await page.screenshot({ path: `${SCREENSHOT_DIR}/dashboard-dark-mode.png`, fullPage: true });
@@ -189,17 +191,20 @@ test.describe('Dashboard - UI Style Unification Visual QA', () => {
       await page.goto('/en/dashboard');
       await page.waitForLoadState('networkidle');
     }
-    await page.waitForTimeout(500);
 
     // Verify cards don't transform on hover
     const cards = page.locator('[data-slot="card"]');
+    // Wait for cards to be visible
+    await expect(cards.first()).toBeVisible({ timeout: 5000 });
+
     if ((await cards.count()) > 0) {
       const card = cards.first();
       const beforeTransform = await card.evaluate((el) =>
         window.getComputedStyle(el).transform
       );
       await card.hover();
-      await page.waitForTimeout(300);
+      // Wait for any potential transition
+      await page.waitForLoadState('networkidle');
       const afterTransform = await card.evaluate((el) =>
         window.getComputedStyle(el).transform
       );

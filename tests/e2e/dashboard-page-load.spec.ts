@@ -38,8 +38,9 @@ test.describe('Dashboard Page Load', () => {
     // Wait for page to stabilize
     await page.waitForLoadState('networkidle');
 
-    // Wait a bit more for async data to load
-    await page.waitForTimeout(2000);
+    // Wait for at least one card with numeric content to appear (data loaded)
+    const firstNumericCard = page.locator('[class*="card"]').filter({ hasText: /\d+/ }).first();
+    await expect(firstNumericCard).toBeVisible({ timeout: 10000 });
 
     // Look for stat cards - they typically have numeric values anywhere in text
     const cards = page.locator('[class*="card"]');

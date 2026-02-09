@@ -36,15 +36,12 @@ test.describe('Authentication Login Flow', () => {
     // Click login button
     await page.click('button[type="submit"]');
 
-    // Wait a bit for error to appear
-    await page.waitForTimeout(2000);
+    // Wait for error alert to appear instead of hard-coded timeout
+    const errorElement = page.getByRole('alert').filter({ hasText: /Invalid|error|failed/i });
+    await expect(errorElement).toBeVisible({ timeout: 5000 });
 
     // Check that we're still on the login page
     expect(page.url()).toContain('/en/login');
-
-    // Verify error message is displayed (filter to avoid Next.js route announcer)
-    const errorElement = page.getByRole('alert').filter({ hasText: /Invalid|error|failed/i });
-    await expect(errorElement).toBeVisible();
   });
 
   test('should require email field', async ({ page }) => {
