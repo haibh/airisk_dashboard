@@ -1,13 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import type { DashboardStats, RiskHeatmapData, ComplianceFramework, Activity } from '@/types/dashboard';
-import { OverallRiskScoreGauge } from '@/components/dashboard/overall-risk-score-gauge';
-import { ComplianceDonutChart } from '@/components/dashboard/compliance-donut-chart';
-import { RiskHeatmapEnhanced } from '@/components/dashboard/risk-heatmap-enhanced';
 import { TopRisksListCard } from '@/components/dashboard/top-risks-list-card';
 import { ActivityFeedCompact } from '@/components/dashboard/activity-feed-compact';
 import { FrameworkCoverageBars } from '@/components/dashboard/framework-coverage-bars';
-import { ControlRiskSankeyDiagramChart } from '@/components/dashboard/widgets/control-risk-sankey-diagram-chart';
+
+// Dynamic imports for recharts-heavy components to reduce initial bundle
+const OverallRiskScoreGauge = dynamic(() => import('@/components/dashboard/overall-risk-score-gauge').then(m => ({ default: m.OverallRiskScoreGauge })), { ssr: false });
+const ComplianceDonutChart = dynamic(() => import('@/components/dashboard/compliance-donut-chart').then(m => ({ default: m.ComplianceDonutChart })), { ssr: false });
+const RiskHeatmapEnhanced = dynamic(() => import('@/components/dashboard/risk-heatmap-enhanced').then(m => ({ default: m.RiskHeatmapEnhanced })), { ssr: false });
+const ControlRiskSankeyDiagramChart = dynamic(() => import('@/components/dashboard/widgets/control-risk-sankey-diagram-chart').then(m => ({ default: m.ControlRiskSankeyDiagramChart })), { ssr: false });
 
 interface DetailedAnalyticsViewProps {
   stats: DashboardStats | null;

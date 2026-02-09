@@ -35,6 +35,15 @@ const nextConfig: NextConfig = {
 
   // Security and CORS headers
   async headers() {
+    // Parse allowed origins from env (comma-separated list)
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+      : ['*'];
+
+    // Use first origin as default for Access-Control-Allow-Origin
+    // Note: For multiple origins, implement CORS logic in middleware/API routes
+    const defaultOrigin = allowedOrigins.length === 1 ? allowedOrigins[0] : '*';
+
     return [
       {
         // Apply to all API routes
@@ -42,7 +51,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: process.env.ALLOWED_ORIGIN || '*',
+            value: defaultOrigin,
           },
           {
             key: 'Access-Control-Allow-Methods',
@@ -50,11 +59,15 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With',
+            value: 'Content-Type, Authorization, X-Requested-With, X-Correlation-ID',
           },
           {
             key: 'Access-Control-Max-Age',
             value: '86400',
+          },
+          {
+            key: 'X-API-Version',
+            value: process.env.API_VERSION || '1.0.0',
           },
           // Security headers
           {
@@ -69,6 +82,14 @@ const nextConfig: NextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
         ],
       },
       {
@@ -82,6 +103,30 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "font-src 'self' data:",
+              "connect-src 'self'",
+              "frame-ancestors 'none'",
+            ].join('; '),
           },
         ],
       },

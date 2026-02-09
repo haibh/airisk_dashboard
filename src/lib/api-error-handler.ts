@@ -3,7 +3,7 @@
  * Provides consistent error responses across all API routes
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { logger, generateErrorId } from './logger';
 import { Prisma } from '@prisma/client';
 
@@ -11,6 +11,7 @@ import { Prisma } from '@prisma/client';
 interface ApiErrorResponse {
   error: string;
   errorId: string;
+  correlationId?: string;
   details?: unknown;
 }
 
@@ -83,10 +84,16 @@ function detectErrorType(error: unknown): ErrorType {
  *
  * @param error - The caught error
  * @param context - Description of the operation that failed (e.g., "fetching AI systems")
+ * @param request - Optional NextRequest to extract correlation ID
  * @returns NextResponse with standardized error format
  */
-export function handleApiError(error: unknown, context: string): NextResponse<ApiErrorResponse> {
+export function handleApiError(
+  error: unknown,
+  context: string,
+  request?: NextRequest
+): NextResponse<ApiErrorResponse> {
   const errorId = generateErrorId();
+  const correlationId = request?.headers.get('x-correlation-id') || undefined;
   const errorType = detectErrorType(error);
   const status = errorStatusMap[errorType];
   const message = errorMessages[errorType];
@@ -98,6 +105,7 @@ export function handleApiError(error: unknown, context: string): NextResponse<Ap
     data: {
       errorType,
       status,
+      ...(correlationId && { correlationId }),
     },
   });
 
@@ -105,6 +113,7 @@ export function handleApiError(error: unknown, context: string): NextResponse<Ap
   const response: ApiErrorResponse = {
     error: message,
     errorId,
+    ...(correlationId && { correlationId }),
   };
 
   if (process.env.NODE_ENV === 'development' && error instanceof Error) {
@@ -120,18 +129,27 @@ export function handleApiError(error: unknown, context: string): NextResponse<Ap
 /**
  * Create a validation error response
  */
-export function validationError(message: string, details?: unknown): NextResponse<ApiErrorResponse> {
+export function validationError(
+  message: string,
+  details?: unknown,
+  request?: NextRequest
+): NextResponse<ApiErrorResponse> {
   const errorId = generateErrorId();
+  const correlationId = request?.headers.get('x-correlation-id') || undefined;
 
   logger.warn(`Validation Error: ${message}`, {
     context: 'validation',
-    data: { details },
+    data: {
+      details,
+      ...(correlationId && { correlationId }),
+    },
   });
 
   return NextResponse.json(
     {
       error: message,
       errorId,
+      ...(correlationId && { correlationId }),
       ...(process.env.NODE_ENV === 'development' && details ? { details } : {}),
     },
     { status: 400 }
@@ -141,13 +159,15 @@ export function validationError(message: string, details?: unknown): NextRespons
 /**
  * Create a not found error response
  */
-export function notFoundError(resource: string): NextResponse<ApiErrorResponse> {
+export function notFoundError(resource: string, request?: NextRequest): NextResponse<ApiErrorResponse> {
   const errorId = generateErrorId();
+  const correlationId = request?.headers.get('x-correlation-id') || undefined;
 
   return NextResponse.json(
     {
       error: `${resource} not found`,
       errorId,
+      ...(correlationId && { correlationId }),
     },
     { status: 404 }
   );
@@ -156,11 +176,14 @@ export function notFoundError(resource: string): NextResponse<ApiErrorResponse> 
 /**
  * Create an unauthorized error response
  */
-export function unauthorizedError(): NextResponse<ApiErrorResponse> {
+export function unauthorizedError(request?: NextRequest): NextResponse<ApiErrorResponse> {
+  const correlationId = request?.headers.get('x-correlation-id') || undefined;
+
   return NextResponse.json(
     {
       error: 'Unauthorized',
       errorId: generateErrorId(),
+      ...(correlationId && { correlationId }),
     },
     { status: 401 }
   );
@@ -169,11 +192,17 @@ export function unauthorizedError(): NextResponse<ApiErrorResponse> {
 /**
  * Create a forbidden error response
  */
-export function forbiddenError(message = 'Insufficient permissions'): NextResponse<ApiErrorResponse> {
+export function forbiddenError(
+  message = 'Insufficient permissions',
+  request?: NextRequest
+): NextResponse<ApiErrorResponse> {
+  const correlationId = request?.headers.get('x-correlation-id') || undefined;
+
   return NextResponse.json(
     {
       error: message,
       errorId: generateErrorId(),
+      ...(correlationId && { correlationId }),
     },
     { status: 403 }
   );

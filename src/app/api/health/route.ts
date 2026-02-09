@@ -21,6 +21,7 @@ interface ServiceStatus {
   status: 'up' | 'down';
   latencyMs?: number;
   message?: string;
+  version?: string;
 }
 
 interface HealthResponse {
@@ -45,14 +46,20 @@ async function checkDatabase(): Promise<ServiceStatus> {
   const startTime = Date.now();
 
   try {
-    // Simple query to test connection
-    await prisma.$queryRaw`SELECT 1`;
+    // Test connection and get PostgreSQL version
+    const result = await prisma.$queryRaw<Array<{ version: string }>>`SELECT version()`;
+    const versionString = result[0]?.version || 'unknown';
+
+    // Extract version number (e.g., "PostgreSQL 15.3" from full version string)
+    const versionMatch = versionString.match(/PostgreSQL (\d+\.\d+)/);
+    const version = versionMatch ? versionMatch[1] : versionString.split(' ')[0];
 
     const latencyMs = Date.now() - startTime;
 
     return {
       status: 'up',
       latencyMs,
+      version,
     };
   } catch (error) {
     const latencyMs = Date.now() - startTime;
