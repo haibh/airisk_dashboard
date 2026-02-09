@@ -1,0 +1,126 @@
+version: '3.9'
+
+services:
+  # ========================================
+  # Application Service
+  # ========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - COMMIT_SHA=${COMMIT_SHA:-local}
+        - BUILD_DATE=${BUILD_DATE:-unknown}
+    container_name: airm-ip-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://airm:airm_secret@postgres:5432/airm_ip?schema=public
+      - REDIS_URL=redis://redis:6379
+      - S3_ENDPOINT=http://minio:9000
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    networks:
+      - airm-network
+
+  # ========================================
+  # PostgreSQL Database
+  # ========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: airm-ip-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=airm_ip
+      - POSTGRES_USER=airm
+      - POSTGRES_PASSWORD=airm_secret
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airm -d airm_ip"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - airm-network
+
+  # ========================================
+  # Redis Cache
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: airm-ip-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - airm-network
+
+  # ========================================
+  # MinIO S3-Compatible Storage
+  # ========================================
+  minio:
+    image: minio/minio:latest
+    container_name: airm-ip-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"  # API
+      - "9001:9001"  # Console
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - airm-network
+
+# ========================================
+# Volumes
+# ========================================
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  minio-data:
+    driver: local
+
+# ========================================
+# Networks
+# ========================================
+networks:
+  airm-network:
+    driver: bridge

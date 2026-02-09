@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for development
   reactStrictMode: true,
 
+  // Docker standalone output (creates self-contained server bundle)
+  output: 'standalone',
+
   // Optimize images
   images: {
     remotePatterns: [],

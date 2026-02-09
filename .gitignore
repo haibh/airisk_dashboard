@@ -170,6 +170,11 @@ logs/
 docker-compose.override.yml
 .docker/
 
+# Docker artifacts
+*.tar
+*.tar.gz
+docker-build-cache/
+
 # Personal notes
 notes.md
 TODO.md

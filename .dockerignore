@@ -1,0 +1,78 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build artifacts
+.next
+out
+dist
+bin
+build
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Environment files (except example)
+.env*
+!.env.example
+
+# Testing
+tests
+test-results
+playwright-report
+.playwright
+coverage
+.nyc_output
+
+# Documentation and plans
+docs
+plans
+*.md
+!README.md
+
+# AI assistants
+.claude
+.cursor
+.aider
+.opencode
+.codeium
+.tabnine
+.copilot
+.windsurf
+.continue
+.sourcegraph
+
+# Temporary files
+Users/
+agentic-reference/
+tmp/
+temp/
+*.tmp
+*.temp
+*.log
+logs/
+
+# IDE and editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Local development
+.local
+local
+storage
+.docker
+
+# Misc
+.DS_Store
+*.pem
+screenshots
+transcripts
+conversations
