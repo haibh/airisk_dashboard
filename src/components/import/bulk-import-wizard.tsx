@@ -5,15 +5,20 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Upload, FileSpreadsheet, CheckCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ImportPreviewTable } from './import-preview-table';
+import {
+  ImportUploadStep,
+  ImportPreviewStep,
+  ImportResultStep,
+  type DryRunResponse,
+  type ImportResponse,
+} from './import-wizard-step-views';
 
 interface BulkImportWizardProps {
   open: boolean;
@@ -24,29 +29,6 @@ interface BulkImportWizardProps {
 interface Assessment {
   id: string;
   title: string;
-}
-
-interface ValidationError {
-  row: number;
-  field: string;
-  message: string;
-}
-
-interface DryRunResponse {
-  dryRun: true;
-  totalRows: number;
-  validRows: number;
-  invalidRows: number;
-  errors: ValidationError[];
-  preview: any[];
-}
-
-interface ImportResponse {
-  dryRun: false;
-  totalRows: number;
-  imported: number;
-  failed: number;
-  errors: ValidationError[];
 }
 
 type Step = 'upload' | 'preview' | 'result';
@@ -60,9 +42,7 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
   const [loading, setLoading] = useState(false);
   const [previewData, setPreviewData] = useState<DryRunResponse | null>(null);
   const [importResult, setImportResult] = useState<ImportResponse | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch assessments on open
   useEffect(() => {
     if (open) {
       fetchAssessments();
@@ -222,103 +202,24 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
 
         {/* Step content */}
         {step === 'upload' && (
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                {t('selectAssessment')}
-              </label>
-              <Select value={assessmentId} onValueChange={setAssessmentId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('assessmentPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {assessments.map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div
-              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,.xlsx"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-              {file ? (
-                <div className="space-y-2">
-                  <FileSpreadsheet className="h-12 w-12 mx-auto text-primary" />
-                  <p className="font-medium">{file.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {(file.size / 1024).toFixed(2)} KB
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
-                  <p className="font-medium">{t('dragDrop')}</p>
-                  <p className="text-sm text-muted-foreground">{t('supportedFormats')}</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <ImportUploadStep
+            file={file}
+            assessmentId={assessmentId}
+            assessments={assessments}
+            onFileSelect={handleFileSelect}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onAssessmentChange={setAssessmentId}
+            t={t}
+          />
         )}
 
         {step === 'preview' && previewData && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 border rounded-lg">
-                <p className="text-2xl font-bold">{previewData.totalRows}</p>
-                <p className="text-sm text-muted-foreground">{t('preview.totalRows')}</p>
-              </div>
-              <div className="text-center p-4 border rounded-lg bg-green-50 dark:bg-green-950">
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {previewData.validRows}
-                </p>
-                <p className="text-sm text-muted-foreground">{t('preview.validRows')}</p>
-              </div>
-              <div className="text-center p-4 border rounded-lg bg-red-50 dark:bg-red-950">
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  {previewData.invalidRows}
-                </p>
-                <p className="text-sm text-muted-foreground">{t('preview.invalidRows')}</p>
-              </div>
-            </div>
-
-            <ImportPreviewTable rows={previewData.preview} errors={previewData.errors} />
-          </div>
+          <ImportPreviewStep previewData={previewData} t={t} />
         )}
 
         {step === 'result' && importResult && (
-          <div className="space-y-4 text-center py-8">
-            <CheckCircle className="h-16 w-16 mx-auto text-green-500" />
-            <h3 className="text-2xl font-bold">{t('result.title')}</h3>
-            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
-              <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950">
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {importResult.imported}
-                </p>
-                <p className="text-sm text-muted-foreground">{t('result.imported')}</p>
-              </div>
-              {importResult.failed > 0 && (
-                <div className="p-4 border rounded-lg bg-red-50 dark:bg-red-950">
-                  <p className="text-3xl font-bold text-red-600 dark:text-red-400">
-                    {importResult.failed}
-                  </p>
-                  <p className="text-sm text-muted-foreground">{t('result.failed')}</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <ImportResultStep importResult={importResult} t={t} />
         )}
 
         {/* Actions */}

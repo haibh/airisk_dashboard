@@ -7,17 +7,13 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit2, Trash2, FileText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ReportTemplateFormDialog, type ReportTemplateFormState } from './report-template-form-dialog';
 
 interface ReportTemplate {
   id: string;
@@ -37,7 +33,10 @@ interface ReportTemplate {
 }
 
 type DataSource = 'risks' | 'assessments' | 'compliance' | 'evidence' | 'ai-systems';
-type OutputFormat = 'csv' | 'xlsx' | 'pdf';
+
+const INITIAL_FORM: ReportTemplateFormState = {
+  name: '', dataSource: 'risks', columns: '', format: 'csv', groupBy: '', sortBy: '',
+};
 
 export function ReportTemplateManager() {
   const t = useTranslations('reportTemplates');
@@ -46,14 +45,7 @@ export function ReportTemplateManager() {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Form state
-  const [formName, setFormName] = useState('');
-  const [formDataSource, setFormDataSource] = useState<DataSource>('risks');
-  const [formColumns, setFormColumns] = useState('');
-  const [formFormat, setFormFormat] = useState<OutputFormat>('csv');
-  const [formGroupBy, setFormGroupBy] = useState('');
-  const [formSortBy, setFormSortBy] = useState('');
+  const [form, setForm] = useState<ReportTemplateFormState>(INITIAL_FORM);
 
   useEffect(() => {
     fetchTemplates();
@@ -75,18 +67,20 @@ export function ReportTemplateManager() {
   }
 
   function handleCreate() {
-    resetForm();
+    setForm(INITIAL_FORM);
     setEditingId(null);
     setShowDialog(true);
   }
 
   function handleEdit(template: ReportTemplate) {
-    setFormName(template.name);
-    setFormDataSource(template.dataSource as DataSource);
-    setFormColumns(template.columns.join(', '));
-    setFormFormat(template.format as OutputFormat);
-    setFormGroupBy(template.groupBy || '');
-    setFormSortBy(template.sortBy || '');
+    setForm({
+      name: template.name,
+      dataSource: template.dataSource as DataSource,
+      columns: template.columns.join(', '),
+      format: template.format as 'csv' | 'xlsx' | 'pdf',
+      groupBy: template.groupBy || '',
+      sortBy: template.sortBy || '',
+    });
     setEditingId(template.id);
     setShowDialog(true);
   }
@@ -113,12 +107,12 @@ export function ReportTemplateManager() {
 
     try {
       const body = {
-        name: formName,
-        dataSource: formDataSource,
-        columns: formColumns.split(',').map((c) => c.trim()).filter(Boolean),
-        format: formFormat,
-        groupBy: formGroupBy || undefined,
-        sortBy: formSortBy || undefined,
+        name: form.name,
+        dataSource: form.dataSource,
+        columns: form.columns.split(',').map((c) => c.trim()).filter(Boolean),
+        format: form.format,
+        groupBy: form.groupBy || undefined,
+        sortBy: form.sortBy || undefined,
       };
 
       const url = editingId ? `/api/report-templates/${editingId}` : '/api/report-templates';
@@ -143,13 +137,8 @@ export function ReportTemplateManager() {
     }
   }
 
-  function resetForm() {
-    setFormName('');
-    setFormDataSource('risks');
-    setFormColumns('');
-    setFormFormat('csv');
-    setFormGroupBy('');
-    setFormSortBy('');
+  function handleFormChange(field: keyof ReportTemplateFormState, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   const dataSourceOptions: { value: DataSource; label: string }[] = [
@@ -260,110 +249,17 @@ export function ReportTemplateManager() {
         </Card>
       )}
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>
-              {editingId ? t('actions.edit') : t('createTemplate')}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name">{t('form.name')}</Label>
-              <Input
-                id="name"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('form.namePlaceholder')}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="dataSource">{t('form.dataSource')}</Label>
-                <Select value={formDataSource} onValueChange={(v) => setFormDataSource(v as DataSource)}>
-                  <SelectTrigger id="dataSource">
-                    <SelectValue placeholder={t('form.dataSourcePlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dataSourceOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="format">{t('form.format')}</Label>
-                <Select value={formFormat} onValueChange={(v) => setFormFormat(v as OutputFormat)}>
-                  <SelectTrigger id="format">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="csv">CSV</SelectItem>
-                    <SelectItem value="xlsx">XLSX</SelectItem>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="columns">{t('form.columns')}</Label>
-              <Textarea
-                id="columns"
-                value={formColumns}
-                onChange={(e) => setFormColumns(e.target.value)}
-                placeholder={t('form.columnsPlaceholder')}
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="groupBy">{t('form.groupBy')}</Label>
-                <Input
-                  id="groupBy"
-                  value={formGroupBy}
-                  onChange={(e) => setFormGroupBy(e.target.value)}
-                  placeholder={t('form.groupByPlaceholder')}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="sortBy">{t('form.sortBy')}</Label>
-                <Input
-                  id="sortBy"
-                  value={formSortBy}
-                  onChange={(e) => setFormSortBy(e.target.value)}
-                  placeholder={t('form.sortByPlaceholder')}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setShowDialog(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  'Save Template'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ReportTemplateFormDialog
+        open={showDialog}
+        onOpenChange={setShowDialog}
+        editing={!!editingId}
+        submitting={submitting}
+        form={form}
+        onFormChange={handleFormChange}
+        onSubmit={handleSubmit}
+        dataSourceOptions={dataSourceOptions}
+        t={t}
+      />
     </div>
   );
 }
