@@ -68,7 +68,7 @@ export function ReportTemplateManager() {
       setTemplates(data.templates || []);
     } catch (error) {
       console.error('Error fetching templates:', error);
-      toast.error('Failed to load templates');
+      toast.error(t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export function ReportTemplateManager() {
       fetchTemplates();
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error('Failed to delete template');
+      toast.error(t('errors.deleteFailed'));
     }
   }
 
@@ -137,7 +137,7 @@ export function ReportTemplateManager() {
       fetchTemplates();
     } catch (error) {
       console.error('Submit error:', error);
-      toast.error('Failed to save template');
+      toast.error(t('errors.saveFailed'));
     } finally {
       setSubmitting(false);
     }

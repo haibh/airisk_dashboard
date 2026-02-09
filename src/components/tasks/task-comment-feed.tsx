@@ -46,7 +46,7 @@ export function TaskCommentFeed({ taskId }: TaskCommentFeedProps) {
       setComments(data.comments || []);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
-      toast.error('Failed to load comments');
+      toast.error(t('loadCommentsFailed'));
     } finally {
       setLoading(false);
     }
@@ -75,7 +75,7 @@ export function TaskCommentFeed({ taskId }: TaskCommentFeedProps) {
       fetchComments();
     } catch (error) {
       console.error('Failed to post comment:', error);
-      toast.error('Failed to post comment');
+      toast.error(t('postCommentFailed'));
     } finally {
       setSubmitting(false);
     }

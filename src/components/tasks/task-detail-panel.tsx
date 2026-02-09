@@ -96,7 +96,7 @@ export function TaskDetailPanel({ taskId, open, onClose, onTaskUpdated }: TaskDe
       setTask(data.task);
     } catch (error) {
       console.error('Failed to fetch task:', error);
-      toast.error('Failed to load task details');
+      toast.error(t('errors.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -120,7 +120,7 @@ export function TaskDetailPanel({ taskId, open, onClose, onTaskUpdated }: TaskDe
       onTaskUpdated();
     } catch (error) {
       console.error('Failed to update task:', error);
-      toast.error('Failed to update task');
+      toast.error(t('errors.updateFailed'));
     } finally {
       setUpdating(false);
     }
@@ -144,7 +144,7 @@ export function TaskDetailPanel({ taskId, open, onClose, onTaskUpdated }: TaskDe
       onTaskUpdated();
     } catch (error) {
       console.error('Failed to update task:', error);
-      toast.error('Failed to update task');
+      toast.error(t('errors.updateFailed'));
     } finally {
       setUpdating(false);
     }
@@ -165,7 +165,7 @@ export function TaskDetailPanel({ taskId, open, onClose, onTaskUpdated }: TaskDe
       onClose();
     } catch (error) {
       console.error('Failed to delete task:', error);
-      toast.error('Failed to delete task');
+      toast.error(t('errors.deleteFailed'));
     }
   };
 

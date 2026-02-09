@@ -70,7 +70,7 @@ export function TaskCreateForm({ open, onClose, onSuccess }: TaskCreateFormProps
       setRisks(data.risks || []);
     } catch (error) {
       console.error('Failed to fetch risks:', error);
-      toast.error('Failed to load risks');
+      toast.error(t('errors.loadRisksFailed'));
     }
   };
 
@@ -83,7 +83,7 @@ export function TaskCreateForm({ open, onClose, onSuccess }: TaskCreateFormProps
       setUsers(data.items || []);
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      toast.error('Failed to load users');
+      toast.error(t('errors.loadUsersFailed'));
     }
   };
 
@@ -91,12 +91,12 @@ export function TaskCreateForm({ open, onClose, onSuccess }: TaskCreateFormProps
     e.preventDefault();
 
     if (!title.trim()) {
-      toast.error('Title is required');
+      toast.error(t('errors.titleRequired'));
       return;
     }
 
     if (!riskId) {
-      toast.error('Risk is required');
+      toast.error(t('errors.riskRequired'));
       return;
     }
 
@@ -131,7 +131,7 @@ export function TaskCreateForm({ open, onClose, onSuccess }: TaskCreateFormProps
       onSuccess();
     } catch (error) {
       console.error('Failed to create task:', error);
-      toast.error('Failed to create task');
+      toast.error(t('errors.createFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -246,7 +246,7 @@ export function TaskCreateForm({ open, onClose, onSuccess }: TaskCreateFormProps
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>
-              {submitting ? 'Creating...' : t('createTask')}
+              {submitting ? t('errors.creating') : t('createTask')}
             </Button>
           </div>
         </form>

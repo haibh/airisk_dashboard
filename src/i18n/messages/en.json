@@ -898,6 +898,19 @@
       "placeholder": "Add a comment...",
       "submit": "Post Comment",
       "success": "Comment added"
+    },
+    "errors": {
+      "loadFailed": "Failed to load task details",
+      "updateFailed": "Failed to update task",
+      "deleteFailed": "Failed to delete task",
+      "createFailed": "Failed to create task",
+      "loadRisksFailed": "Failed to load risks",
+      "loadUsersFailed": "Failed to load users",
+      "titleRequired": "Title is required",
+      "riskRequired": "Risk is required",
+      "loadCommentsFailed": "Failed to load comments",
+      "postCommentFailed": "Failed to post comment",
+      "creating": "Creating..."
     }
   },
   "import": {
@@ -932,7 +945,9 @@
       "noFile": "Please select a file",
       "noAssessment": "Please select an assessment",
       "uploadFailed": "File upload failed",
-      "importFailed": "Import failed"
+      "importFailed": "Import failed",
+      "loadAssessmentsFailed": "Failed to load assessments",
+      "invalidFileFormat": "Please select a CSV or XLSX file"
     }
   },
   "reportTemplates": {
@@ -969,6 +984,11 @@
       "createSuccess": "Template created",
       "updateSuccess": "Template updated",
       "deleteSuccess": "Template deleted"
+    },
+    "errors": {
+      "loadFailed": "Failed to load templates",
+      "deleteFailed": "Failed to delete template",
+      "saveFailed": "Failed to save template"
     }
   }
 }

@@ -1,10 +1,57 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-09 | **Current Version:** 2.5.1 (MVP5 Complete + Security Hardening)
+**Last Updated:** 2026-02-09 | **Current Version:** 2.6.0 (MVP5 Complete + Frontend Phases 16-18)
 
 ---
 
 ## Version History
+
+### 2.6.0 — Frontend UI Implementation (2026-02-09)
+**Date:** 2026-02-09
+**Impact:** Complete frontend UI for Phase 16-18 backend features
+
+**UI Features Delivered:**
+- **Phase A:** Evidence version history panel with diff viewer and per-version download
+- **Phase B:** Storage quota indicator (admin-only) with progress bar and usage tracking
+- **Phase C:** Full task management page (list, detail slideout, create form, comment feed)
+- **Phase D:** Bulk import wizard (multi-step: upload→preview→import) with progress tracking
+- **Phase E:** Report template manager (CRUD) with templates tab in reports page
+
+**New Components (12 total):**
+- `evidence-version-history-panel.tsx` — Version list + diff + download
+- `storage-quota-indicator.tsx` — Progress UI with usage tracking
+- `task-list-table.tsx` — Paginated task list with filters
+- `task-detail-panel.tsx` — Slideout detail view with comment thread
+- `task-create-form.tsx` — Task creation and editing form
+- `task-comment-feed.tsx` — Discussion threads and activity
+- `bulk-import-wizard.tsx` — Multi-step import workflow
+- `import-preview-table.tsx` — Data preview with validation
+- `report-template-manager.tsx` — Template list + CRUD forms
+- Plus evidence-detail-modal modifications and evidence-upload-form enhancements
+
+**New Routes:**
+- `/{locale}/tasks` — Full task management page (sidebar nav added)
+
+**Modified Pages:**
+- `/{locale}/evidence` — Added quota widget + version tabs to detail modal
+- `/{locale}/reports` — Added templates management tab
+- `/{locale}/risk-assessment` — Added import button for bulk upload
+
+**i18n Expansion (+158 keys per language):**
+- `evidence.versions.*` — Version history terminology
+- `evidence.storage.*` — Quota and usage tracking
+- `tasks.*` — Task management UI text
+- `import.*` — Bulk import wizard workflow
+- `reportTemplates.*` — Template management
+
+**Files Modified:** 27 files (12 new components + 10 modified + 5 i18n updates)
+**Lines Added:** 2,938+ (component code + i18n translations)
+**Tests:** 833/833 passing (100%) — no regression
+
+**Build Status:** Production-ready
+**Type Safety:** 0 TypeScript errors
+
+---
 
 ### 2.5.1 — Security Hardening & Test Expansion (2026-02-09)
 **Date:** 2026-02-09
@@ -994,12 +1041,13 @@ See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
 
 ---
 
-**Document Version:** 2.5.1
-**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 + Security Hardening)
+**Document Version:** 2.6.0
+**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend + Frontend UI)
 **Maintained By:** docs-manager agent
-**Total Commits:** 70+ since project start
+**Total Commits:** 71+ since project start
 **Total Tests:** 833/833 passing (100%) across 46 test files
+**UI Components:** 112+ (including 12 new for Phases 16-18)
 **Database Models:** 42 (Phases 1-18)
 **API Routes:** 97 route files
 **Security Status:** All CRITICAL + HIGH + 2 MEDIUM findings resolved
-**Production Ready:** ✅ MVP5 Backend + Security Hardening Complete
+**Production Ready:** ✅ MVP5 Complete - Backend + Frontend UI

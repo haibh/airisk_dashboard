@@ -898,6 +898,19 @@
       "placeholder": "Thêm bình luận...",
       "submit": "Đăng bình luận",
       "success": "Đã thêm bình luận"
+    },
+    "errors": {
+      "loadFailed": "Không thể tải chi tiết công việc",
+      "updateFailed": "Không thể cập nhật công việc",
+      "deleteFailed": "Không thể xóa công việc",
+      "createFailed": "Không thể tạo công việc",
+      "loadRisksFailed": "Không thể tải danh sách rủi ro",
+      "loadUsersFailed": "Không thể tải danh sách người dùng",
+      "titleRequired": "Tiêu đề là bắt buộc",
+      "riskRequired": "Rủi ro là bắt buộc",
+      "loadCommentsFailed": "Không thể tải bình luận",
+      "postCommentFailed": "Không thể đăng bình luận",
+      "creating": "Đang tạo..."
     }
   },
   "import": {
@@ -932,7 +945,9 @@
       "noFile": "Vui lòng chọn tệp",
       "noAssessment": "Vui lòng chọn đánh giá",
       "uploadFailed": "Tải tệp thất bại",
-      "importFailed": "Nhập thất bại"
+      "importFailed": "Nhập thất bại",
+      "loadAssessmentsFailed": "Không thể tải danh sách đánh giá",
+      "invalidFileFormat": "Vui lòng chọn tệp CSV hoặc XLSX"
     }
   },
   "reportTemplates": {
@@ -969,6 +984,11 @@
       "createSuccess": "Đã tạo mẫu",
       "updateSuccess": "Đã cập nhật mẫu",
       "deleteSuccess": "Đã xóa mẫu"
+    },
+    "errors": {
+      "loadFailed": "Không thể tải danh sách mẫu",
+      "deleteFailed": "Không thể xóa mẫu",
+      "saveFailed": "Không thể lưu mẫu"
     }
   }
 }

@@ -1,11 +1,11 @@
 # AIRisk Dashboard - Codebase Summary
 
 **Generated:** 2026-02-09
-**Codebase Status:** MVP5 Complete - Phases 16-18 Backend + Security Hardening
-**Total Files:** 400+ files (including tests, migrations, seeds)
-**Total Lines:** ~71,000+ lines of TypeScript/TSX/SQL
-**Codebase Size:** 540,000+ tokens, 2,150,000+ chars
-**Latest Additions:** Phase 16 (evidence versioning, virus scanning, quotas), Phase 17 (reports, email, cron), Phase 18 (bulk import, task management), Security fixes (HIGH + MEDIUM findings resolved)
+**Codebase Status:** MVP5 Complete - Phases 16-18 Backend + Frontend UI Implementation
+**Total Files:** 425+ files (including tests, migrations, seeds, new UI components)
+**Total Lines:** ~74,000+ lines of TypeScript/TSX/SQL
+**Codebase Size:** 560,000+ tokens, 2,220,000+ chars
+**Latest Additions:** Phase 16-18 Frontend UI (12 new components), Evidence versioning UI, Task management page, Bulk import wizard, Report template manager, Storage quota widget, i18n expansion (+158 keys per language)
 
 ---
 
@@ -75,7 +75,7 @@ AIRisk_Dashboard/
 │   │       ├── frameworks/
 │   │       ├── dashboard/
 │   │       └── reports/
-│   ├── components/             # 112+ files, 12K+ LOC (16 directories)
+│   ├── components/             # 124+ files, 14.2K+ LOC (20 directories)
 │   │   ├── layout/             # Header, Sidebar, notification dropdown (4 files)
 │   │   ├── ui/                 # Shadcn/ui wrappers (23 components)
 │   │   ├── forms/              # Form components with Zod validation
@@ -84,7 +84,10 @@ AIRisk_Dashboard/
 │   │   ├── risk-assessment/    # 5-step wizard, matrix visualization
 │   │   ├── frameworks/         # Framework tree, controls table
 │   │   ├── settings/           # Organization, users, API keys, webhooks (15 files)
-│   │   ├── evidence/           # Evidence upload, approval workflow
+│   │   ├── evidence/           # Evidence upload, approval workflow, versioning, storage quota (6 files)
+│   │   ├── tasks/              # Task management: list, detail, create, comments (4 files, NEW Phases 16-18)
+│   │   ├── import/             # Bulk import wizard and preview (2 files, NEW Phases 16-18)
+│   │   ├── reports/            # Report templates manager (1 file, NEW Phases 16-18)
 │   │   ├── dashboard/          # 26 files: 4 main views + 15 widgets + 4 drag-drop + consolidated widgets
 │   │   │   ├── executive-brief-view.tsx
 │   │   │   ├── detailed-analytics-view.tsx
@@ -1032,11 +1035,13 @@ npm run analyze             # Analyze bundle size
 ## Feature Completeness Summary
 
 **MVP5 Complete (Phases 1-18 + 21):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 660 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering,
+Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 833 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering,
 
 **Phase 21 Features:** risk supply chain mapping (React Flow vendor graph), regulatory change tracker (timeline + impact assessment), peer benchmarking (differential privacy + anonymized comparison), ROI calculator (ALE/ROSI formulas), remediation burndown charts (Recharts), framework control overlap (Sankey + matrix), bento grid layouts (3 presets with customization), data storytelling (anomaly detection + narrative insights), compliance chain graph (requirement→control→evidence visualization),
 
-**Phase 16-18 Features:** Evidence file versioning (SHA-256 checksums), virus scanning (ClamAV), storage quota management (org-level), bulk file upload, SMTP email service, scheduled report generation (PDF/Excel), Handlebars/Markdown templates, cron job management, recurring assessments, report file lifecycle management, bulk import service (CSV/Excel with Zod validation), task management CRUD, task comments and discussion threads, conflict detection and resolution, import job tracking with progress monitoring.
+**Phase 16-18 Backend Features:** Evidence file versioning (SHA-256 checksums), virus scanning (ClamAV), storage quota management (org-level), bulk file upload, SMTP email service, scheduled report generation (PDF/Excel), Handlebars/Markdown templates, cron job management, recurring assessments, report file lifecycle management, bulk import service (CSV/Excel with Zod validation), task management CRUD, task comments and discussion threads, conflict detection and resolution, import job tracking with progress monitoring.
+
+**Phase 16-18 Frontend UI (NEW):** Evidence version history panel with diff viewer, storage quota indicator widget (admin-only), full task management page (list/detail/create/comments), bulk import wizard (multi-step with preview), report template manager, `/tasks` sidebar route, i18n expansion (+158 keys per language).
 
 **Infrastructure:** 42 database models, 15 enums, 35 lib modules, 97 API route files, 833 unit tests (46 files), 28 E2E tests, 100% TypeScript strict mode, production-ready build.
 
@@ -1118,7 +1123,9 @@ Enterprise SSO/SAML integration, mobile app, real-time collaboration, advanced S
 ---
 
 **Codebase Summary Generated:** 2026-02-09
-**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 + Security Hardening)
+**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend + Frontend UI)
 **Maintained By:** docs-manager agent
 **Test Status:** 833/833 passing (100%)
 **Security Status:** All CRITICAL + HIGH findings resolved
+**UI Components:** 124+ across 20 directories
+**Frontend Implementation:** 100% complete for Phases 16-18

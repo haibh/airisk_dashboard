@@ -5,13 +5,13 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ImportPreviewTable } from './import-preview-table';
 
@@ -63,11 +63,11 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch assessments on open
-  useState(() => {
+  useEffect(() => {
     if (open) {
       fetchAssessments();
     }
-  });
+  }, [open]);
 
   async function fetchAssessments() {
     try {
@@ -77,7 +77,7 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
       setAssessments(data.assessments || []);
     } catch (error) {
       console.error('Error fetching assessments:', error);
-      toast.error('Failed to load assessments');
+      toast.error(t('errors.loadAssessmentsFailed'));
     }
   }
 
@@ -88,7 +88,7 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
       if (ext === 'csv' || ext === 'xlsx') {
         setFile(selectedFile);
       } else {
-        toast.error('Please select a CSV or XLSX file');
+        toast.error(t('errors.invalidFileFormat'));
       }
     }
   }
@@ -105,7 +105,7 @@ export function BulkImportWizard({ open, onClose, onSuccess }: BulkImportWizardP
       if (ext === 'csv' || ext === 'xlsx') {
         setFile(droppedFile);
       } else {
-        toast.error('Please select a CSV or XLSX file');
+        toast.error(t('errors.invalidFileFormat'));
       }
     }
   }
