@@ -147,6 +147,12 @@ export async function POST(request: NextRequest) {
       return validationError('At least one file is required');
     }
 
+    // Limit bulk upload to 20 files per request to prevent resource exhaustion
+    const MAX_FILES_PER_REQUEST = 20;
+    if (filesToUpload.length > MAX_FILES_PER_REQUEST) {
+      return validationError(`Maximum ${MAX_FILES_PER_REQUEST} files per upload request`);
+    }
+
     // Process each file
     const results = [];
     for (const file of filesToUpload) {
@@ -187,7 +193,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Write to temporary file for virus scanning
-      const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const sanitizedFilename = file.name
+        .replace(/[^a-zA-Z0-9.-]/g, '_')
+        .replace(/\.{2,}/g, '.'); // Collapse consecutive dots to prevent path traversal
       const tempFilePath = `/tmp/${randomUUID()}_${sanitizedFilename}`;
       writeFileSync(tempFilePath, buffer);
       tempFiles.push(tempFilePath);

@@ -153,7 +153,9 @@ export async function POST(
     }
 
     // Write to temporary file for virus scanning
-    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const sanitizedFilename = file.name
+      .replace(/[^a-zA-Z0-9.-]/g, '_')
+      .replace(/\.{2,}/g, '.'); // Collapse consecutive dots to prevent path traversal
     tempFilePath = `/tmp/${randomUUID()}_${sanitizedFilename}`;
     writeFileSync(tempFilePath, buffer);
 

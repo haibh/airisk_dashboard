@@ -5,6 +5,7 @@
 
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { resolve, normalize } from 'path';
 import { logger } from './logger';
 
 const execFileAsync = promisify(execFile);
@@ -29,6 +30,16 @@ export async function scanFile(filePath: string): Promise<ScanResult> {
   if (!enabled) {
     logger.debug('Virus scanning disabled', { context: 'VirusScanner' });
     return { clean: true, skipped: true };
+  }
+
+  // Validate file path is within /tmp/ to prevent path traversal
+  const resolvedPath = resolve(normalize(filePath));
+  if (!resolvedPath.startsWith('/tmp/')) {
+    logger.error('Virus scan rejected: file path outside /tmp/', {
+      context: 'VirusScanner',
+      data: { filePath, resolvedPath },
+    });
+    throw new Error('File path must be in /tmp/ directory');
   }
 
   try {

@@ -131,6 +131,11 @@ describe('organization-storage-quota-service', () => {
   });
 
   describe('checkQuota', () => {
+    // checkQuota uses prisma.$transaction, so we need to pass `prisma` itself as the tx
+    beforeEach(() => {
+      vi.mocked(prisma.$transaction).mockImplementation((callback: any) => callback(prisma));
+    });
+
     it('allows upload when quota not exceeded', async () => {
       vi.mocked(prisma.evidence.aggregate).mockResolvedValue({
         _sum: { fileSize: 1000000 },
@@ -190,7 +195,6 @@ describe('organization-storage-quota-service', () => {
       const result = await checkQuota('org-1', additionalBytes);
 
       expect(result.allowed).toBe(true);
-      // remaining is calculated before the upload, so it's maxBytes - usedBytes
       expect(result.remaining).toBe(500000);
     });
 
@@ -226,13 +230,12 @@ describe('organization-storage-quota-service', () => {
 
       const result = await checkQuota('org-1', 500000);
 
-      // Verify check completes successfully
       expect(result).toBeDefined();
       expect(result.allowed).toBeDefined();
     });
 
     it('throws error when quota check fails', async () => {
-      vi.mocked(prisma.evidence.aggregate).mockRejectedValue(
+      vi.mocked(prisma.$transaction).mockRejectedValue(
         new Error('Query failed')
       );
 

@@ -75,17 +75,33 @@ export async function checkQuota(
   additionalBytes: number
 ): Promise<{ allowed: boolean; remaining: number }> {
   try {
-    const usage = await getStorageUsage(orgId);
-    const newTotal = usage.usedBytes + additionalBytes;
-    const remaining = usage.maxBytes - usage.usedBytes;
-    const allowed = newTotal <= usage.maxBytes;
+    // Use transaction to prevent race condition with concurrent uploads
+    return await prisma.$transaction(async (tx) => {
+      const result = await tx.evidence.aggregate({
+        where: { organizationId: orgId },
+        _sum: { fileSize: true },
+      });
 
-    logger.debug('Quota check performed', {
-      context: 'StorageQuotaService',
-      data: { orgId, additionalBytes, allowed, remaining },
+      const usedBytes = result._sum.fileSize || 0;
+
+      const organization = await tx.organization.findUnique({
+        where: { id: orgId },
+        select: { settings: true },
+      });
+
+      const maxBytes =
+        (organization?.settings as any)?.storageQuota?.maxBytes || DEFAULT_MAX_BYTES;
+
+      const remaining = maxBytes - usedBytes;
+      const allowed = (usedBytes + additionalBytes) <= maxBytes;
+
+      logger.debug('Quota check performed', {
+        context: 'StorageQuotaService',
+        data: { orgId, additionalBytes, allowed, remaining },
+      });
+
+      return { allowed, remaining };
     });
-
-    return { allowed, remaining };
   } catch (error) {
     logger.error('Failed to check quota', error, {
       context: 'StorageQuotaService',
