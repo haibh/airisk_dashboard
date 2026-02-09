@@ -15,7 +15,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { AlertCircle, Loader2, Shield } from 'lucide-react';
+import { AlertCircle, Loader2, Shield, Info } from 'lucide-react';
+import { SSOLoginButton } from '@/components/auth/sso-login-button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+interface SSOConfig {
+  enabled: boolean;
+  forceSSO: boolean;
+  organizationName?: string;
+}
 
 export default function LoginPage() {
   const t = useTranslations();
@@ -25,11 +33,56 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [ssoConfig, setSSOConfig] = useState<SSOConfig | null>(null);
+  const [checkingSSO, setCheckingSSO] = useState(false);
+
+  const checkSSOAvailability = async (emailValue: string) => {
+    if (!emailValue || !emailValue.includes('@')) {
+      setSSOConfig(null);
+      return;
+    }
+
+    try {
+      setCheckingSSO(true);
+      const response = await fetch(`/api/auth/saml/authorize?email=${encodeURIComponent(emailValue)}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setSSOConfig({
+          enabled: true,
+          forceSSO: data.forceSSO || false,
+          organizationName: data.organizationName,
+        });
+      } else {
+        setSSOConfig(null);
+      }
+    } catch (err) {
+      // SSO not available, continue with password login
+      setSSOConfig(null);
+    } finally {
+      setCheckingSSO(false);
+    }
+  };
+
+  const handleEmailBlur = () => {
+    checkSSOAvailability(email);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+
+    // Check SSO before attempting password login
+    if (!ssoConfig) {
+      await checkSSOAvailability(email);
+    }
+
+    // If SSO is forced, redirect to SSO
+    if (ssoConfig?.forceSSO) {
+      window.location.href = `/api/auth/saml/authorize?email=${encodeURIComponent(email)}`;
+      return;
+    }
 
     try {
       const result = await signIn('credentials', {
@@ -85,49 +138,77 @@ export default function LoginPage() {
               placeholder="user@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={handleEmailBlur}
               required
-              disabled={isLoading}
+              disabled={isLoading || checkingSSO}
               autoComplete="email"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('auth.password')}</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              autoComplete="current-password"
-            />
-          </div>
+          {ssoConfig?.enabled && !ssoConfig.forceSSO && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>{t('login.sso.ssoDetected')}</AlertDescription>
+            </Alert>
+          )}
+
+          {ssoConfig?.forceSSO && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>{t('login.sso.forceSSOMessage')}</AlertDescription>
+            </Alert>
+          )}
+
+          {!ssoConfig?.forceSSO && (
+            <div className="space-y-2">
+              <Label htmlFor="password">{t('auth.password')}</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                autoComplete="current-password"
+              />
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('common.loading')}
-              </>
-            ) : (
-              t('auth.login')
-            )}
-          </Button>
+          {!ssoConfig?.forceSSO && (
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || checkingSSO}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('common.loading')}
+                </>
+              ) : (
+                t('auth.login')
+              )}
+            </Button>
+          )}
 
-          <Button
-            type="button"
-            variant="link"
-            className="text-sm text-muted-foreground hover:text-foreground"
-            disabled={isLoading}
-          >
-            {t('auth.forgotPassword')}
-          </Button>
+          {ssoConfig?.enabled && (
+            <SSOLoginButton
+              email={email}
+              organizationName={ssoConfig.organizationName}
+            />
+          )}
+
+          {!ssoConfig?.forceSSO && (
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground hover:text-foreground"
+              disabled={isLoading}
+            >
+              {t('auth.forgotPassword')}
+            </Button>
+          )}
         </CardFooter>
       </form>
     </Card>

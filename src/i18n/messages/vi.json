@@ -341,6 +341,13 @@
     "authRequired": "Yêu cầu xác thực",
     "sessionExpired": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại."
   },
+  "login": {
+    "sso": {
+      "signInWithSSO": "Đăng nhập bằng SSO",
+      "ssoDetected": "SSO đã được cấu hình cho tổ chức của bạn",
+      "forceSSOMessage": "Tổ chức của bạn yêu cầu xác thực SSO"
+    }
+  },
   "roles": {
     "admin": "Quản trị viên",
     "riskManager": "Quản lý rủi ro",
@@ -408,7 +415,33 @@
       "auditLog": "Nhật ký kiểm toán",
       "apiKeys": "Khóa API",
       "webhooks": "Webhooks",
-      "complianceScoring": "Điểm tuân thủ"
+      "complianceScoring": "Điểm tuân thủ",
+      "sso": "Cấu hình SSO",
+      "scim": "Cung cấp SCIM"
+    },
+    "sso": {
+      "metadataUrl": "URL Metadata",
+      "metadataXml": "Metadata XML",
+      "idpEntityId": "ID Thực thể IdP",
+      "idpSsoUrl": "URL SSO IdP",
+      "idpCertificate": "Chứng chỉ IdP (PEM)",
+      "allowedDomains": "Tên miền Email cho phép",
+      "defaultRole": "Vai trò mặc định cho người dùng SSO",
+      "forceSSO": "Bắt buộc SSO (tắt đăng nhập bằng mật khẩu)",
+      "forceSSOWarning": "Cảnh báo: Chỉ bật sau khi xác minh SSO hoạt động. Ít nhất một quản trị viên phải giữ quyền truy cập bằng mật khẩu.",
+      "testConnection": "Kiểm tra Kết nối",
+      "testSuccess": "Kiểm tra kết nối thành công",
+      "testFailed": "Kiểm tra kết nối thất bại",
+      "spMetadata": "Tải xuống Metadata SP",
+      "saveConnection": "Lưu Cấu hình SSO"
+    },
+    "scim": {
+      "title": "Cung cấp SCIM",
+      "enable": "Bật SCIM",
+      "endpoint": "URL Endpoint SCIM",
+      "generateToken": "Tạo Token SCIM",
+      "tokenGenerated": "Token đã được tạo. Sao chép ngay — nó sẽ không được hiển thị lại.",
+      "tokenSet": "Token SCIM đã được cấu hình"
     },
     "auditLog": {
       "title": "Nhật ký kiểm toán",

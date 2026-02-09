@@ -341,6 +341,13 @@
     "authRequired": "Authentication required",
     "sessionExpired": "Your session has expired. Please login again."
   },
+  "login": {
+    "sso": {
+      "signInWithSSO": "Sign in with SSO",
+      "ssoDetected": "SSO is configured for your organization",
+      "forceSSOMessage": "Your organization requires SSO authentication"
+    }
+  },
   "roles": {
     "admin": "Administrator",
     "riskManager": "Risk Manager",
@@ -408,7 +415,33 @@
       "auditLog": "Audit Log",
       "apiKeys": "API Keys",
       "webhooks": "Webhooks",
-      "complianceScoring": "Compliance Scoring"
+      "complianceScoring": "Compliance Scoring",
+      "sso": "SSO Configuration",
+      "scim": "SCIM Provisioning"
+    },
+    "sso": {
+      "metadataUrl": "Metadata URL",
+      "metadataXml": "Metadata XML",
+      "idpEntityId": "IdP Entity ID",
+      "idpSsoUrl": "IdP SSO URL",
+      "idpCertificate": "IdP Certificate (PEM)",
+      "allowedDomains": "Allowed Email Domains",
+      "defaultRole": "Default Role for SSO Users",
+      "forceSSO": "Force SSO (disable password login)",
+      "forceSSOWarning": "Warning: Enable only after verifying SSO works. At least one admin must retain password access.",
+      "testConnection": "Test Connection",
+      "testSuccess": "Connection test successful",
+      "testFailed": "Connection test failed",
+      "spMetadata": "Download SP Metadata",
+      "saveConnection": "Save SSO Configuration"
+    },
+    "scim": {
+      "title": "SCIM Provisioning",
+      "enable": "Enable SCIM",
+      "endpoint": "SCIM Endpoint URL",
+      "generateToken": "Generate SCIM Token",
+      "tokenGenerated": "Token generated. Copy it now — it won't be shown again.",
+      "tokenSet": "SCIM token is configured"
     },
     "auditLog": {
       "title": "Audit Log",
