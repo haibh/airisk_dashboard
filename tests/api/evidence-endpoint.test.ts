@@ -353,7 +353,10 @@ describe('Evidence API - Approval Workflow', () => {
       expect(data.success).toBe(true);
       expect(prismaMock.evidence.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: { reviewStatus: 'APPROVED' },
+          data: expect.objectContaining({
+            reviewStatus: 'APPROVED',
+            reviewedById: 'user-1',
+          }),
         })
       );
       expect(prismaMock.auditLog.create).toHaveBeenCalled();
@@ -380,7 +383,10 @@ describe('Evidence API - Approval Workflow', () => {
       expect(data.success).toBe(true);
       expect(prismaMock.evidence.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: { reviewStatus: 'REJECTED' },
+          data: expect.objectContaining({
+            reviewStatus: 'REJECTED',
+            reviewedById: 'user-1',
+          }),
         })
       );
     });

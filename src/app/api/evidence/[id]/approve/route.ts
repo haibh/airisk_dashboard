@@ -58,6 +58,7 @@ export async function POST(
     }
 
     const { action, reason } = validation.data;
+    const reviewNotes = (validation.data as any).reviewNotes;
 
     // Determine new status based on action
     let newStatus: EvidenceStatus;
@@ -90,6 +91,8 @@ export async function POST(
       where: { id },
       data: {
         reviewStatus: newStatus,
+        reviewedById: session.user.id,
+        reviewNotes: reviewNotes || null,
       },
       include: {
         uploadedBy: {

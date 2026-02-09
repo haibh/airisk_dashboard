@@ -22,8 +22,16 @@ export interface JobConfig {
   riskCategories?: string[];
   severityLevels?: string[];
   includeEvidence?: boolean;
-  format?: 'json' | 'csv';
+  format?: 'json' | 'csv' | 'pdf' | 'xlsx';
   recipients?: string[];
+  template?: {
+    title?: string;
+    sections?: string[];
+    headerText?: string;
+    footerText?: string;
+  };
+  sourceAssessmentId?: string; // for RECURRING_ASSESSMENT
+  maxAgeDays?: number; // for REPORT_CLEANUP
   [key: string]: unknown;
 }
 
@@ -33,6 +41,8 @@ export interface JobResult {
   error?: string;
   duration: number;
   executedAt: string;
+  reportKey?: string;
+  downloadUrl?: string;
 }
 
 export interface JobHandler {

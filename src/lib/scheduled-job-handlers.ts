@@ -16,6 +16,125 @@ import {
   type JobConfig,
   type JobResult,
 } from './scheduled-job-runner';
+import { saveReport, getReportDownloadUrl } from './scheduled-report-file-manager';
+import { sendReportEmail } from './email-smtp-service';
+import { generateComplianceExcel, generateRiskRegisterExcel, generateAssessmentExcel, generateActivityLogExcel } from './scheduled-report-excel-generator';
+import { generateCompliancePdf, generateRiskRegisterPdf, generateAssessmentPdf, generateActivityLogPdf } from './scheduled-report-pdf-generator';
+
+// ============================================================================
+// HELPER: FORMAT AND SEND REPORT
+// ============================================================================
+
+/**
+ * Generate report file based on format and optionally send via email
+ */
+async function handleReportFormatAndEmail(
+  data: any,
+  reportType: string,
+  config: JobConfig,
+  orgId: string
+): Promise<{ reportKey?: string; downloadUrl?: string }> {
+  const format = config.format || 'json';
+
+  let buffer: Buffer;
+  let filename: string;
+
+  // Generate buffer based on format
+  switch (format) {
+    case 'xlsx':
+      switch (reportType) {
+        case 'compliance':
+          buffer = await generateComplianceExcel(data);
+          break;
+        case 'risk-register':
+          buffer = await generateRiskRegisterExcel(data);
+          break;
+        case 'activity-log':
+          buffer = await generateActivityLogExcel(data);
+          break;
+        case 'gap-analysis':
+          // Reuse compliance Excel for gap analysis
+          buffer = await generateComplianceExcel(data);
+          break;
+        default:
+          buffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
+      }
+      filename = `${reportType}_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+      break;
+
+    case 'pdf':
+      switch (reportType) {
+        case 'compliance':
+          buffer = await generateCompliancePdf(data, config.template);
+          break;
+        case 'risk-register':
+          buffer = await generateRiskRegisterPdf(data, config.template);
+          break;
+        case 'activity-log':
+          buffer = await generateActivityLogPdf(data, config.template);
+          break;
+        case 'gap-analysis':
+          buffer = await generateCompliancePdf(data, config.template);
+          break;
+        default:
+          buffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
+      }
+      filename = `${reportType}_${new Date().toISOString().replace(/[:.]/g, '-')}.pdf`;
+      break;
+
+    case 'csv':
+      // Simple CSV conversion (first level only)
+      const csvLines: string[] = [];
+      if (Array.isArray(data)) {
+        if (data.length > 0) {
+          csvLines.push(Object.keys(data[0]).join(','));
+          data.forEach((row) => {
+            csvLines.push(Object.values(row).map(v => JSON.stringify(v)).join(','));
+          });
+        }
+      }
+      buffer = Buffer.from(csvLines.join('\n'), 'utf-8');
+      filename = `${reportType}_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+      break;
+
+    case 'json':
+    default:
+      buffer = Buffer.from(JSON.stringify(data, null, 2), 'utf-8');
+      filename = `${reportType}_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+  }
+
+  // Save to S3 if format is not JSON
+  let reportKey: string | undefined;
+  let downloadUrl: string | undefined;
+
+  if (format !== 'json') {
+    try {
+      reportKey = await saveReport(orgId, reportType, buffer, format);
+      downloadUrl = await getReportDownloadUrl(reportKey);
+      logger.info(`Report saved: ${reportKey}`);
+    } catch (error) {
+      logger.error('Failed to save report to S3', error);
+    }
+  }
+
+  // Send email if recipients specified
+  if (config.recipients && config.recipients.length > 0) {
+    try {
+      await sendReportEmail({
+        recipients: config.recipients,
+        reportType,
+        buffer,
+        filename,
+      });
+      logger.info(`Report email sent to ${config.recipients.length} recipients`);
+    } catch (error) {
+      logger.error('Failed to send report email', error);
+      // Don't fail the job if email fails
+    }
+  }
+
+  return { reportKey, downloadUrl };
+}
 
 // ============================================================================
 // COMPLIANCE REPORT HANDLER
@@ -110,22 +229,40 @@ async function executeComplianceReport(
       };
     });
 
+    const reportData = {
+      organizationId: orgId,
+      reportType: 'compliance',
+      frameworks: complianceData,
+      totalFrameworks: frameworks.length,
+      totalControls: complianceData.reduce((sum, f) => sum + f.totalControls, 0),
+      implementedControls: complianceData.reduce((sum, f) => sum + f.implementedControls, 0),
+      averageCoverage: complianceData.reduce((sum, f) => sum + f.controlCoverage, 0) / (complianceData.length || 1),
+      criticalRisks: complianceData.reduce((sum, f) => sum + f.risksBySeverity.CRITICAL, 0),
+      highRisks: complianceData.reduce((sum, f) => sum + f.risksBySeverity.HIGH, 0),
+      summary: {
+        totalFrameworks: frameworks.length,
+        totalAssessments: complianceData.reduce(
+          (sum, f) => sum + f.totalAssessments,
+          0
+        ),
+      },
+    };
+
+    // Handle format and email
+    const { reportKey, downloadUrl } = await handleReportFormatAndEmail(
+      reportData,
+      'compliance',
+      config,
+      orgId
+    );
+
     const duration = Date.now() - startTime;
 
     return {
       success: true,
-      data: {
-        organizationId: orgId,
-        reportType: 'compliance',
-        frameworks: complianceData,
-        summary: {
-          totalFrameworks: frameworks.length,
-          totalAssessments: complianceData.reduce(
-            (sum, f) => sum + f.totalAssessments,
-            0
-          ),
-        },
-      },
+      data: reportData,
+      reportKey,
+      downloadUrl,
       duration,
       executedAt: new Date().toISOString(),
     };
@@ -262,34 +399,59 @@ async function executeRiskRegister(
       {} as Record<string, number>
     );
 
+    const reportData = {
+      organizationId: orgId,
+      reportType: 'risk-register',
+      totalRisks: filteredRisks.length,
+      risks: filteredRisks.map(risk => ({
+        id: risk.id,
+        title: risk.title,
+        category: risk.category,
+        likelihood: risk.likelihood,
+        impact: risk.impact,
+        inherentScore: risk.inherentScore,
+        residualScore: risk.residualScore,
+        severity: classifyRisk(risk.residualScore),
+        treatmentStatus: risk.treatmentStatus,
+        aiSystemName: risk.assessment.aiSystem?.name,
+        frameworkName: risk.assessment.framework?.shortName,
+      })),
+      risksByCategory,
+      risksBySeverity,
+      summary: {
+        highestRisk: filteredRisks[0]
+          ? {
+              id: filteredRisks[0].id,
+              title: filteredRisks[0].title,
+              score: filteredRisks[0].residualScore,
+            }
+          : null,
+        risksTreated: filteredRisks.filter(
+          (r) => r.treatmentStatus === 'COMPLETED'
+        ).length,
+        risksOverdue: filteredRisks.filter(
+          (r) =>
+            r.treatmentDueDate && new Date(r.treatmentDueDate) < new Date()
+        ).length,
+      },
+      generatedAt: new Date().toISOString(),
+    };
+
+    // Handle format and email
+    const { reportKey, downloadUrl } = await handleReportFormatAndEmail(
+      reportData,
+      'risk-register',
+      config,
+      orgId
+    );
+
     const duration = Date.now() - startTime;
 
     return {
       success: true,
-      data: {
-        organizationId: orgId,
-        reportType: 'risk-register',
-        totalRisks: filteredRisks.length,
-        risksByCategory,
-        risksBySeverity,
-        summary: {
-          highestRisk: filteredRisks[0]
-            ? {
-                id: filteredRisks[0].id,
-                title: filteredRisks[0].title,
-                score: filteredRisks[0].residualScore,
-              }
-            : null,
-          risksTreated: filteredRisks.filter(
-            (r) => r.treatmentStatus === 'COMPLETED'
-          ).length,
-          risksOverdue: filteredRisks.filter(
-            (r) =>
-              r.treatmentDueDate && new Date(r.treatmentDueDate) < new Date()
-          ).length,
-        },
-        generatedAt: new Date().toISOString(),
-      },
+      data: reportData,
+      reportKey,
+      downloadUrl,
       duration,
       executedAt: new Date().toISOString(),
     };
@@ -410,23 +572,45 @@ async function executeActivityLog(
       .sort((a, b) => b.activityCount - a.activityCount)
       .slice(0, 10);
 
+    const reportData = {
+      organizationId: orgId,
+      reportType: 'activity-log',
+      period: {
+        startDate: dateFilter.createdAt?.gte?.toISOString(),
+        endDate: dateFilter.createdAt?.lte?.toISOString() || new Date().toISOString(),
+      },
+      totalLogs: logs.length,
+      logs: logs.map(log => ({
+        timestamp: log.createdAt,
+        userName: log.user.name,
+        action: log.action,
+        entityType: log.entityType,
+        entityId: log.entityId,
+        ipAddress: log.ipAddress,
+        oldValues: log.oldValues,
+        newValues: log.newValues,
+      })),
+      logsByAction,
+      logsByEntity,
+      topUsers,
+      generatedAt: new Date().toISOString(),
+    };
+
+    // Handle format and email
+    const { reportKey, downloadUrl } = await handleReportFormatAndEmail(
+      reportData,
+      'activity-log',
+      config,
+      orgId
+    );
+
     const duration = Date.now() - startTime;
 
     return {
       success: true,
-      data: {
-        organizationId: orgId,
-        reportType: 'activity-log',
-        period: {
-          startDate: dateFilter.createdAt?.gte?.toISOString(),
-          endDate: dateFilter.createdAt?.lte?.toISOString() || new Date().toISOString(),
-        },
-        totalLogs: logs.length,
-        logsByAction,
-        logsByEntity,
-        topUsers,
-        generatedAt: new Date().toISOString(),
-      },
+      data: reportData,
+      reportKey,
+      downloadUrl,
       duration,
       executedAt: new Date().toISOString(),
     };
@@ -543,21 +727,127 @@ async function executeGapAnalysis(
       };
     });
 
+    const reportData = {
+      organizationId: orgId,
+      reportType: 'gap-analysis',
+      frameworks: gapAnalysis,
+      summary: {
+        totalFrameworks: frameworks.length,
+        totalGaps: gapAnalysis.reduce((sum, f) => sum + f.notImplementedCount, 0),
+        avgImplementationRate:
+          gapAnalysis.reduce((sum, f) => sum + f.implementationRate, 0) /
+          (gapAnalysis.length || 1),
+      },
+      generatedAt: new Date().toISOString(),
+    };
+
+    // Handle format and email
+    const { reportKey, downloadUrl } = await handleReportFormatAndEmail(
+      reportData,
+      'gap-analysis',
+      config,
+      orgId
+    );
+
+    const duration = Date.now() - startTime;
+
+    return {
+      success: true,
+      data: reportData,
+      reportKey,
+      downloadUrl,
+      duration,
+      executedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error('Gap analysis generation failed:', error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration,
+      executedAt: new Date().toISOString(),
+    };
+  }
+}
+
+// ============================================================================
+// RECURRING ASSESSMENT HANDLER
+// ============================================================================
+
+async function executeRecurringAssessment(
+  config: JobConfig,
+  orgId: string
+): Promise<JobResult> {
+  const startTime = Date.now();
+
+  try {
+    const { sourceAssessmentId } = config;
+
+    if (!sourceAssessmentId) {
+      throw new Error('sourceAssessmentId is required for recurring assessment');
+    }
+
+    // Get source assessment
+    const sourceAssessment = await prisma.riskAssessment.findFirst({
+      where: {
+        id: sourceAssessmentId,
+        organizationId: orgId,
+      },
+      include: {
+        risks: {
+          include: {
+            controls: true,
+          },
+        },
+      },
+    });
+
+    if (!sourceAssessment) {
+      throw new Error(`Source assessment not found: ${sourceAssessmentId}`);
+    }
+
+    // Create new assessment based on source
+    const newAssessment = await prisma.riskAssessment.create({
+      data: {
+        title: `${sourceAssessment.title} (Recurring - ${new Date().toLocaleDateString()})`,
+        organizationId: orgId,
+        frameworkId: sourceAssessment.frameworkId,
+        aiSystemId: sourceAssessment.aiSystemId,
+        createdById: sourceAssessment.createdById,
+        status: 'IN_PROGRESS',
+        risks: {
+          create: sourceAssessment.risks.map((risk) => ({
+            title: risk.title,
+            description: risk.description,
+            category: risk.category,
+            likelihood: risk.likelihood,
+            impact: risk.impact,
+            inherentScore: risk.inherentScore,
+            residualScore: risk.residualScore,
+            treatmentStatus: 'PENDING',
+            controls: {
+              create: risk.controls.map((rc) => ({
+                controlId: rc.controlId,
+                effectiveness: 0, // Reset effectiveness for new assessment
+                implementationNotes: '',
+              })),
+            },
+          })),
+        },
+      },
+    });
+
     const duration = Date.now() - startTime;
 
     return {
       success: true,
       data: {
         organizationId: orgId,
-        reportType: 'gap-analysis',
-        frameworks: gapAnalysis,
-        summary: {
-          totalFrameworks: frameworks.length,
-          totalGaps: gapAnalysis.reduce((sum, f) => sum + f.notImplementedCount, 0),
-          avgImplementationRate:
-            gapAnalysis.reduce((sum, f) => sum + f.implementationRate, 0) /
-            gapAnalysis.length,
-        },
+        sourceAssessmentId,
+        newAssessmentId: newAssessment.id,
+        risksCreated: sourceAssessment.risks.length,
         generatedAt: new Date().toISOString(),
       },
       duration,
@@ -565,7 +855,66 @@ async function executeGapAnalysis(
     };
   } catch (error) {
     const duration = Date.now() - startTime;
-    logger.error('Gap analysis generation failed:', error);
+    logger.error('Recurring assessment creation failed:', error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      duration,
+      executedAt: new Date().toISOString(),
+    };
+  }
+}
+
+// ============================================================================
+// REPORT CLEANUP HANDLER
+// ============================================================================
+
+async function executeReportCleanup(
+  config: JobConfig,
+  orgId: string
+): Promise<JobResult> {
+  const startTime = Date.now();
+
+  try {
+    const maxAgeDays = config.maxAgeDays || 30;
+    const cutoffDate = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000);
+
+    // Delete old scheduled job records
+    const deletedJobs = await prisma.scheduledJob.deleteMany({
+      where: {
+        organizationId: orgId,
+        lastRunAt: {
+          lt: cutoffDate,
+        },
+        status: {
+          in: ['FAILED'],
+        },
+      },
+    });
+
+    logger.info(`Cleaned up ${deletedJobs.count} old job records for org ${orgId}`);
+
+    // TODO: Also cleanup old report files from S3 when S3 listing is implemented
+
+    const duration = Date.now() - startTime;
+
+    return {
+      success: true,
+      data: {
+        organizationId: orgId,
+        maxAgeDays,
+        cutoffDate: cutoffDate.toISOString(),
+        jobsDeleted: deletedJobs.count,
+        filesDeleted: 0, // Placeholder until S3 cleanup is implemented
+        generatedAt: new Date().toISOString(),
+      },
+      duration,
+      executedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    logger.error('Report cleanup failed:', error);
 
     return {
       success: false,
@@ -604,7 +953,17 @@ export function initializeJobHandlers(): void {
     execute: executeGapAnalysis,
   });
 
-  logger.info('All job handlers initialized');
+  registerJobHandler({
+    type: JobType.RECURRING_ASSESSMENT,
+    execute: executeRecurringAssessment,
+  });
+
+  registerJobHandler({
+    type: JobType.REPORT_CLEANUP,
+    execute: executeReportCleanup,
+  });
+
+  logger.info('All job handlers initialized (6 handlers)');
 }
 
 // Auto-initialize handlers on module load

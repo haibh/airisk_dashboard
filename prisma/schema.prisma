@@ -40,7 +40,8 @@ model Organization {
   rosiCalculations ROSICalculation[]
   insights         GeneratedInsight[]
   anomalyEvents    AnomalyEvent[]
-  complianceChains ComplianceChain[]
+  complianceChains  ComplianceChain[]
+  reportTemplates   ReportTemplate[]
 
   @@map("organizations")
 }
@@ -68,6 +69,8 @@ model User {
   createdAssessments RiskAssessment[]  @relation("AssessmentCreator")
   assignedTasks      Task[]            @relation("TaskAssignee")
   uploadedEvidence   Evidence[]        @relation("EvidenceUploader")
+  reviewedEvidence   Evidence[]        @relation("EvidenceReviewer")
+  evidenceVersions   EvidenceVersion[] @relation("VersionUploader")
   auditLogs          AuditLog[]
   createdJobs        ScheduledJob[]    @relation("JobCreator")
   savedFilters       SavedFilter[]     @relation("UserSavedFilters")
@@ -76,6 +79,8 @@ model User {
   webhooks           Webhook[]         @relation("WebhookCreator")
   notifications      Notification[]    @relation("UserNotifications")
   dashboardLayouts   DashboardLayout[] @relation("UserDashboardLayouts")
+  reportTemplates    ReportTemplate[]  @relation("ReportTemplateCreator")
+  taskComments       TaskComment[]     @relation("TaskCommenter")
 
   // NextAuth relations
   accounts Account[]
@@ -470,18 +475,20 @@ model RiskControl {
 // ============================================================================
 
 model Evidence {
-  id           String         @id @default(cuid())
-  filename     String
-  originalName String
-  mimeType     String
-  fileSize     Int
-  storagePath  String
-  hashSha256   String
-  description  String?        @db.Text
-  reviewStatus EvidenceStatus @default(SUBMITTED)
-  validUntil   DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id             String         @id @default(cuid())
+  filename       String
+  originalName   String
+  mimeType       String
+  fileSize       Int
+  storagePath    String
+  hashSha256     String
+  description    String?        @db.Text
+  reviewStatus   EvidenceStatus @default(SUBMITTED)
+  currentVersion Int            @default(1)
+  reviewNotes    String?        @db.Text
+  validUntil     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   // Organization relation
   organizationId String
@@ -491,8 +498,13 @@ model Evidence {
   uploadedById String
   uploadedBy   User   @relation("EvidenceUploader", fields: [uploadedById], references: [id])
 
+  // Reviewer relation
+  reviewedById String?
+  reviewedBy   User?  @relation("EvidenceReviewer", fields: [reviewedById], references: [id])
+
   // Relations
-  links EvidenceLink[]
+  links    EvidenceLink[]
+  versions EvidenceVersion[]
 
   @@map("evidence")
 }
@@ -503,6 +515,29 @@ enum EvidenceStatus {
   APPROVED
   REJECTED
   EXPIRED
+}
+
+model EvidenceVersion {
+  id            String   @id @default(cuid())
+  versionNumber Int
+  filename      String
+  originalName  String
+  mimeType      String
+  fileSize      Int
+  storagePath   String
+  hashSha256    String
+  createdAt     DateTime @default(now())
+
+  // Evidence parent relation
+  evidenceId String
+  evidence   Evidence @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+
+  // Uploader relation
+  uploadedById String
+  uploadedBy   User   @relation("VersionUploader", fields: [uploadedById], references: [id])
+
+  @@index([evidenceId, versionNumber])
+  @@map("evidence_versions")
 }
 
 model EvidenceLink {
@@ -560,7 +595,26 @@ model Task {
   assigneeId String?
   assignee   User?   @relation("TaskAssignee", fields: [assigneeId], references: [id])
 
+  // Relations
+  comments TaskComment[]
+
   @@map("tasks")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  // Task relation
+  taskId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  // Author relation
+  authorId String
+  author   User   @relation("TaskCommenter", fields: [authorId], references: [id])
+
+  @@map("task_comments")
 }
 
 enum TaskStatus {
@@ -637,6 +691,8 @@ enum JobType {
   RISK_REGISTER
   ACTIVITY_LOG
   GAP_ANALYSIS
+  RECURRING_ASSESSMENT
+  REPORT_CLEANUP
 }
 
 enum JobStatus {
@@ -644,6 +700,31 @@ enum JobStatus {
   PAUSED
   RUNNING
   FAILED
+}
+
+// ============================================================================
+// REPORT TEMPLATES
+// ============================================================================
+
+model ReportTemplate {
+  id         String   @id @default(cuid())
+  name       String
+  dataSource String // 'risks' | 'assessments' | 'compliance' | 'evidence' | 'ai-systems'
+  columns    Json // Field selections
+  filters    Json? // Filter criteria
+  groupBy    String?
+  sortBy     String?
+  format     String   @default("csv") // 'csv' | 'xlsx' | 'pdf'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation("ReportTemplateCreator", fields: [createdById], references: [id])
+
+  @@map("report_templates")
 }
 
 // ============================================================================

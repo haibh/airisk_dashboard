@@ -1,5 +1,13 @@
 import { vi } from 'vitest';
 
+// Mock fs module for file operations
+vi.mock('fs', () => ({
+  writeFileSync: vi.fn(),
+  unlinkSync: vi.fn(),
+  existsSync: vi.fn(() => true),
+  readFileSync: vi.fn(() => Buffer.from('mock file content')),
+}));
+
 // Mock next-auth
 vi.mock('next-auth', () => ({
   default: vi.fn(),
@@ -116,6 +124,16 @@ const createPrismaMock = () => ({
     count: vi.fn(),
   },
   evidence: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
+    count: vi.fn(),
+    aggregate: vi.fn(),
+  },
+  evidenceVersion: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     findMany: vi.fn(),
@@ -287,6 +305,24 @@ vi.mock('@/lib/risk-velocity-batch-calculator', () => ({
     trend: 'stable',
     periodDays: 0,
   })),
+}));
+
+// Mock file-virus-scanner-service
+vi.mock('@/lib/file-virus-scanner-service', () => ({
+  scanFile: vi.fn(async () => ({ clean: true, skipped: true })),
+  isVirusScannerAvailable: vi.fn(() => false),
+}));
+
+// Mock organization-storage-quota-service
+vi.mock('@/lib/organization-storage-quota-service', () => ({
+  getStorageUsage: vi.fn(async () => ({
+    usedBytes: 0,
+    maxBytes: 5368709120,
+    percentage: 0,
+    fileCount: 0,
+  })),
+  checkQuota: vi.fn(async () => ({ allowed: true, remaining: 5368709120 })),
+  updateUsage: vi.fn(async () => {}),
 }));
 
 // Export mocks for use in tests

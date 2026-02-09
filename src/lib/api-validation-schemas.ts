@@ -124,6 +124,7 @@ export const updateEvidenceSchema = z.object({
 export const approveEvidenceSchema = z.object({
   action: z.enum(['APPROVE', 'REJECT'], { message: 'Action must be APPROVE or REJECT' }),
   reason: z.string().max(500).optional(),
+  reviewNotes: z.string().max(2000).optional(),
 });
 
 export type EvidenceFilterInput = z.infer<typeof evidenceFilterSchema>;
