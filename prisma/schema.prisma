@@ -42,6 +42,7 @@ model Organization {
   anomalyEvents    AnomalyEvent[]
   complianceChains  ComplianceChain[]
   reportTemplates   ReportTemplate[]
+  ssoConnection     SSOConnection?
 
   @@map("organizations")
 }
@@ -59,6 +60,11 @@ model User {
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  // SSO fields
+  ssoProvider     String?   // "saml" | null
+  ssoExternalId   String?   // External user ID from IdP
+  ssoManagedFields String[] // Fields managed by SCIM (cannot be edited locally)
 
   // Organization relation
   organizationId String
@@ -1193,4 +1199,41 @@ model ComplianceChain {
 
   @@index([organizationId, controlId])
   @@map("compliance_chains")
+}
+
+// ============================================================================
+// SSO/SAML AUTHENTICATION
+// ============================================================================
+
+model SSOConnection {
+  id             String   @id @default(cuid())
+  organizationId String   @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // SAML Configuration
+  metadataUrl     String?  // IdP metadata URL (preferred)
+  metadataXml     String?  @db.Text // IdP metadata XML (fallback)
+  idpEntityId     String   // IdP entity ID
+  idpSsoUrl       String   // IdP SSO endpoint
+  idpCertificate  String   @db.Text // IdP signing certificate (PEM)
+
+  // SP Configuration
+  spEntityId      String   // SP entity ID (our app)
+  acsUrl          String   // Assertion Consumer Service URL
+
+  // Settings
+  defaultRole     UserRole @default(VIEWER)
+  allowedDomains  String[] // Email domains that can use this SSO
+  forceSSO        Boolean  @default(false) // Disable password login for this org
+  isActive        Boolean  @default(true)
+
+  // SCIM
+  scimEnabled     Boolean  @default(false)
+  scimToken       String?  // Bearer token for SCIM endpoint (hashed)
+  scimTokenPrefix String?  // First 8 chars for identification
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("sso_connections")
 }

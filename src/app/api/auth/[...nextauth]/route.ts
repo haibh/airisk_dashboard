@@ -61,6 +61,7 @@ export const authOptions: NextAuthOptions = {
             image: user.image,
             organizationId: user.organizationId,
             organizationName: user.organization.name,
+            ssoProvider: user.ssoProvider || undefined,
           };
         } catch (error) {
           console.error('Auth error:', error);
@@ -85,6 +86,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.organizationId = user.organizationId;
         token.organizationName = user.organizationName;
+        token.ssoProvider = user.ssoProvider;
       }
       return token;
     },
@@ -94,8 +96,14 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.organizationId = token.organizationId as string;
         session.user.organizationName = token.organizationName as string;
+        session.user.ssoProvider = token.ssoProvider as string | undefined;
       }
       return session;
+    },
+    async signIn({ user }) {
+      // Allow SSO users (no password) to sign in
+      // Credentials provider will handle password validation for non-SSO users
+      return true;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

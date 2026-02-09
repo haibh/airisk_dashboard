@@ -77,3 +77,52 @@ export function hasMinimumRole(
 
   return userIndex >= minIndex;
 }
+
+/**
+ * Get SSO connection for organization
+ * @param organizationId - Organization ID
+ * @returns SSO connection or null
+ */
+export async function getOrgSSOConnection(organizationId: string) {
+  const { prisma } = await import('./db');
+
+  return prisma.sSOConnection.findUnique({
+    where: { organizationId },
+  });
+}
+
+/**
+ * Get organization by email domain
+ * Looks up SSO connection with matching allowed domain
+ * @param email - User email address
+ * @returns Organization ID or null
+ */
+export async function getOrgByEmailDomain(email: string): Promise<string | null> {
+  const { prisma } = await import('./db');
+  const emailDomain = email.split('@')[1];
+
+  if (!emailDomain) {
+    return null;
+  }
+
+  const ssoConnection = await prisma.sSOConnection.findFirst({
+    where: {
+      isActive: true,
+      allowedDomains: {
+        has: emailDomain,
+      },
+    },
+  });
+
+  return ssoConnection?.organizationId || null;
+}
+
+/**
+ * Check if organization requires force SSO
+ * @param organizationId - Organization ID
+ * @returns True if force SSO is enabled
+ */
+export async function isForceSSO(organizationId: string): Promise<boolean> {
+  const ssoConnection = await getOrgSSOConnection(organizationId);
+  return ssoConnection?.forceSSO || false;
+}

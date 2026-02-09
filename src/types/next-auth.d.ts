@@ -8,6 +8,7 @@ declare module 'next-auth' {
       role: string;
       organizationId: string;
       organizationName: string;
+      ssoProvider?: string;
     } & DefaultSession['user'];
   }
 
@@ -15,6 +16,7 @@ declare module 'next-auth' {
     role: string;
     organizationId: string;
     organizationName: string;
+    ssoProvider?: string;
   }
 }
 
@@ -24,5 +26,6 @@ declare module 'next-auth/jwt' {
     role: string;
     organizationId: string;
     organizationName: string;
+    ssoProvider?: string;
   }
 }

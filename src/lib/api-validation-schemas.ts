@@ -271,3 +271,35 @@ export const updateWebhookSchema = z.object({
 
 export type CreateWebhookInput = z.infer<typeof createWebhookSchema>;
 export type UpdateWebhookInput = z.infer<typeof updateWebhookSchema>;
+
+// ============================================
+// SSO/SAML Schemas
+// ============================================
+
+// Base SSO fields (without refinement, so .partial() works for updates)
+const ssoConnectionBaseSchema = z.object({
+  metadataUrl: z.string().url().optional().nullable(),
+  metadataXml: z.string().optional().nullable(),
+  idpEntityId: z.string().min(1, 'IdP Entity ID is required'),
+  idpSsoUrl: z.string().url('Invalid IdP SSO URL'),
+  idpCertificate: z.string().min(1, 'IdP certificate is required'),
+  defaultRole: z.nativeEnum(UserRole).optional().default(UserRole.VIEWER),
+  allowedDomains: z.array(z.string().min(1)).min(1, 'At least one allowed domain is required'),
+  forceSSO: z.boolean().optional().default(false),
+  scimEnabled: z.boolean().optional().default(false),
+});
+
+export const ssoConnectionSchema = ssoConnectionBaseSchema.refine(
+  (data) => data.metadataUrl || data.metadataXml,
+  { message: 'Either metadataUrl or metadataXml must be provided', path: ['metadataUrl'] }
+);
+
+export const updateSSOConnectionSchema = ssoConnectionBaseSchema.partial();
+
+export const scimTokenSchema = z.object({
+  regenerate: z.boolean().optional().default(false),
+});
+
+export type SSOConnectionInput = z.infer<typeof ssoConnectionSchema>;
+export type UpdateSSOConnectionInput = z.infer<typeof updateSSOConnectionSchema>;
+export type SCIMTokenInput = z.infer<typeof scimTokenSchema>;

@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Skip auth check for API routes (handled by individual API route handlers)
+  // Also skip for SAML/SCIM endpoints which have their own auth
   if (pathname.startsWith('/api')) {
     const response = NextResponse.next();
     response.headers.set('x-correlation-id', correlationId);
