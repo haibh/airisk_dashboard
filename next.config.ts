@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   // Enable React strict mode for development
   reactStrictMode: true,
 
+  // Disable X-Powered-By header to reduce fingerprinting
+  poweredByHeader: false,
+
   // Docker standalone output (creates self-contained server bundle)
   output: 'standalone',
 
@@ -39,13 +42,13 @@ const nextConfig: NextConfig = {
   // Security and CORS headers
   async headers() {
     // Parse allowed origins from env (comma-separated list)
+    // CORS: restrict to app origin by default, configurable via ALLOWED_ORIGINS env var
+    const appUrl = process.env.NEXTAUTH_URL || 'https://airm-ip-demo.vercel.app';
     const allowedOrigins = process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-      : ['*'];
+      : [appUrl];
 
-    // Use first origin as default for Access-Control-Allow-Origin
-    // Note: For multiple origins, implement CORS logic in middleware/API routes
-    const defaultOrigin = allowedOrigins.length === 1 ? allowedOrigins[0] : '*';
+    const defaultOrigin = allowedOrigins[0];
 
     return [
       {
@@ -113,7 +116,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
+            value: 'max-age=31536000; includeSubDomains; preload',
           },
           {
             key: 'Permissions-Policy',

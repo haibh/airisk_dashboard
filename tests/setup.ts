@@ -344,6 +344,13 @@ vi.mock('@/lib/webhook-event-dispatcher', () => ({
   emitWebhookEvent: vi.fn(async () => {}),
 }));
 
+// Mock login-attempt-tracker to prevent side effects in tests
+vi.mock('@/lib/login-attempt-tracker', () => ({
+  isAccountLocked: vi.fn(async () => ({ locked: false, remainingSeconds: 0 })),
+  recordFailedAttempt: vi.fn(async () => 4),
+  clearFailedAttempts: vi.fn(async () => {}),
+}));
+
 // Mock risk-velocity-batch-calculator
 vi.mock('@/lib/risk-velocity-batch-calculator', () => ({
   calculateBatchVelocity: vi.fn(async () => new Map()),

@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/db';
 import { verifyPassword } from '@/lib/auth-helpers';
+import { isAccountLocked, recordFailedAttempt, clearFailedAttempts } from '@/lib/login-attempt-tracker';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,9 +17,17 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password required');
         }
 
+        const email = credentials.email.toLowerCase();
+
         try {
+          // Check brute-force lockout before any DB query
+          const lockStatus = await isAccountLocked(email);
+          if (lockStatus.locked) {
+            throw new Error('Account temporarily locked due to too many failed attempts');
+          }
+
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+            where: { email },
             include: {
               organization: {
                 select: {
@@ -30,10 +39,10 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user || !user.passwordHash) {
+            await recordFailedAttempt(email);
             throw new Error('Invalid credentials');
           }
 
-          // Check if account is active
           if (!user.isActive) {
             throw new Error('Account is deactivated');
           }
@@ -44,10 +53,13 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isValid) {
+            await recordFailedAttempt(email);
             throw new Error('Invalid credentials');
           }
 
-          // Update last login timestamp
+          // Successful login — clear failed attempts
+          await clearFailedAttempts(email);
+
           await prisma.user.update({
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
