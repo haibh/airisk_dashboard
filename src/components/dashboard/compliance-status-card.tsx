@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,6 +42,18 @@ export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatus
   const [showDetails, setShowDetails] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null);
 
+  // Hooks must be called before any early returns to satisfy Rules of Hooks
+  const sorted = useMemo(
+    () => [...frameworks].sort((a, b) => a.percentage - b.percentage),
+    [frameworks]
+  );
+  const avgCompliance = useMemo(
+    () => frameworks.length > 0
+      ? Math.round(frameworks.reduce((sum, fw) => sum + fw.percentage, 0) / frameworks.length)
+      : 0,
+    [frameworks]
+  );
+
   if (isLoading) {
     return (
       <Card>
@@ -75,9 +87,6 @@ export function ComplianceStatusCard({ frameworks, isLoading }: ComplianceStatus
       </Card>
     );
   }
-
-  const sorted = [...frameworks].sort((a, b) => a.percentage - b.percentage);
-  const avgCompliance = Math.round(frameworks.reduce((sum, fw) => sum + fw.percentage, 0) / frameworks.length);
 
   return (
     <Card>

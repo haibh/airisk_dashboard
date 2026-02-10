@@ -2,6 +2,28 @@
 
 Enterprise-grade platform for managing AI risks, compliance frameworks, and governance. Built with Next.js 16, TypeScript, and PostgreSQL.
 
+## Screenshots
+
+| Landing Page | Login |
+|:---:|:---:|
+| ![Landing](docs/screenshots/00-landing.png) | ![Login](docs/screenshots/01-login.png) |
+
+| Change Password (First Login) | Executive Dashboard |
+|:---:|:---:|
+| ![Change Password](docs/screenshots/02-change-password.png) | ![Dashboard](docs/screenshots/03-dashboard.png) |
+
+| Risk Assessment | Compliance Frameworks |
+|:---:|:---:|
+| ![Risk Assessment](docs/screenshots/04-risk-assessment.png) | ![Frameworks](docs/screenshots/05-frameworks.png) |
+
+| AI System Registry | Evidence Management |
+|:---:|:---:|
+| ![AI Systems](docs/screenshots/06-ai-systems.png) | ![Evidence](docs/screenshots/07-evidence.png) |
+
+| Settings |
+|:---:|
+| ![Settings](docs/screenshots/08-settings.png) |
+
 ## Quick Start
 
 ### Docker (Recommended)

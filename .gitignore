@@ -64,7 +64,7 @@ repomix-output.xml
 plans/**/*
 !plans/templates/*
 screenshots/*
-docs/screenshots/*
+!docs/screenshots/
 docs/research/*
 logs.txt
 test-ck

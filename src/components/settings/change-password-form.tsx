@@ -41,6 +41,7 @@ export function ChangePasswordForm() {
         body: JSON.stringify({
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword,
         }),
       });
 
@@ -76,6 +77,7 @@ export function ChangePasswordForm() {
             type="password"
             value={formData.currentPassword}
             onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+            autoComplete="current-password"
             required
           />
         </div>
@@ -87,6 +89,7 @@ export function ChangePasswordForm() {
             type="password"
             value={formData.newPassword}
             onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+            autoComplete="new-password"
             minLength={8}
             required
           />
@@ -100,6 +103,7 @@ export function ChangePasswordForm() {
             type="password"
             value={formData.confirmPassword}
             onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            autoComplete="new-password"
             minLength={8}
             required
           />

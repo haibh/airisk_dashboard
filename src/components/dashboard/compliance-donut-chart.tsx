@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PieChart as PieChartIcon } from 'lucide-react';
@@ -23,6 +24,19 @@ interface ComplianceDonutChartProps {
 }
 
 export function ComplianceDonutChart({ frameworks, isLoading }: ComplianceDonutChartProps) {
+  // Hooks must be called before any early returns to satisfy Rules of Hooks
+  const avg = useMemo(
+    () => frameworks.length > 0
+      ? Math.round(frameworks.reduce((sum, fw) => sum + fw.percentage, 0) / frameworks.length)
+      : 0,
+    [frameworks]
+  );
+
+  const chartData = useMemo(
+    () => frameworks.map((fw) => ({ name: fw.framework, value: fw.percentage })),
+    [frameworks]
+  );
+
   if (isLoading) {
     return (
       <Card>
@@ -54,15 +68,6 @@ export function ComplianceDonutChart({ frameworks, isLoading }: ComplianceDonutC
       </Card>
     );
   }
-
-  const avg = Math.round(
-    frameworks.reduce((sum, fw) => sum + fw.percentage, 0) / frameworks.length
-  );
-
-  const chartData = frameworks.map((fw) => ({
-    name: fw.framework,
-    value: fw.percentage,
-  }));
 
   return (
     <Card>

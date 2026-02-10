@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BarChart3, Scale, Lock, ShieldAlert, Cpu, Eye } from 'lucide-react';
@@ -34,6 +35,12 @@ interface TopRisksListCardProps {
 }
 
 export function TopRisksListCard({ heatmapData, isLoading }: TopRisksListCardProps) {
+  // Hooks must be called before any early returns to satisfy Rules of Hooks
+  const categories = useMemo(
+    () => heatmapData ? getCategoryDistribution(heatmapData.heatmap) : [],
+    [heatmapData]
+  );
+
   if (isLoading) {
     return (
       <Card>
@@ -67,8 +74,6 @@ export function TopRisksListCard({ heatmapData, isLoading }: TopRisksListCardPro
       </Card>
     );
   }
-
-  const categories = getCategoryDistribution(heatmapData.heatmap);
 
   return (
     <Card>

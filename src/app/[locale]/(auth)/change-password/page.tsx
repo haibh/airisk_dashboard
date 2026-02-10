@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { signIn, signOut } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,19 +51,16 @@ export default function ChangePasswordPage() {
         body: JSON.stringify({
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
+          confirmPassword: formData.confirmPassword,
         }),
       });
 
       if (response.ok) {
         toast.success(t('success'));
-        // Sign out and re-login to refresh JWT with mustChangePassword=false
+        // Sign out to clear JWT, then redirect to login for re-authentication
         await signOut({ redirect: false });
-        const result = await signIn('credentials', {
-          redirect: false,
-          email: '', // Will be handled by redirect below
-        });
-        // Force redirect to login — user re-authenticates with new password
         window.location.href = '/login';
+        return;
       } else {
         const error = await response.json();
         if (error.error?.includes('incorrect')) {
