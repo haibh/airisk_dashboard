@@ -81,7 +81,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[SAVED_FILTERS_LIST_ERROR]', error);
     return NextResponse.json(
       {
         success: false,
@@ -168,7 +167,6 @@ export async function POST(request: NextRequest) {
     );
 
   } catch (error) {
-    console.error('[SAVED_FILTER_CREATE_ERROR]', error);
     return NextResponse.json(
       {
         success: false,

@@ -81,7 +81,6 @@ export async function GET(
     });
 
   } catch (error) {
-    console.error('[SAVED_FILTER_GET_ERROR]', error);
     return NextResponse.json(
       {
         success: false,
@@ -211,7 +210,6 @@ export async function PUT(
     });
 
   } catch (error) {
-    console.error('[SAVED_FILTER_UPDATE_ERROR]', error);
     return NextResponse.json(
       {
         success: false,
@@ -288,7 +286,6 @@ export async function DELETE(
     });
 
   } catch (error) {
-    console.error('[SAVED_FILTER_DELETE_ERROR]', error);
     return NextResponse.json(
       {
         success: false,

@@ -123,7 +123,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[SEARCH_ERROR]', error);
     return NextResponse.json(
       {
         success: false,

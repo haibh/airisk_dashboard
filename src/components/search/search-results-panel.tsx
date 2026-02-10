@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface SearchResult {
   entityType: 'ai_system' | 'assessment' | 'risk' | 'evidence';
@@ -107,9 +108,9 @@ export function SearchResultsPanel({
     }
   };
 
-  // Format snippet HTML (contains <mark> tags)
+  // Format snippet HTML (contains <mark> tags) — sanitize for defense-in-depth
   const formatSnippet = (snippet: string) => {
-    return { __html: snippet };
+    return { __html: DOMPurify.sanitize(snippet, { ALLOWED_TAGS: ['mark'] }) };
   };
 
   if (isLoading) {

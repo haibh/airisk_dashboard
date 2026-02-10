@@ -142,7 +142,7 @@ export async function POST(
       title: 'Invitation Accepted',
       body: `${name} (${invitation.email}) has accepted your invitation and joined the organization.`,
       link: null,
-    }).catch((err) => console.error('Failed to create notification:', err));
+    }).catch(() => { /* notification failure non-critical */ });
 
     return NextResponse.json({
       success: true,

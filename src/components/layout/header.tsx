@@ -36,9 +36,13 @@ export function Header() {
   useEffect(() => setMounted(true), []);
 
   const switchLocale = (newLocale: string) => {
+    // Validate locale to prevent injection
+    if (!['en', 'vi'].includes(newLocale)) return;
     // Replace locale segment in current URL
     const current = window.location.pathname;
-    const newPath = current.replace(`/${locale}`, `/${newLocale}`);
+    const newPath = current.replace(/^\/(en|vi)/, `/${newLocale}`);
+    // Additional safety check
+    if (!newPath.startsWith('/')) return;
     router.push(newPath);
   };
 

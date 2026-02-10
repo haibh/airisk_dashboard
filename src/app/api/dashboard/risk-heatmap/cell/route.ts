@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
       risks: formattedRisks,
     });
   } catch (error) {
-    console.error('Error fetching heatmap cell risks:', error);
     return NextResponse.json(
       { error: 'Failed to fetch heatmap cell risks' },
       { status: 500 }

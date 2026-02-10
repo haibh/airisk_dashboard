@@ -102,7 +102,6 @@ export async function GET(
       totalRisks,
     });
   } catch (error) {
-    console.error('Error fetching AI system risk profile:', error);
     return NextResponse.json(
       { error: 'Failed to fetch risk profile' },
       { status: 500 }

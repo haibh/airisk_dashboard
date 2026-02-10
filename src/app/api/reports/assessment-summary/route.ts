@@ -211,7 +211,6 @@ export async function GET(request: NextRequest) {
     // Return JSON format
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('Error generating assessment summary report:', error);
     return NextResponse.json(
       { error: 'Failed to generate assessment summary report' },
       { status: 500 }

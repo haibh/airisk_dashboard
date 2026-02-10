@@ -35,10 +35,24 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const controlId = searchParams.get('controlId');
 
-    // Build where clause (controls are global, no org filter needed)
-    const where: any = {};
+    // Scope investments to controls used in the org's risk assessments
+    const orgControlIds = await prisma.riskControl.findMany({
+      where: {
+        risk: { assessment: { organizationId: session.user.organizationId } },
+      },
+      select: { controlId: true },
+      distinct: ['controlId'],
+    });
+    const allowedControlIds = orgControlIds.map((rc) => rc.controlId);
+
+    const where: Record<string, unknown> = {
+      controlId: { in: allowedControlIds },
+    };
 
     if (controlId) {
+      if (!allowedControlIds.includes(controlId)) {
+        return NextResponse.json({ investments: [], total: 0 });
+      }
       where.controlId = controlId;
     }
 
@@ -100,18 +114,18 @@ export async function POST(request: NextRequest) {
       deploymentDate,
     } = parseResult.data;
 
-    // Verify control exists (controls are global, no org check needed)
-    const control = await prisma.control.findUnique({
+    // Verify control exists and is used by the org's risk assessments
+    const orgControl = await prisma.riskControl.findFirst({
       where: {
-        id: controlId,
+        controlId,
+        risk: { assessment: { organizationId: session.user.organizationId } },
       },
+      select: { controlId: true },
     });
 
-    if (!control) {
+    if (!orgControl) {
       return NextResponse.json(
-        {
-          error: 'Control not found',
-        },
+        { error: 'Control not found' },
         { status: 404 }
       );
     }

@@ -150,7 +150,6 @@ export async function GET(request: NextRequest) {
       avgEffectiveness: Math.round(avgEffectiveness * 10) / 10,
     });
   } catch (error) {
-    console.error('Error fetching control-risk flow:', error);
     return NextResponse.json(
       { error: 'Failed to fetch control-risk flow' },
       { status: 500 }

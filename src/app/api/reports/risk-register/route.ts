@@ -225,7 +225,6 @@ export async function GET(request: NextRequest) {
     // Return JSON format
     return NextResponse.json(summary);
   } catch (error) {
-    console.error('Error generating risk register report:', error);
     return NextResponse.json(
       { error: 'Failed to generate risk register report' },
       { status: 500 }

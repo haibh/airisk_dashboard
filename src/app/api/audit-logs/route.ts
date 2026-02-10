@@ -124,7 +124,6 @@ export async function GET(request: NextRequest) {
       pageSize,
     });
   } catch (error) {
-    console.error('GET /api/audit-logs error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch audit logs' },
       { status: 500 }

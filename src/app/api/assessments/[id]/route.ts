@@ -192,7 +192,7 @@ export async function PUT(
         title: 'Assessment Status Changed',
         body: `Assessment "${assessment.title}" status changed from ${existing.status} to ${assessment.status}`,
         link: `/${session.user.organizationId}/risk-assessment/${assessment.id}`,
-      }).catch((err) => console.error('Failed to create notification:', err));
+      }).catch(() => { /* notification failure non-critical */ });
     }
 
     return NextResponse.json(assessment);

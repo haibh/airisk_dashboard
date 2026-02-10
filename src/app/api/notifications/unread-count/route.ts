@@ -24,7 +24,6 @@ export async function GET() {
       data: { count },
     });
   } catch (error) {
-    console.error('GET /api/notifications/unread-count error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch unread count' },
       { status: 500 }

@@ -91,7 +91,6 @@ export async function GET(
       total: historyRecords.length,
     });
   } catch (error) {
-    console.error('Error fetching risk history:', error);
     return NextResponse.json(
       { error: 'Failed to fetch risk history' },
       { status: 500 }

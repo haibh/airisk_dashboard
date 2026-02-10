@@ -43,7 +43,6 @@ export async function GET(request: NextRequest) {
       pageSize: result.pageSize,
     });
   } catch (error) {
-    console.error('GET /api/notifications error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch notifications' },
       { status: 500 }
@@ -99,7 +98,6 @@ export async function PUT(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('PUT /api/notifications error:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update notifications' },
       { status: 500 }
