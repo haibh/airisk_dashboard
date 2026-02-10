@@ -1,6 +1,6 @@
 # AIRisk Dashboard - Deployment Guide
 
-**Version:** 2.0 | **Date:** 2026-02-04 | **Status:** Active
+**Version:** 2.2 | **Date:** 2026-02-10 | **Status:** Active (Updated for Docker deployment)
 **Tech Stack:** Next.js 16, React 19, PostgreSQL 15+, Prisma 5, Tailwind CSS v4
 
 ---
@@ -116,6 +116,30 @@ NEXT_PUBLIC_APP_ENV="development"
 
 # Logging
 LOG_LEVEL="debug"
+
+# Optional: Redis (for caching, falls back to in-memory)
+REDIS_URL="redis://localhost:6379"
+
+# Optional: S3/Blob Storage (for evidence files)
+STORAGE_TYPE="s3"  # or "blob"
+AWS_ACCESS_KEY_ID="..."
+AWS_SECRET_ACCESS_KEY="..."
+AWS_S3_BUCKET="airisk-evidence"
+
+# Optional: SMTP (for email notifications)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="noreply@company.com"
+SMTP_PASS="..."
+SMTP_FROM="AIRisk Dashboard <noreply@company.com>"
+
+# Optional: Virus Scanning (Phase 16)
+CLAMAV_ENABLED="false"  # Set to "true" if ClamAV service available
+CLAMAV_HOST="localhost"
+CLAMAV_PORT="3310"
+
+# Optional: Cron Jobs (Phase 17)
+CRON_SECRET="$(openssl rand -base64 32)"  # For secure cron triggers
 ```
 
 ### Production (.env)
@@ -164,78 +188,38 @@ NEXT_PUBLIC_API_BASE_URL="https://staging-airisk.example.com"
 
 ### PostgreSQL Installation
 
-#### macOS (Homebrew)
 ```bash
-brew install postgresql@15
-brew services start postgresql@15
-createdb airm_ip
-```
+# macOS (Homebrew)
+brew install postgresql@15 && brew services start postgresql@15 && createdb airm_ip
 
-#### Ubuntu/Debian
-```bash
-sudo apt-get update
-sudo apt-get install postgresql-15
-sudo systemctl start postgresql
-sudo -u postgres createdb airm_ip
-```
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install postgresql-15
+sudo systemctl start postgresql && sudo -u postgres createdb airm_ip
 
-#### Docker
-```bash
-docker run -d \
-  --name postgres \
-  -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=airm_ip \
-  -p 5432:5432 \
-  postgres:15
+# Docker (or use docker-compose, see Docker Deployment section)
+docker run -d --name postgres -e POSTGRES_PASSWORD=password -e POSTGRES_DB=airm_ip -p 5432:5432 postgres:15
 ```
 
 ### Database Schema Management
 
-#### Initial Migration
 ```bash
-npm run db:push
-# Creates all tables and indexes
-```
-
-#### Create New Migration (Development)
-```bash
-npm run db:migrate -- --name add_new_table
-# Creates migration file in prisma/migrations/
-```
-
-#### Reset Database (Development Only)
-```bash
-npm run db:reset
-# Caution: Deletes all data and re-creates schema
-```
-
-#### Database Seeding
-```bash
-# Seed organizations, users, and frameworks
-npm run db:seed
-
-# Seed only frameworks
-npm run db:seed:frameworks
+npm run db:push           # Initial migration: creates all tables
+npm run db:migrate        # Create new migration (dev): --name add_table
+npm run db:reset          # Reset database (dev only): deletes all data
+npm run db:seed           # Seed orgs, users, frameworks
+npm run db:seed:frameworks  # Seed frameworks only
 ```
 
 ### Backup & Restore
 
-#### Backup
 ```bash
-# Full database backup
+# Backup (full)
 pg_dump -h localhost -U postgres -d airm_ip > backup.sql
+pg_dump -h localhost -U postgres -d airm_ip | gzip > backup.sql.gz  # compressed
 
-# With compression
-pg_dump -h localhost -U postgres -d airm_ip | gzip > backup.sql.gz
-```
-
-#### Restore
-```bash
-# From backup file
+# Restore
 psql -h localhost -U postgres -d airm_ip < backup.sql
-
-# From compressed backup
-gunzip < backup.sql.gz | psql -h localhost -U postgres -d airm_ip
+gunzip < backup.sql.gz | psql -h localhost -U postgres -d airm_ip  # from compressed
 ```
 
 ---
@@ -272,24 +256,19 @@ npm run lint -- --fix
 
 ### Testing
 
-#### Unit & Integration Tests
 ```bash
+# Unit & integration
 npm run test              # Watch mode
 npm run test:run          # Run once
-npm run test:coverage     # With coverage report
-```
+npm run test:coverage     # With coverage
 
-#### End-to-End Tests
-```bash
-npm run test:e2e          # Headless mode
-npm run test:e2e:headed   # With browser visible
+# E2E
+npm run test:e2e          # Headless
+npm run test:e2e:headed   # Browser visible
 npm run test:e2e -- --debug  # Debug mode
-```
 
-#### Performance Benchmarks
-```bash
-npx tsx scripts/performance-benchmark.ts
-# Measures page load and API response times
+# Performance
+npx tsx scripts/performance-benchmark.ts  # Page load + API response times
 ```
 
 ### Pre-Deployment Checklist
@@ -314,128 +293,336 @@ echo "✅ All checks passed"
 - Domain name
 - Environment variables configured
 
-### Vercel Deployment (Recommended for Next.js)
-
-#### Setup
-1. Push code to GitHub
-2. Import project in Vercel console
-3. Set environment variables
-4. Deploy
+### Vercel Deployment (Recommended)
 
 ```bash
-# Command line deployment
-npm i -g vercel
-vercel --prod
+# Setup: Push to GitHub → Import in Vercel → Set env vars → Deploy
+npm i -g vercel && vercel --prod  # CLI deployment
 ```
 
-#### Configuration (vercel.json)
+vercel.json:
 ```json
 {
   "env": [
     { "key": "DATABASE_URL", "value": "@db_url" },
-    { "key": "NEXTAUTH_SECRET", "value": "@nextauth_secret" },
-    { "key": "NEXTAUTH_URL", "value": "@nextauth_url" }
+    { "key": "NEXTAUTH_SECRET", "value": "@nextauth_secret" }
   ],
-  "buildCommand": "npm run build",
-  "installCommand": "npm install"
+  "buildCommand": "npm run build"
 }
 ```
 
 ### AWS EC2 Deployment
 
-#### EC2 Setup
 ```bash
-# Connect to instance
 ssh -i key.pem ubuntu@instance-ip
-
-# Install Node.js
 curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+sudo apt-get install -y nodejs postgresql-client
 
-# Install PostgreSQL client
-sudo apt-get install -y postgresql-client
-
-# Clone repository
-git clone https://github.com/yourorg/airisk-dashboard.git
-cd airisk-dashboard
-
-# Install dependencies
-npm install
-npm run build
+git clone https://github.com/yourorg/airisk-dashboard.git && cd airisk-dashboard
+npm install && npm run build
 
 # Create systemd service
 sudo tee /etc/systemd/system/airisk.service > /dev/null <<EOF
 [Unit]
 Description=AIRisk Dashboard
 After=network.target
-
 [Service]
 User=ubuntu
 ExecStart=/usr/bin/npm start
 WorkingDirectory=/home/ubuntu/airisk-dashboard
 Restart=always
-
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Start service
-sudo systemctl enable airisk
-sudo systemctl start airisk
+sudo systemctl enable airisk && sudo systemctl start airisk
 ```
 
-### Docker Deployment
+## Docker Deployment
 
-#### Dockerfile
+### Quick Start
+
+```bash
+# Copy environment configuration
+cp .env.docker.example .env.docker
+
+# Edit .env.docker with your values
+nano .env.docker
+
+# Start development environment (hot-reload)
+make dev
+
+# Or start production environment (nginx + resource limits)
+make ssl-self-signed  # Generate self-signed certs for nginx
+make prod
+```
+
+### Architecture
+
+**3-stage Dockerfile** (109L, final image: 421MB)
+- **Stage 1 (deps):** Install all dependencies (dev + prod)
+- **Stage 2 (builder):** TypeScript compilation + Next.js build
+- **Stage 3 (runner):** Minimal runtime with prod deps only
+
+**3 Compose files:**
+- `docker-compose.yml` — Base configuration (PostgreSQL, Redis, app)
+- `docker-compose.dev.yml` — Dev overrides (source mount, auto-seed, debug ports)
+- `docker-compose.prod.yml` — Prod overrides (nginx reverse proxy, resource limits, log rotation)
+
+### Configuration Files
+
+#### .env.docker (Required)
+```bash
+# Copy example and configure
+cp .env.docker.example .env.docker
+
+# Key variables:
+DATABASE_URL=postgresql://airisk:password@db:5432/airm_ip
+NEXTAUTH_SECRET=<generate-with-openssl-rand-base64-32>
+NEXTAUTH_URL=http://localhost:3000  # or https://yourdomain.com
+REDIS_URL=redis://redis:6379
+NODE_ENV=production
+```
+
+### Makefile Targets
+
+| Command | Purpose |
+|---------|---------|
+| `make dev` | Start dev with hot-reload (port 3000) |
+| `make prod` | Start prod with nginx (ports 80/443) |
+| `make build` | Build Docker images |
+| `make up` | Start containers (detached) |
+| `make down` | Stop containers |
+| `make logs` | Follow all container logs |
+| `make logs-app` | Follow app logs only |
+| `make shell` | Bash shell into app container |
+| `make db-shell` | psql shell into database |
+| `make clean` | Remove containers + volumes |
+| `make backup` | Backup database to ./backups/ |
+| `make restore FILE=<path>` | Restore database from backup |
+| `make ssl-self-signed` | Generate self-signed SSL certs |
+| `make migrate` | Run Prisma migrations |
+| `make seed` | Seed database |
+| `make test` | Run tests in container |
+
+### Development Mode
+
+**Features:**
+- Source code mounted at `/app` (hot-reload enabled)
+- Auto-seed on first run
+- Debug ports exposed: 3000 (app), 5432 (db), 6379 (redis)
+- Verbose logging
+
+```bash
+# Start dev environment
+make dev
+
+# View logs
+make logs-app
+
+# Access database
+make db-shell
+
+# Run migrations
+make migrate
+```
+
+### Production Mode
+
+**Features:**
+- Nginx reverse proxy (SSL termination, gzip, rate limiting, static caching)
+- Resource limits: app (512MB-1GB), db (256MB-512MB), redis (128MB-256MB)
+- JSON log rotation (10MB × 3 files)
+- Internal-only db/redis ports
+- Backup service (pg_dump to /backups)
+
+```bash
+# Generate SSL certificates (self-signed for testing)
+make ssl-self-signed
+
+# Or copy your real certs to:
+# docker/nginx/ssl/server.crt
+# docker/nginx/ssl/server.key
+
+# Start production stack
+make prod
+
+# Access via:
+# - HTTP: http://localhost:80 (redirects to HTTPS)
+# - HTTPS: https://localhost:443
+```
+
+**Nginx Configuration:**
+- SSL/TLS 1.2-1.3, modern cipher suite
+- Gzip compression for text assets
+- Static asset caching (1 year for immutable, 1 hour for HTML)
+- Rate limiting: 10 req/s burst 20
+- Reverse proxy to app:3000 with keepalive
+
+### Critical Configuration Notes
+
+**1. Health Check Uses curl + 127.0.0.1**
 ```dockerfile
-FROM node:20-alpine AS builder
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://127.0.0.1:3000/api/health || exit 1
+```
+- **Do NOT use** `localhost` or `wget` (Alpine busybox wget lacks required flags)
+- `curl` installed in runner stage specifically for health checks
+
+**2. Prisma Uses Local CLI**
+```dockerfile
+CMD ["sh", "-c", "node ./node_modules/prisma/build/index.js migrate deploy && exec npm start"]
+```
+- **Do NOT use** `npx prisma` or `npm run` in CMD (breaks in Alpine)
+- Direct node execution ensures consistent behavior
+
+**3. Prisma Binary Targets**
+```prisma
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+```
+- Required for Alpine Linux (musl libc) compatibility
+- Regenerate client after changes: `make migrate`
+
+### Dockerfile Structure
+
+```dockerfile
+# Stage 1: Install all dependencies (dev + prod)
+FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+
+# Stage 2: Build application
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN npx prisma generate
 RUN npm run build
 
-FROM node:20-alpine
+# Stage 3: Production runtime (minimal)
+FROM node:20-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache curl  # For health checks
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/src ./src
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["sh", "-c", "node ./node_modules/prisma/build/index.js migrate deploy && exec npm start"]
 ```
 
-#### Docker Compose
-```yaml
-version: '3.8'
+### Docker Compose Services
 
+**app:**
+- Build context: `.`
+- Depends on: db, redis
+- Env file: `.env.docker`
+- Health check: `/api/health` endpoint
+
+**db (PostgreSQL 15):**
+- Volume: `postgres_data` → `/var/lib/postgresql/data`
+- Default user: `airisk` / `password` (change in .env.docker)
+- Internal port: 5432 (exposed only in dev)
+
+**redis:**
+- Volume: `redis_data` → `/data`
+- Internal port: 6379 (exposed only in dev)
+
+**nginx (prod only):**
+- Ports: 80, 443
+- Volumes: `./docker/nginx/nginx-reverse-proxy.conf`, `./docker/nginx/ssl/`
+
+**backup (prod only):**
+- Runs pg_dump daily at 2 AM (configure with cron)
+- Saves to `./backups/`
+
+### Troubleshooting
+
+**Issue: Health check failing**
+```bash
+# Check logs
+make logs-app
+
+# Verify database connection
+make db-shell
+# Then: \l to list databases
+
+# Test health endpoint manually
+docker exec -it airisk-app curl http://127.0.0.1:3000/api/health
+```
+
+**Issue: Prisma client errors**
+```bash
+# Regenerate client
+make migrate
+
+# Or inside container:
+make shell
+node ./node_modules/prisma/build/index.js generate
+```
+
+**Issue: Port conflicts**
+```bash
+# Check what's using port 3000
+lsof -ti:3000 | xargs kill -9
+
+# Or change port in docker-compose.override.yml:
 services:
   app:
-    build: .
     ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://user:pass@db:5432/airm_ip
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
-      NEXTAUTH_URL: http://localhost:3000
-    depends_on:
-      - db
+      - "3001:3000"
+```
 
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: airm_ip
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+**Issue: Database connection refused**
+```bash
+# Verify db service is running
+docker ps | grep db
 
-volumes:
-  postgres_data:
+# Check DATABASE_URL in .env.docker
+# Must use service name "db" as hostname: postgresql://user:pass@db:5432/airm_ip
+```
+
+### Deployment Workflow
+
+**Development:**
+```bash
+cp .env.docker.example .env.docker
+make dev          # Start all services
+make logs-app     # Monitor logs
+make migrate      # Run migrations
+make seed         # Seed data
+```
+
+**Production:**
+```bash
+# Setup
+cp .env.docker.example .env.docker
+# Edit .env.docker with production values
+make ssl-self-signed  # Or copy real certs
+
+# Deploy
+make build
+make prod
+make backup  # Verify backup works
+
+# Monitor
+make logs
+docker stats  # Check resource usage
+```
+
+**CI/CD Integration:**
+```bash
+# In GitHub Actions or GitLab CI
+docker build -t airisk-dashboard:$VERSION .
+docker tag airisk-dashboard:$VERSION registry.example.com/airisk:$VERSION
+docker push registry.example.com/airisk:$VERSION
 ```
 
 ### SSL/TLS Setup (nginx)
@@ -443,24 +630,15 @@ volumes:
 server {
     listen 443 ssl http2;
     server_name airisk.example.com;
-
     ssl_certificate /etc/ssl/certs/cert.pem;
     ssl_certificate_key /etc/ssl/private/key.pem;
-
     location / {
         proxy_pass http://localhost:3000;
         proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
-
-server {
-    listen 80;
-    server_name airisk.example.com;
-    return 301 https://$server_name$request_uri;
-}
+server { listen 80; server_name airisk.example.com; return 301 https://$server_name$request_uri; }
 ```
 
 ---
@@ -469,48 +647,31 @@ server {
 
 ### Health Checks
 ```bash
-# API health endpoint
-curl https://airisk.example.com/api/health
-
-# Database connectivity
-npm run db:studio  # Opens Prisma Studio for inspection
+curl https://airisk.example.com/api/health  # API health
+npm run db:studio  # Database connectivity via Prisma Studio
 ```
 
 ### Logs
 ```bash
-# Application logs (if running on server)
-journalctl -u airisk -f  # Follow logs for airisk service
-
-# Check server logs
-tail -f /var/log/application.log
+journalctl -u airisk -f  # Follow systemd service logs
+tail -f /var/log/application.log  # Server logs
 ```
 
 ### Performance Monitoring
 ```bash
-# Run performance benchmarks
-npx tsx scripts/performance-benchmark.ts
-
-# Check build size
-npm run build && ls -lh .next/
+npx tsx scripts/performance-benchmark.ts  # Benchmarks
+npm run build && ls -lh .next/  # Build size
 ```
 
 ### Database Maintenance
 ```bash
-# Analyze query performance
-ANALYZE;
-
-# Vacuum (cleanup dead rows)
-VACUUM ANALYZE;
-
-# Monitor connections
-SELECT * FROM pg_stat_activity;
+# In psql:
+ANALYZE; VACUUM ANALYZE;  # Query optimization + cleanup
+SELECT * FROM pg_stat_activity;  # Monitor connections
 ```
 
 ### Backup Schedule
-- Daily automated backups to S3/GCS
-- Test restore process weekly
-- Keep 30 days of backups
-- Document recovery procedure
+Daily backups to S3/GCS, test restore weekly, keep 30 days, document recovery procedure.
 
 ---
 
@@ -634,4 +795,4 @@ npm install -D @next/bundle-analyzer
 
 ---
 
-**Deployment Guide Version:** 1.0 | **Last Updated:** 2026-02-03 | **Maintained By:** docs-manager agent
+**Deployment Guide Version:** 2.2 | **Last Updated:** 2026-02-10 | **Maintained By:** docs-manager agent
