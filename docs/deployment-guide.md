@@ -155,9 +155,10 @@ NEXTAUTH_URL="https://airisk.example.com"
 NEXT_PUBLIC_API_BASE_URL="https://airisk.example.com"
 NEXT_PUBLIC_APP_ENV="production"
 
-# Security
-ALLOWED_ORIGINS="https://airisk.example.com"
-CORS_CREDENTIALS="true"
+# Security - CORS Configuration (IMPORTANT)
+# Restrict CORS to specific origins (comma-separated, no spaces)
+# Protects against cross-origin attacks. Default: '*' (not recommended for production)
+ALLOWED_ORIGINS="https://airisk.example.com,https://admin.airisk.example.com"
 
 # Logging
 LOG_LEVEL="info"
@@ -180,6 +181,7 @@ NEXT_PUBLIC_API_BASE_URL="https://staging-airisk.example.com"
 | NEXTAUTH_SECRET | JWT signing secret (32+ chars) | Generated via `openssl rand -base64 32` |
 | NEXTAUTH_URL | Deployment URL for auth callbacks | http://localhost:3000 |
 | NEXT_PUBLIC_API_BASE_URL | API base URL (public, safe to expose) | http://localhost:3000 |
+| ALLOWED_ORIGINS | CORS allowed origins (comma-separated) | https://airisk.example.com,https://admin.example.com |
 | LOG_LEVEL | Logging verbosity | debug, info, warn, error |
 
 ---

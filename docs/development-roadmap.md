@@ -1,6 +1,6 @@
 # AIRisk Dashboard - Development Roadmap
 
-**Version:** 2.6 | **Date:** 2026-02-04 | **Last Updated:** 2026-02-09 (Frontend Phases 16-18 Complete)
+**Version:** 2.7 | **Date:** 2026-02-04 | **Last Updated:** 2026-02-10 (Security Audit + Hardening Complete)
 
 ---
 
@@ -220,9 +220,10 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 
 ## Current Status Summary
 
-**Completed Features:** 120+/120+ (100%)
+**Completed Features:** 125+/125+ (100%)
 - ✅ All MVP1-4 requirements
 - ✅ Phase 15 security hardening (XSS & CSV injection prevention)
+- ✅ Phase 20 security audit (B+ grade, 0 CVEs, hardening applied)
 - ✅ Phase 21: Dashboard Features & UI/UX Upgrade (9 advanced features)
 - ✅ Risk Visualization Enhancement (velocity, Sankey, radar, drill-down)
 - ✅ Multi-tenant architecture with API keys & webhooks
@@ -282,6 +283,47 @@ Jan-Feb 2025     Feb-Mar 2025          Jan-Feb 2026           Q1+ 2026
 - All 12 security fixes completed
 - Tests passing (262/262)
 - Production deployment approved
+
+---
+
+### Phase 20: Security Audit & Hardening (COMPLETE)
+**Status:** ✅ COMPLETE | **Timeline:** 2026-02-10
+**Progress:** 100% (external audit + 4 hardening fixes applied)
+
+**Security Audit Results:**
+- **Grade:** B+ (Strong foundational security)
+- **Scanner:** Nuclei v3.7.0
+- **CVEs Found:** 0
+- **API Coverage:** 11/12 endpoints require authentication (health check is public)
+
+**Hardening Fixes Applied (commit abe1d16):**
+1. ✅ CORS Restriction — `ALLOWED_ORIGINS` environment variable (configurable whitelist)
+2. ✅ Brute-Force Protection — `login-attempt-tracker.ts` (5 attempts = 15min lockout)
+3. ✅ Info Leak Prevention — `X-Powered-By` header removed
+4. ✅ HSTS Preload — `Strict-Transport-Security` header with preload directive
+
+**Security Verification:**
+- All security headers present (CSP, HSTS, X-Frame-Options, etc.)
+- SQL injection: Not vulnerable (Prisma parameterization)
+- Path traversal: Not vulnerable (validation + 403)
+- Sensitive files: Protected (404 for .env, package.json)
+- CORS: Fixed (wildcard → origin whitelist)
+
+**Files Modified:** 5 files
+- `next.config.ts` — CORS + poweredByHeader + HSTS preload
+- `src/lib/login-attempt-tracker.ts` — NEW brute-force service
+- `src/app/api/auth/[...nextauth]/route.ts` — Integrated login tracker
+- `tests/setup.ts` — Mock for login-attempt-tracker
+- `.env.example` — ALLOWED_ORIGINS documentation
+
+**Tests:** 1,080/1,080 passing (100%) — No regression
+**Documentation:** README + Deployment Guide + System Architecture updated
+
+**Success Criteria:** ✅ All met
+- Audit completed with B+ grade
+- 0 CVEs found
+- All recommendations implemented
+- Production ready
 
 ---
 

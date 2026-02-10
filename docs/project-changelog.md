@@ -1,10 +1,70 @@
 # AIRisk Dashboard - Project Changelog
 
-**Last Updated:** 2026-02-09 | **Current Version:** 2.6.1 (Security & Code Quality Improvements)
+**Last Updated:** 2026-02-10 | **Current Version:** 2.7.0 (Security Audit & Hardening)
 
 ---
 
 ## Version History
+
+### 2.7.0 — Security Audit & Hardening (2026-02-10)
+**Date:** 2026-02-10
+**Impact:** Low-priority security audit completion with Grade B+ assessment
+
+**Security Audit Results:**
+- **Grade:** B+ (Strong foundational security with minor recommendations)
+- **Scanner:** Nuclei v3.7.0 (zero CVEs or misconfigurations found)
+- **Status:** All 11/12 API endpoint groups return 401 for unauthenticated access (health check is public)
+- **Verdict:** Production-ready with robust security controls
+
+**Security Enhancements Implemented (commit abe1d16):**
+1. **CORS Restriction:** Changed from wildcard `*` to `ALLOWED_ORIGINS` environment variable
+   - Configurable: comma-separated trusted origins
+   - Backward compatible (defaults to `*` if not set)
+   - Prevents cross-origin attacks from untrusted domains
+2. **Brute-Force Protection:** New `login-attempt-tracker.ts` service
+   - 5 failed login attempts = 15-minute account lockout
+   - In-memory tracking with automatic cleanup
+   - Prevents credential stuffing attacks
+3. **Server Info Leak Prevention:** `X-Powered-By` header removed
+   - `poweredByHeader: false` in next.config.ts
+   - Reduces reconnaissance surface
+4. **HSTS Preload:** Enhanced Strict-Transport-Security header
+   - Added `preload` directive
+   - Increases browser HSTS preload list eligibility
+   - Forces HTTPS for all requests
+
+**Security Headers Verified:**
+- Content-Security-Policy ✅
+- Strict-Transport-Security (with preload) ✅
+- X-Frame-Options: DENY ✅
+- X-Content-Type-Options: nosniff ✅
+- Referrer-Policy ✅
+- Permissions-Policy ✅
+
+**Database Security Verified:**
+- SQL injection: Not vulnerable (Prisma parameterization)
+- Path traversal: Not vulnerable (validation + 403 responses)
+- Sensitive files: All hidden (404 for .env, package.json, etc.)
+
+**Files Modified:** 2 files
+- `next.config.ts` — CORS + poweredByHeader + HSTS preload
+- `src/lib/login-attempt-tracker.ts` — NEW brute-force service
+- `src/app/api/auth/[...nextauth]/route.ts` — Integrated login attempt tracker
+- `tests/setup.ts` — Mock for login-attempt-tracker
+- `.env.example` — Added ALLOWED_ORIGINS documentation
+
+**Tests:** 1,080/1,080 passing (100%) — No regression
+**Type Safety:** 0 TypeScript errors
+**Documentation:** README, Deployment Guide, System Architecture updated with security findings
+
+**Future Recommendations (not implemented):**
+- 2FA/MFA (TOTP) — Multi-factor authentication
+- JWT Revocation — Redis-based token blacklist
+- Magic Byte Validation — Enhanced file type verification
+- CSP Nonces — Replace unsafe-inline directives
+- Per-Endpoint Rate Limiting — Fine-grained limits on sensitive operations
+
+---
 
 ### 2.6.2 — Docker Optimization & Deployment (2026-02-10)
 **Date:** 2026-02-10

@@ -298,6 +298,39 @@ Comprehensive documentation in `/docs`:
 - **Risk Assessment** — Wizard flow, form validation, submission
 - **Evidence Management** — Upload, version history, storage quotas
 
+## Security
+
+### Audit Results (Feb 10, 2026)
+**Grade: B+ (Strong foundational security with minor recommendations)**
+
+### Key Protections
+- **CORS**: Restricted to configured origins (see `ALLOWED_ORIGINS` env var)
+- **Authentication**: JWT-based with NextAuth.js, 24h session timeout, 30min idle timeout
+- **Authorization**: 5-role RBAC with minimum role checks on all protected endpoints
+- **Database**: Parameterized queries via Prisma, multi-tenant isolation via `organizationId`
+- **Brute-Force Protection**: 5 failed login attempts = 15min lockout (in-memory tracker)
+- **Headers**: CSP, HSTS (with preload), X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
+- **Secrets**: No hardcoded credentials; `.env` files excluded from git
+- **Rate Limiting**: Tiered role-based limits (unauthenticated, authenticated, admin)
+- **SQL Injection**: Not vulnerable (Prisma parameterization)
+- **Path Traversal**: Blocked with 403 responses
+
+### Security Audit Findings
+- **11/12 API endpoint groups**: Return 401 for unauthenticated access (1 public health check expected)
+- **Sensitive files**: All hidden (404 for `.env`, `package.json`, etc.)
+- **External scanners**: Nuclei v3.7.0 found zero CVEs or misconfigurations
+- **Security headers**: All 6 required headers present and properly configured
+
+### Recommendations (Future Roadmap)
+- **2FA/MFA (TOTP)** — Multi-factor authentication for enhanced account security
+- **JWT Revocation** — Redis-based token blacklist for immediate session termination
+- **Magic Byte Validation** — File type verification for evidence uploads
+- **Webhook HMAC-SHA256** — Enhanced webhook signature validation (partially implemented)
+- **CSP Nonces** — Replace `unsafe-inline` with per-request nonces
+- **Per-Endpoint Rate Limiting** — Fine-grained limits on sensitive operations
+
+For detailed security architecture, see [System Architecture — Security Section](./docs/system-architecture.md#security-architecture).
+
 ## License
 
 MIT
