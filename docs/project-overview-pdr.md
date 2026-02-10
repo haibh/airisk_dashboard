@@ -1,14 +1,14 @@
 # AIRisk Dashboard - Project Overview & PDR
 
-**Version:** 3.1 | **Date:** 2026-02-06 | **Status:** MVP4 (Phase 14.5 + Phase 15)
+**Version:** 3.2 | **Date:** 2026-02-09 | **Status:** MVP5 Phase 18 Complete + MVP6 Enterprise (In Progress)
 
 ---
 
 ## Executive Summary
 
-AIRisk Dashboard (AIRM-IP) is an enterprise AI Risk Management Intelligence Platform enabling organizations to manage AI system risks end-to-end through comprehensive dashboards, assessments, framework mapping (23 frameworks), and compliance tracking.
+AIRisk Dashboard (AIRM-IP) is an enterprise AI Risk Management Intelligence Platform enabling organizations to manage AI system risks end-to-end through 23 compliance frameworks (1,323 controls), evidence management, bulk import, scheduled reports, task tracking, and advanced analytics (supply chain, regulatory, benchmarking, ROI).
 
-**Current Status:** MVP4 complete with 14.5 phases delivered including customizable dashboard widget system with Simple/Advanced modes, drag-and-drop reordering, and security hardening (in progress).
+**Current Status:** MVP5 complete with Phases 16-18 delivered (evidence versioning, file storage, scheduled reports, task management, bulk import). MVP6 enterprise features in progress (SSO/SAML, SCIM 2.0, Docker/CI-CD).
 
 ---
 
@@ -328,19 +328,46 @@ Residual Risk = Inherent Risk × (1 - ControlEffectiveness/100)
 ## Deployment Requirements
 
 ### Prerequisites
+**Local Development:**
 - Node.js 18+
 - PostgreSQL 15+
 - npm or yarn package manager
 
-### Environment Variables
-```
-DATABASE_URL=postgresql://user:pass@localhost:5432/airm_ip
-NEXTAUTH_SECRET=<generate: openssl rand -base64 32>
-NEXTAUTH_URL=http://localhost:3000
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+**Docker Deployment:**
+- Docker 20.10+ and Docker Compose 2.0+
+- 2GB RAM minimum (4GB recommended)
+- 10GB disk space
+
+### Deployment Options
+
+**1. Docker Development (Recommended):**
+```bash
+# Copy environment template
+cp .env.docker.example .env.docker
+
+# Start dev stack with hot-reload
+make dev
+
+# View logs
+make logs
+
+# Stop and clean up
+make clean
 ```
 
-### Initial Setup
+**2. Docker Production:**
+```bash
+# Generate SSL certificate (self-signed or use LetsEncrypt)
+make ssl-self-signed
+
+# Start production stack with nginx
+make prod
+
+# Backup database
+make backup
+```
+
+**3. Local Development (Traditional):**
 ```bash
 npm install                    # Install dependencies
 npm run db:generate           # Generate Prisma client
@@ -348,6 +375,36 @@ npm run db:push               # Push schema to database
 npm run db:seed               # Seed initial data
 npm run dev                   # Start dev server
 ```
+
+### Environment Variables
+**Local (.env.local):**
+```
+DATABASE_URL=postgresql://user:pass@localhost:5432/airm_ip
+NEXTAUTH_SECRET=<generate: openssl rand -base64 32>
+NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+```
+
+**Docker (.env.docker):**
+```
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/airm_ip
+REDIS_URL=redis://redis:6379
+MINIO_ENDPOINT=http://minio:9000
+NEXTAUTH_SECRET=<generate: openssl rand -base64 32>
+NEXTAUTH_URL=http://localhost:3000
+```
+
+### Docker Stack Components
+- **App Container:** Next.js 16 application (421MB Alpine image)
+- **PostgreSQL:** Database with automated backups (7-day rotation)
+- **Redis:** Session and cache storage
+- **MinIO:** S3-compatible object storage for evidence files
+- **Nginx (prod only):** Reverse proxy with SSL/TLS termination
+
+### Deployment Strategy
+- **Development:** Docker dev stack with hot-reload and auto-seed
+- **Staging:** Docker prod stack with self-signed SSL
+- **Production:** Cloud deployment (AWS ECS, GCP Cloud Run, Azure Container Apps) or on-premise Kubernetes
 
 ---
 

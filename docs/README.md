@@ -1,7 +1,7 @@
 # AIRisk Dashboard Documentation
 
-**Status:** MVP4 Phase 14.5 + Phase 15 (Dashboard Widgets & Security Hardening)
-**Last Updated:** 2026-02-06
+**Status:** MVP5 Phase 18 Complete + MVP6 Enterprise Features (In Progress)
+**Last Updated:** 2026-02-09
 
 ---
 
@@ -47,9 +47,19 @@
 7. ✅ API Keys & Webhooks (HMAC-SHA256 signing)
 8. ✅ Notifications & Audit Logs (7 event types + CSV export)
 9. ✅ Evidence Management & Gap Analysis
-10. ✅ Testing Infrastructure (262+ tests, 95%+ coverage)
+10. ✅ Testing Infrastructure (1,080 unit tests across 55 files, 28 E2E tests)
 11. ✅ Accessibility (WCAG 2.1 AA)
 12. ✅ Caching & Rate Limiting (Redis + sliding window)
+13. ✅ Supply Chain Risk Mapping (React Flow vendor graph, risk propagation)
+14. ✅ Regulatory Change Tracker (timeline, impact assessment)
+15. ✅ Peer Benchmarking (differential privacy, cross-org comparison)
+16. ✅ ROI Calculator (ALE/ROSI formulas, scenario builder)
+17. ✅ Evidence Versioning & File Storage (SHA-256, virus scanning, quotas)
+18. ✅ Scheduled Reports (PDF/Excel generation, SMTP delivery)
+19. ✅ Task Management (CRUD, comments, workflow tracking)
+20. ✅ Bulk Import (CSV/Excel with validation)
+21. ✅ Enterprise SSO/SAML (saml-jackson integration)
+22. ✅ SCIM 2.0 (IdP user sync)
 
 ### Quick Commands
 ```bash
@@ -87,55 +97,32 @@ src/
 │   ├── (auth)/login/            # Login page
 │   └── (dashboard)/             # Protected dashboard (29 pages)
 ├── app/api/                     # REST API (53 routes across 21 groups)
-├── components/                  # React components (112+ files, 12K+ LOC)
-├── lib/                        # Utilities (28 files: caching, webhooks, jobs, etc.)
+├── components/                  # React components (174 files, 26.9K LOC across 27 directories)
+├── lib/                        # Utilities (51 files, 7.3K LOC across 11 categories)
 ├── store/                      # Zustand state (4 stores)
 ├── types/                      # TypeScript definitions
 ├── i18n/                       # Translations (EN/VI)
 └── middleware.ts               # Auth + i18n middleware
 
 prisma/
-├── schema.prisma               # Database schema (20 models + 11 enums)
-├── seed.ts                     # User/org seeding
-├── seed-frameworks.ts          # NIST/ISO framework data
-├── seed-cis-controls.ts        # CIS Controls v8.1
-├── seed-csa-aicm.ts            # CSA AICM framework
-├── seed-nist-csf.ts            # NIST Cybersecurity Framework
-└── seed-pci-dss.ts             # PCI DSS v4.0.1
+├── schema.prisma               # Database schema (42 models + 15 enums)
+└── seed*.ts                    # 24 seed files: frameworks, vendors, regulatory, benchmarks, insights, mock data
 
 tests/
-├── api/                        # Integration tests (262+ passing)
-├── e2e/                        # End-to-end tests (Playwright)
+├── api/                        # Integration tests (55+ files, 1,080 unit tests)
+├── e2e/                        # End-to-end tests (28 E2E, Playwright)
 ├── lib/                        # Unit tests
-└── setup.ts                    # Global test configuration
+└── setup.ts                    # Global test configuration (auto-mocks Prisma, auth, cache, services)
 ```
 
 ---
 
-## Database Entities (20 Models)
+## Database Entities (42 Models + 15 Enums)
 
 | Entity | Purpose |
 |--------|---------|
-| **Organization** | Root tenant entity |
-| **User** | System users with 5 roles (active/inactive tracking) |
-| **AISystem** | AI inventory (name, type, lifecycle, classification) |
-| **Framework** | NIST/ISO frameworks (85+ NIST, 38 ISO controls) |
-| **Control** | Framework controls with hierarchy |
-| **Mapping** | Cross-framework relationships (confidence levels) |
-| **Assessment** | Risk assessment snapshots (4-step status workflow) |
-| **Risk** | Individual risks (5×5 matrix, inherent/residual scores) |
-| **RiskControl** | Links risks to framework controls |
-| **Evidence** | Evidence artifacts (SHA-256 hashing) |
-| **EvidenceLink** | Links evidence to risks/controls/assessments |
-| **Task** | Remediation tasks (treatment workflow) |
-| **AuditLog** | Immutable action logs (user, entity, change details) |
-| **Invitation** | User invitations (token-based, expiry tracking) |
-| **APIKey** | API keys (SHA-256 hashed, max 10/org, 3 permission levels) |
-| **Webhook** | Webhook endpoints (SSRF protected, HMAC signing) |
-| **WebhookDelivery** | Delivery logs (retry tracking, response codes) |
-| **Notification** | User notifications (7 event types, read/unread) |
-| **SavedFilter** | Per-user saved filters for dashboards |
-| **ScheduledJob** | Cron-based scheduled tasks |
+| **Core (1-22)** | Organization, User, Account, Session, VerificationToken, AISystem, Framework, Control, ControlMapping, RiskAssessment, Risk, RiskScoreHistory, RiskControl, Evidence, EvidenceLink, Task, AuditLog, ScheduledJob, SavedFilter, Invitation, APIKey, Webhook |
+| **Enterprise (23-42)** | WebhookDelivery, Notification, Vendor, VendorRiskPath, RegulatoryChange, FrameworkChange, ChangeImpact, BenchmarkSnapshot, BenchmarkResult, RiskCostProfile, MitigationInvestment, ROSICalculation, InsightTemplate, GeneratedInsight, AnomalyEvent, DashboardLayout, ComplianceChain, EvidenceVersion, TaskComment, ReportTemplate, ImportJob, ActiveSession, SSOConnection |
 
 ---
 
@@ -287,26 +274,20 @@ See [deployment-guide.md](./deployment-guide.md) for:
 
 ---
 
-## Known Limitations (MVP4)
+## Next Phase (MVP6+)
 
-- No file storage integration (S3/Blob uploading evidence files)
-- No scheduled report generation (cron-based)
-- Bundle size optimization pending (target: 400KB gzip)
+**In Progress:**
+- Enterprise SSO/SAML (saml-jackson integration)
+- SCIM 2.0 IdP user sync
+- Session tracking & IP allowlist enforcement
+- Docker deployment & GitHub Actions CI/CD
 
----
-
-## Next Phase (MVP5)
-
-**Focus Areas:**
-- S3/Blob storage integration for evidence files
-- Report scheduling & email delivery
-- Advanced gap analysis visualization
-- Performance optimizations (bundle size, query caching)
-
-**Documentation Updates:**
-- evidence-storage-guide.md
-- report-scheduling.md
-- advanced-caching-guide.md
+**Planned:**
+- Mobile app (React Native)
+- Real-time collaboration (WebSockets)
+- Advanced SIEM analytics
+- Machine learning anomaly detection
+- Multi-region deployment
 
 ---
 
@@ -347,9 +328,9 @@ See [deployment-guide.md](./deployment-guide.md#troubleshooting) for:
 ---
 
 **Documentation Status:** Current ✅
-**Last Verified:** 2026-02-04
-**MVP Phase:** 4 (Phase 13 - Multi-Tenant & Polish)
-**Test Status:** 262/262 passing
-**Quality Score:** A+ (97/100)
+**Last Verified:** 2026-02-09
+**MVP Phase:** 5 (Phases 16-18 Complete) + MVP6 (Enterprise Features)
+**Test Status:** 1,080/1,080 unit tests passing, 26/28 E2E passing
+**Components:** 174 files | **Models:** 42 | **Frameworks:** 23 (1,323 controls) | **API Routes:** 97 files
 
 For detailed information, see individual documentation files above.

@@ -1,6 +1,6 @@
 # AIRisk Dashboard - Code Standards & Conventions
 
-**Version:** 2.0 | **Date:** 2026-02-04 | **Status:** Active
+**Version:** 2.1 | **Date:** 2026-02-09 | **Status:** Active (Updated for Phase 16-18, Zod v4)
 
 ---
 
@@ -80,7 +80,7 @@ src/
 │       ├── scheduled-jobs/        # CRUD, trigger, logs
 │       ├── health/                # DB + Redis + S3 status
 │       └── cron/                  # Cron job handlers
-├── components/                    # React components (112+ files, 12K+ LOC)
+├── components/                    # React components (174 files, 26.9K LOC across 27 directories)
 │   ├── layout/                    # Header, Sidebar, notification dropdown (4 files)
 │   ├── ui/                        # Shadcn/ui wrappers (23 components)
 │   ├── forms/                     # Forms with React Hook Form + Zod
@@ -245,10 +245,8 @@ model AISystem { }    // not AISystems
 ## TypeScript Guidelines
 
 ### Type Safety
-- **Always use TypeScript types** - No `any` type unless absolutely necessary
-- **Import types from `@/types`** - Centralize type definitions
-- **Use strict tsconfig** - Enable strict mode in `tsconfig.json`
-- **Avoid `as` assertions** - Use proper typing instead
+- Always use TypeScript types (avoid `any` unless necessary)
+- Import types from `@/types`; enable strict mode; avoid `as` assertions
 
 ```typescript
 // ❌ Bad: Using 'any'
@@ -342,60 +340,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 ```typescript
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 
-// Define schema with Zod
-const formSchema = z.object({
-  name: z.string().min(1, 'Name required'),
-  email: z.string().email('Invalid email'),
-});
-
-// Use in component
-export function MyForm() {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-  });
-
-  return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      {/* form fields */}
-    </form>
-  );
-}
-```
-
-### Component Organization
-```typescript
-// 1. Imports
-import { useState } from 'react';
-import { useTranslations } from 'next-intl';
-
-// 2. Type definitions
-interface Props {
-  id: string;
-  onSubmit: (data: FormData) => Promise<void>;
-}
-
-// 3. Component
-export function MyComponent({ id, onSubmit }: Props) {
-  // Hooks first
-  const t = useTranslations();
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Event handlers
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    await onSubmit({});
-    setIsLoading(false);
-  };
-
-  // Render
-  return (
-    <div>
-      <button onClick={handleSubmit}>{t('submit')}</button>
-    </div>
-  );
-}
+// Use Zod for schema validation + React Hook Form
+const form = useForm({ resolver: zodResolver(schema) });
 ```
 
 ---
@@ -435,64 +382,28 @@ All API responses follow this format:
 
 ### Route Implementation
 ```typescript
-// src/app/api/ai-systems/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { db } from '@/lib/db';
-import { hasMinimumRole } from '@/lib/auth-helpers';
-
+// Standard API route pattern: Auth → RBAC → Validation → Query → Response
 export async function GET(request: NextRequest) {
   try {
-    // 1. Authentication check
     const session = await getServerSession();
-    if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    if (!session?.user) return unauthorizedError();
+    if (!hasMinimumRole(session.user.role, 'VIEWER')) return forbiddenError();
 
-    // 2. Authorization check
-    if (!hasMinimumRole(session.user.role, 'VIEWER')) {
-      return NextResponse.json(
-        { success: false, error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // 3. Validation
+    // Parse pagination
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '10');
 
-    // 4. Database query
+    // Query with org filter
     const items = await db.aiSystem.findMany({
       where: { organizationId: session.user.organizationId },
       skip: (page - 1) * pageSize,
       take: pageSize,
     });
 
-    const total = await db.aiSystem.count({
-      where: { organizationId: session.user.organizationId },
-    });
-
-    // 5. Response
-    return NextResponse.json({
-      success: true,
-      data: items,
-      pagination: {
-        total,
-        page,
-        pageSize,
-        totalPages: Math.ceil(total / pageSize),
-      },
-    });
+    return NextResponse.json({ success: true, data: items });
   } catch (error) {
-    console.error('AI Systems fetch error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleApiError(error, 'fetching AI systems');
   }
 }
 ```
@@ -616,20 +527,11 @@ describe('GET /api/ai-systems', () => {
 ```
 
 ### Testing Best Practices
-- **Unit tests:** Focus on isolated functions
-- **Integration tests:** Test API routes with mocked database
-- **E2E tests:** Test complete user workflows
-- **Coverage goal:** 80%+ for critical paths
-- **No fake data:** Use realistic test scenarios
-- **Mock external dependencies:** Database, auth, APIs
+- Unit tests (isolated functions), integration tests (API + mocked DB), E2E tests (workflows)
+- Coverage goal: 80%+ for critical paths; use realistic scenarios; mock external dependencies
 
 ### Test Coverage Areas
-- API endpoints (CRUD operations)
-- Error handling and edge cases
-- Authorization and RBAC
-- Database queries and filters
-- Business logic (risk scoring)
-- i18n string loading
+- API endpoints (CRUD), error handling, authorization (RBAC), database queries, business logic (risk scoring), i18n
 
 ---
 
@@ -762,14 +664,6 @@ function sanitizeCsvValue(value: string): string {
   }
   return value;
 }
-
-// Applied in formatValue() to all string exports
-function formatValue(value: unknown): string {
-  if (typeof value === 'string') {
-    return sanitizeCsvValue(value);
-  }
-  return String(value);
-}
 ```
 
 **Key Points:**
@@ -783,21 +677,12 @@ function formatValue(value: unknown): string {
 ## Linting & Formatting
 
 ### ESLint Configuration
-- Run `npm run lint` before commits
-- Fix auto-fixable issues: `npm run lint -- --fix`
-- Review and resolve non-fixable warnings
+- Run `npm run lint` before commits; fix auto-fixable issues with `npm run lint -- --fix`
 
 ### Code Review Checklist
-- [ ] No syntax errors (compiles cleanly)
-- [ ] TypeScript strict mode passes
-- [ ] No `any` types without justification
-- [ ] Functions under 50 lines
-- [ ] Components under 100 lines (split if larger)
-- [ ] Error handling implemented
-- [ ] Tests pass
-- [ ] No console.log in production code
-- [ ] Security checks passed
-- [ ] Documentation updated
+- [ ] No syntax errors; TypeScript strict mode passes
+- [ ] No `any` types without justification; functions <50 lines; components <100 lines
+- [ ] Error handling implemented; tests pass; security checks passed
 
 ---
 
@@ -812,14 +697,73 @@ refactor(api): simplify error handling
 test(risk): add scoring calculation tests
 ```
 
-### Commit Best Practices
-- One logical change per commit
-- Keep commits focused and atomic
-- Write clear, descriptive messages
-- Reference issues/tickets if applicable
-- Don't commit secrets or dependencies
 
 ---
 
-**Code Standards Version:** 2.1 | **Last Updated:** 2026-02-05 | **Maintained By:** docs-manager agent
-**Recent Additions:** XSS & CSV injection prevention patterns (Phase 15)
+## Docker Standards
+
+### Compose Naming Conventions
+- Service names: lowercase, hyphen-separated (e.g., `app`, `postgres`, `redis`, `minio`)
+- Network names: `{project}_network` pattern
+- Volume names: `{service}-data` pattern (e.g., `postgres-data`, `minio-data`)
+- Container names: `{project}-{service}-{env}` (e.g., `airisk-app-dev`, `airisk-nginx-prod`)
+
+### Health Check Pattern
+**Always use IPv4 `127.0.0.1` for Alpine-based containers:**
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/api/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+```
+
+**Why:** Alpine Linux networking requires explicit IPv4. Using `localhost` may fail.
+
+### Prisma in Docker Containers
+**Binary targets must include Alpine Linux:**
+```prisma
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+```
+
+**Prisma CLI usage:**
+```bash
+# Inside container (via entrypoint script)
+npx prisma generate
+npx prisma migrate deploy
+npx prisma db seed
+```
+
+**Dev dependencies required:** Prisma CLI must be available during build for `prisma generate` command. Keep `@prisma/client` and `prisma` in `devDependencies` and install all deps in Docker deps stage.
+
+### Entrypoint Script Pattern
+```bash
+#!/bin/sh
+set -e
+
+# Wait for database
+./scripts/wait-for-postgres-database-ready.sh
+
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate deploy
+
+# Seed data (dev only)
+if [ "$NODE_ENV" = "development" ]; then
+  npx prisma db seed
+fi
+
+# Start application
+exec "$@"
+```
+
+---
+
+**Code Standards Version:** 2.2 | **Last Updated:** 2026-02-10 | **Maintained By:** docs-manager agent
+**Recent Additions:** Docker standards (Feb 2026), XSS & CSV injection prevention (Phase 15), modularization patterns (Phase 16-18)

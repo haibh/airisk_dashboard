@@ -1,11 +1,11 @@
 # AIRisk Dashboard - Codebase Summary
 
 **Generated:** 2026-02-09
-**Codebase Status:** MVP5 Complete - Phases 16-18 Backend + Frontend UI Implementation
-**Total Files:** 425+ files (including tests, migrations, seeds, new UI components)
-**Total Lines:** ~74,000+ lines of TypeScript/TSX/SQL
-**Codebase Size:** 560,000+ tokens, 2,220,000+ chars
-**Latest Additions:** Phase 16-18 Frontend UI (12 new components), Evidence versioning UI, Task management page, Bulk import wizard, Report template manager, Storage quota widget, i18n expansion (+158 keys per language)
+**Status:** MVP5 Complete (Phase 18) + MVP6 Enterprise Features (In Progress)
+**Total Files:** 483 files (src/, prisma/, tests/, docs/, etc.)
+**Total Lines:** ~64,678 LOC (source) + 24,000+ LOC (seeds, tests)
+**Total Tokens:** 595,053 tokens (595K)
+**Latest:** Phase 16-18 (evidence versions, tasks, bulk import, reports, file storage, scheduled reports, SSO/SAML, SCIM 2.0, session tracking, IP allowlist) + Docker/CI-CD
 
 ---
 
@@ -19,7 +19,7 @@ AIRisk Dashboard is a comprehensive AI Risk Management Intelligence Platform bui
 - **Internationalization:** next-intl (EN/VI)
 - **State Management:** Zustand (4 stores)
 - **UI Components:** Shadcn/ui (23 wrappers) + Radix UI
-- **Testing:** Vitest 4.0+ (833 passing across 46 files) + Playwright 1.58 (28 E2E)
+- **Testing:** Vitest 4.0+ (1,080 passing across 55 files) + Playwright 1.58 (28 E2E, 26 passing)
 - **Visualizations:** Recharts, React Flow (~45KB gzip)
 - **Drag & Drop:** dnd-kit with rectSortingStrategy
 - **Slider:** @radix-ui/react-slider for ROI inputs
@@ -38,6 +38,13 @@ The platform enables organizations to manage AI system risks end-to-end through 
 - **package.json** - Dependencies and build scripts
 - **postcss.config.mjs** - PostCSS plugins for Tailwind
 - **.env.example** - Environment variables template
+- **Dockerfile** (109L) - 3-stage build: deps → builder → runner (421MB)
+- **docker-compose.yml** (127L) - Base stack: app + postgres + redis + minio
+- **docker-compose.dev.yml** (52L) - Dev overrides: hot-reload + auto-seed
+- **docker-compose.prod.yml** (137L) - Prod overrides: nginx + limits
+- **Makefile** (116L) - 21 targets: dev, prod, build, logs, clean, backup, ssl
+- **.dockerignore** - Build context exclusions
+- **.env.docker.example** - Docker environment template
 
 ### Directory Structure
 
@@ -46,6 +53,13 @@ AIRisk_Dashboard/
 ├── .claude/                    # Claude Code configuration
 │   ├── rules/                  # Development and workflow rules
 │   └── skills/                 # Custom Python scripts for AI assistance
+├── docker/                     # Docker configuration
+│   └── nginx/
+│       └── nginx-reverse-proxy.conf  # 130L: SSL, gzip, rate limit, caching
+├── scripts/                    # Automation scripts
+│   ├── docker-entrypoint-startup.sh       # Container startup automation
+│   ├── wait-for-postgres-database-ready.sh # DB readiness check
+│   └── postgres-backup-with-rotation.sh   # Backup with 7-day rotation
 ├── prisma/                     # Database schema and seeding
 │   ├── schema.prisma           # Complete data model (20 models, 11 enums)
 │   ├── seed.ts                 # User and organization seeding
@@ -75,69 +89,35 @@ AIRisk_Dashboard/
 │   │       ├── frameworks/
 │   │       ├── dashboard/
 │   │       └── reports/
-│   ├── components/             # 124+ files, 14.2K+ LOC (20 directories)
-│   │   ├── layout/             # Header, Sidebar, notification dropdown (4 files)
-│   │   ├── ui/                 # Shadcn/ui wrappers (23 components)
-│   │   ├── forms/              # Form components with Zod validation
-│   │   ├── tables/             # Data tables with pagination
-│   │   ├── charts/             # Risk heatmap, compliance scorecard
-│   │   ├── risk-assessment/    # 5-step wizard, matrix visualization
-│   │   ├── frameworks/         # Framework tree, controls table
-│   │   ├── settings/           # Organization, users, API keys, webhooks (15 files)
-│   │   ├── evidence/           # Evidence upload, approval workflow, versioning, storage quota (6 files)
-│   │   ├── tasks/              # Task management: list, detail, create, comments (4 files, NEW Phases 16-18)
-│   │   ├── import/             # Bulk import wizard and preview (2 files, NEW Phases 16-18)
-│   │   ├── reports/            # Report templates manager (1 file, NEW Phases 16-18)
-│   │   ├── dashboard/          # 26 files: 4 main views + 15 widgets + 4 drag-drop + consolidated widgets
-│   │   │   ├── executive-brief-view.tsx
-│   │   │   ├── detailed-analytics-view.tsx
-│   │   │   ├── operations-view.tsx
-│   │   │   ├── ai-risk-view-panel.tsx
-│   │   │   ├── dashboard-sortable-container.tsx    # dnd-kit container (NEW Feb 6)
-│   │   │   ├── dashboard-widget-wrapper.tsx         # Widget wrapper with controls (NEW Feb 6)
-│   │   │   ├── dashboard-widget-settings-panel.tsx # Settings panel (NEW Feb 6)
-│   │   │   ├── sortable-widget.tsx                  # dnd-kit useSortable wrapper (NEW Feb 6)
-│   │   │   ├── risk-pulse-strip.tsx                 # Consolidated widget (NEW Feb 5)
-│   │   │   ├── unified-risk-view.tsx                # Consolidated widget (NEW Feb 5)
-│   │   │   ├── compliance-status-card.tsx           # Consolidated widget (NEW Feb 5)
-│   │   │   ├── next-best-actions-card.tsx           # Consolidated widget (NEW Feb 5)
-│   │   │   └── 11 individual widgets (stat-cards, risk-score, heatmap, etc.)
-│   │   ├── ops-center/         # 6 files: system-health-indicators, risk-alerts-panel, etc.
-│   │   ├── ai-risk-view/      # 7 files: model-registry-panel, risk-card-panel, treemap-panel, etc.
-│   │   ├── landing/            # Landing page (3 files: main + content sections)
-│   │   ├── gap-analysis/       # Gap analysis engine and visualization
-│   │   ├── notifications/      # Notification dropdown, list
-│   │   ├── audit-log/          # Audit log viewer with filters
-│   │   ├── search/             # Global multi-entity search
-│   │   └── providers/          # NextAuth, Theme providers
-│   ├── lib/                    # 35 files, 8.7K LOC (+ Phase 16-18 modules)
-│   │   ├── auth-helpers.ts     # RBAC, role checking, hasMinimumRole()
-│   │   ├── db.ts               # Prisma client initialization
-│   │   ├── risk-scoring-calculator.ts # Inherent/residual risk math
-│   │   ├── cache-service.ts    # Multi-layer caching (LRU + Redis)
-│   │   ├── cache-invalidation.ts # Domain-specific cache invalidation
-│   │   ├── cache-advanced.ts   # Stale-while-revalidate, warming
-│   │   ├── webhooks/           # Webhook dispatch, signature, delivery worker
-│   │   ├── scheduled-job-*.ts  # Cron runner, handlers, queue
-│   │   ├── rate-limiter.ts     # Sliding window, role-based tiers
-│   │   ├── logger*.ts          # Structured logging
-│   │   ├── api-error-handler.ts # Error middleware
-│   │   ├── api-validation-schemas.ts # Zod schemas
-│   │   ├── api-key-*.ts        # API key generation, authentication
-│   │   ├── storage-service.ts  # S3/Blob integration
-│   │   ├── gap-analysis-engine.ts # Gap analysis logic
-│   │   ├── global-search-service.ts # Multi-entity search
-│   │   ├── import-parser.ts    # CSV/Excel import
-│   │   ├── export-generator.ts # CSV/Excel export with streaming
-│   │   ├── email-service.ts    # SMTP email with templates (NEW Phase 17)
-│   │   ├── virus-scanner.ts    # ClamAV integration (NEW Phase 16)
-│   │   ├── storage-quota-service.ts # Quota enforcement (NEW Phase 16)
-│   │   ├── evidence-version-service.ts # Version tracking (NEW Phase 16)
-│   │   ├── bulk-upload-service.ts # Batch processing (NEW Phase 16)
-│   │   ├── excel-report-generator.ts # Multi-sheet workbooks (NEW Phase 17)
-│   │   ├── pdf-report-generator.ts # HTML-to-PDF (NEW Phase 17)
-│   │   ├── file-report-manager.ts # S3 file lifecycle (NEW Phase 17)
-│   │   └── utils.ts            # General utilities
+│   ├── components/             # 174 files across 27 directories (~26,900 LOC)
+│   │   ├── dashboard/          # 31 files (4 views, 15 widgets, drag-drop controls)
+│   │   ├── settings/           # 17 files (users, org, SSO, SCIM, audit, API keys)
+│   │   ├── evidence/           # 6 files (upload, versions, quota, approval)
+│   │   ├── tasks/              # 5 files (list, detail, create, comments, NEW)
+│   │   ├── charts/             # 6 files (Sankey, burndown, velocity, matrix, etc.)
+│   │   ├── gap-analysis/       # 5 files (framework mapping, pairwise, visualization)
+│   │   ├── roi-calculator/     # 5 files (scenarios, payback, analysis)
+│   │   ├── supply-chain/       # 8 files (vendor graph, risk heatmap)
+│   │   ├── regulatory-tracker/ # 6 files (feed, impact, controls)
+│   │   ├── benchmarking/       # 4 files (trends, percentiles, peers)
+│   │   ├── ai-risk-view/       # 7 files (radar, treemap, registry, lifecycle)
+│   │   ├── insights/           # 5 files (feed, anomaly, stats)
+│   │   ├── landing/            # 3 files (hero, sections, content)
+│   │   ├── auth/               # 2 files (layout, providers)
+│   │   ├── forms, tables, ui/  # Input components, data tables, shadcn wrappers
+│   │   └── [other dirs]/       # Notifications, audit-log, search, layout, providers
+│   ├── lib/                    # 51 files, 7,259 LOC (11 categories)
+│   │   ├── Core (7): db, redis-client, logger, storage-service, notification-service, utils
+│   │   ├── Auth & Security (8): auth-helpers, sso-jit-provisioning, scim-user-sync, saml-jackson, ip-allowlist-checker, api-key-*
+│   │   ├── Caching (4): cache-service, cache-advanced, cache-invalidation, cache-warming
+│   │   ├── Validation (2): api-validation-schemas (Zod v4), api-error-handler
+│   │   ├── Risk Calculators (5): risk-scoring, risk-velocity-batch, supply-chain-risk, regulatory-impact, roi-rosi
+│   │   ├── Analytics (5): gap-analysis-engine, global-search, control-mapping-transformer, compliance-chain, anomaly-detector
+│   │   ├── Reports (6): scheduled-job-*, email-smtp, report-*-generator (PDF/Excel), file-manager
+│   │   ├── Import/Export (2): bulk-import-service, export-generator
+│   │   ├── Webhooks (3): webhook-event-dispatcher, webhook-delivery-worker, webhook-signature-generator
+│   │   ├── Enterprise (6): file-virus-scanner, organization-storage-quota, active-session-tracker, rate-limiter, import-parser, insight-generator
+│   │   └── Advanced Analytics (3): benchmarking-differential-privacy, burndown-calculator, audit-log-export-csv
 │   ├── store/                  # Zustand state management
 │   ├── types/                  # TypeScript type definitions
 │   ├── i18n/                   # Internationalization
@@ -201,32 +181,14 @@ AIRisk_Dashboard/
 
 ---
 
-### 1.1 Landing Page & Theme System (Feb 2026)
-**Status:** ✅ Completed (Commit ea1905a - Theme Unification)
+### 1.1 Theme System & Landing Page (Phase 14, Feb 2026)
+**Status:** ✅ Completed
 
-**Theme System Implementation (Phase 14):**
-- Unified CSS variable token system across all pages (`hsl(var(--xxx))`)
-- Support for light/dark mode toggle via `next-themes`
-- Adaptive styling on all pages: auth, landing, dashboard
-- Removed hardcoded color classes, migrated to semantic tokens
-- Animation prefix standardization: `ai-scene-*` (float, pulse, dash-flow, logo-bob, shape-morph)
-- SVG backgrounds use `currentColor` for true theme support
-- Theme toggle button (Sun/Moon) added to auth layout
-
-**Landing Page Features (Phase 14):**
-- Full-screen adaptive gradient background (`landing-gradient`)
-- Content sections: hero + stats bar + frameworks grid + capabilities + methodology + architecture
-- Modularized components: `landing-page.tsx` + `landing-page-content-sections.tsx`
-- Interactive AI scene with parallax effects and shape-morphing logo
-- CTA buttons with adaptive styling, mouse-tracking parallax
-- i18n expanded: `landing.stats.*`, `landing.supportedFrameworks.*`, `landing.capabilities.*`, `landing.methodology.*`, `landing.architecture.*`
-
-**Key Files:**
-- `src/components/landing/landing-page.tsx` (main, modular structure)
-- `src/components/landing/landing-page-content-sections.tsx` (new, content organization)
-- `src/app/globals.css` (CSS variables, adaptive utilities, animation keyframes)
-- `src/i18n/messages/en.json` (landing namespace expansion)
-- `src/i18n/messages/vi.json` (landing namespace expansion)
+- Unified CSS variable tokens (`hsl(var(--xxx))`) with light/dark toggle via `next-themes`
+- Landing page: hero + stats + frameworks grid + capabilities (modularized)
+- Theme toggle (Sun/Moon) in auth layout, adaptive styling on all pages
+- Animations: `ai-scene-*` prefix (float, pulse, dash-flow, logo-bob, shape-morph)
+- i18n: ~1,027 LOC per locale (EN/VI), 28 namespaces
 
 ---
 
@@ -428,122 +390,15 @@ model Risk {
 
 ---
 
-### 4.1 Risk Supply Chain Mapping (FR-SUPCHAIN)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+### 4.1-4.4 Advanced Risk Analytics (Phase 21 - Feb 6, 2026)
+**Status:** ✅ Completed (4 features, 28 components)
 
-**Features:**
-- Interactive vendor risk propagation graph using React Flow
-- Vendor registry with risk scoring
-- Bidirectional vendor risk path tracking
-- Risk cascade visualization
-- Vendor search and filtering
+1. **Supply Chain Risk Mapping** — React Flow vendor graph, risk propagation paths (8 components)
+2. **Regulatory Change Tracker** — Timeline view, impact assessment, framework annotations (6 components)
+3. **Peer Benchmarking** — Cross-org comparison, differential privacy, percentile rankings (4 components)
+4. **ROI Calculator** — ALE/ROSI formulas, scenario builder, cost-benefit analysis (5 components)
 
-**Database Models:**
-- `Vendor` — Vendor entity with risk profile
-- `VendorRiskPath` — Risk propagation paths
-
-**Key Files:**
-- `src/components/supply-chain/` — Vendor graph, registry, risk visualization
-- `src/app/[locale]/(dashboard)/supply-chain/` — Page route
-- `prisma/migrations/` — Vendor schema
-
-**API Endpoints:**
-```
-GET    /api/supply-chain/vendors          # List vendors
-POST   /api/supply-chain/vendors          # Create vendor
-GET    /api/supply-chain/vendors/[id]     # Get vendor
-PUT    /api/supply-chain/vendors/[id]     # Update vendor
-GET    /api/supply-chain/risk-paths       # Get propagation paths
-```
-
----
-
-### 4.2 Regulatory Change Tracker (FR-REGTRACK)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- Timeline view of regulatory changes
-- Impact assessment on controls and frameworks
-- Framework change annotations
-- Change impact propagation
-- Historical tracking and version control
-
-**Database Models:**
-- `RegulatoryChange` — Change event and metadata
-- `FrameworkChange` — Framework-level changes
-- `ChangeImpact` — Impact on affected controls/assessments
-
-**Key Files:**
-- `src/components/regulatory-tracker/` — Timeline, impact assessment, change list
-- `src/app/[locale]/(dashboard)/regulatory/` — Page route
-
-**API Endpoints:**
-```
-GET    /api/regulatory/changes             # List regulatory changes
-POST   /api/regulatory/changes             # Create change
-GET    /api/regulatory/changes/[id]        # Get change details
-GET    /api/regulatory/impacts             # List impacted controls
-```
-
----
-
-### 4.3 Peer Benchmarking (FR-BENCHMARK)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- Anonymous cross-organization comparison
-- Differential privacy (Laplace noise) to protect individual org data
-- Benchmark snapshots (point-in-time measurements)
-- Compliance score comparison by framework
-- Risk distribution comparison across orgs
-- Percentile ranking against peer group
-
-**Database Models:**
-- `BenchmarkSnapshot` — Snapshot of org metrics at point in time
-- `BenchmarkResult` — Aggregated benchmark statistics with privacy
-
-**Key Files:**
-- `src/components/benchmarking/` — Peer comparison charts, percentile viz, metrics table
-- `src/app/[locale]/(dashboard)/benchmarking/` — Page route
-- `src/lib/differential-privacy.ts` — Laplace noise implementation
-
-**API Endpoints:**
-```
-GET    /api/benchmarking/snapshots         # List benchmarks
-POST   /api/benchmarking/snapshots         # Create snapshot
-GET    /api/benchmarking/comparison        # Get peer comparison (anonymized)
-GET    /api/benchmarking/percentiles       # Get percentile rankings
-```
-
----
-
-### 4.4 ROI Calculator (FR-ROICALC)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- ALE (Annualized Loss Expectancy) calculation
-- ROSI (Return on Security Investment) formulas
-- Scenario comparison (baseline vs. mitigation strategies)
-- Cost/benefit analysis for risk treatments
-- Investment recommendation scoring
-
-**Database Models:**
-- `RiskCostProfile` — Cost parameters per risk (frequency, loss value)
-- `MitigationInvestment` — Cost of mitigation strategies
-- `ROSICalculation` — Calculated ROSI metrics and scenarios
-
-**Key Files:**
-- `src/components/roi-calculator/` — Calculator form, scenario builder, comparison table
-- `src/app/[locale]/(dashboard)/roi-calculator/` — Page route
-- `src/lib/rosi-calculator.ts` — Formulas: ALE = frequency × loss value; ROSI = (benefit - cost) / cost
-
-**API Endpoints:**
-```
-POST   /api/roi/calculate                  # Calculate ALE/ROSI
-GET    /api/roi/scenarios                  # List saved scenarios
-POST   /api/roi/scenarios                  # Save scenario
-GET    /api/roi/scenarios/[id]             # Get scenario details
-```
+**Database Models:** Vendor, VendorRiskPath, RegulatoryChange, FrameworkChange, ChangeImpact, BenchmarkSnapshot, BenchmarkResult, RiskCostProfile, MitigationInvestment, ROSICalculation (10 new models)
 
 ---
 
@@ -626,150 +481,27 @@ GET    /api/reports/compliance       # Compliance report
 
 ---
 
-### 5.1 Remediation Burndown Charts (FR-BURNDOWN)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+### 5.1-5.5 Dashboard Enhancements (Phase 21 - Feb 6, 2026)
+**Status:** ✅ Completed (5 features, 18 components)
 
-**Features:**
-- Sprint-based remediation tracking
-- Burndown chart visualization (tasks completed vs. time)
-- Velocity bar chart (tasks closed per sprint)
-- Sprint retrospective metrics
-- Team capacity planning
+1. **Burndown Charts** — Sprint tracking, velocity metrics, Recharts visualizations
+2. **Framework Control Overlap** — React Flow Sankey (172 mappings × 23 frameworks), coverage matrix
+3. **Bento Grid Layouts** — 3 presets (Executive/Analyst/Auditor), drag-drop reordering via dnd-kit
+4. **Data Storytelling & Insights** — Z-score anomalies, narrative templates, executive summaries
+5. **Compliance Chain Graph** — Requirement→Control→Evidence visualization, coverage donut
 
-**Key Files:**
-- `src/components/dashboard/remediation-burndown-chart.tsx` — Recharts burndown + velocity
-- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Operations tab
+**Database Models:** InsightTemplate, GeneratedInsight, AnomalyEvent, DashboardLayout, ComplianceChain (5 new models)
 
 ---
 
-### 5.2 Framework Control Overlap (FR-OVERLAP)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
+### 6. Testing & Quality Assurance
+**Status:** ✅ 1,080 unit tests across 55 files (100% passing) + 28 E2E tests (26 passing)
 
-**Features:**
-- React Flow Sankey diagram visualization
-- 172 control mappings across 23 frameworks
-- Control coverage matrix (framework vs. control)
-- Highlight unmapped controls
-- Mapping confidence indicators (HIGH/MEDIUM/LOW)
-
-**Key Files:**
-- `src/components/dashboard/framework-control-overlap.tsx` — React Flow Sankey
-- `src/components/dashboard/control-overlap-matrix.tsx` — Mapping matrix
-- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Detailed Analytics tab
-
----
-
-### 5.3 Bento Grid Layouts (FR-BENTO)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- 3 preset dashboard layouts: Executive, Analyst, Auditor
-- Drag-and-drop widget reordering via dnd-kit
-- Widget visibility toggles per user
-- View mode persistence (localStorage)
-- Responsive grid adaptation
-
-**Database Model:**
-- `DashboardLayout` — User's layout configuration and widget order
-
-**Key Files:**
-- `src/components/dashboard/bento-grid-preset-selector.tsx` — Layout picker
-- `src/components/dashboard/dashboard-sortable-container.tsx` — dnd-kit container
-- `src/components/dashboard/dashboard-widget-wrapper.tsx` — Widget controls
-- `src/hooks/use-dashboard-widget-config.ts` — State management
-
----
-
-### 5.4 Data Storytelling & Insights (FR-INSIGHTS)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- Template-based narrative insights generation
-- Z-score anomaly detection for statistical outliers
-- Auto-generated executive summaries
-- Key findings and risk trends
-- Actionable recommendations based on data patterns
-
-**Database Models:**
-- `InsightTemplate` — Narrative templates and rules
-- `GeneratedInsight` — AI-generated insights per assessment
-- `AnomalyEvent` — Detected anomalies (Z-score > 2.5)
-
-**Key Files:**
-- `src/components/insights/` — Insight display, anomaly indicators, trend analysis
-- `src/lib/insight-generator.ts` — Z-score calculation, template rendering
-- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Executive Brief tab
-
----
-
-### 5.5 Compliance Chain Graph (FR-COMPCHAIN)
-**Status:** ✅ Completed (Phase 21 - Feb 6, 2026)
-
-**Features:**
-- React Flow chain diagram: Requirement → Control → Evidence
-- Visual traceability across compliance chain
-- Coverage donut chart (% requirements with evidence)
-- Filter by framework
-- Gap identification (requirements without controls)
-
-**Database Model:**
-- `ComplianceChain` — Link between requirement, control, evidence
-
-**Key Files:**
-- `src/components/compliance-graph/` — Chain diagram, coverage donut, filter panel
-- `src/lib/compliance-chain-builder.ts` — Graph generation
-- `src/app/[locale]/(dashboard)/dashboard/` — Integrated into Detailed Analytics tab
-
----
-
-### 6. Testing & Quality Assurance (Phase 7)
-**Status:** ✅ Completed (Phase 7)
-
-**Test Infrastructure:**
-- **Framework:** Vitest for unit & integration tests
-- **E2E Testing:** Playwright with Chromium
-- **Performance:** Benchmark script measuring page load & API response times
-
-**Test Coverage:**
-
-1. **Unit Tests** (`tests/utils/`)
-   - Risk scoring calculator logic
-   - Utility function validation
-
-2. **Integration Tests** (`tests/api/`)
-   - AI Systems endpoint (CRUD operations)
-   - Assessments endpoint (creation, queries)
-   - Frameworks endpoint (data retrieval)
-   - Dashboard endpoints (stats, heatmap, compliance, activity)
-   - Mock Prisma client + session fixtures
-
-3. **E2E Tests** (`tests/e2e/`)
-   - auth-login-flow.spec.ts: Login, validation, error handling
-   - auth-unauthorized-access-redirect.spec.ts: Authorization checks
-   - dashboard-page-load.spec.ts: Component rendering, UI validation
-
-**Test Configuration:**
-- `playwright.config.ts`: Headless/headed modes, CI retries, trace recording
-- `vitest.config.ts`: Unit test configuration
-- `tests/setup.ts`: Global test setup & mocks
-
-**Performance Benchmarking:**
-- `scripts/performance-benchmark.ts`: Measures page load (< 3s) and API response (< 500ms P95)
-- Validates: list, single resource, CRUD operations endpoints
-
-**Execution:**
-```bash
-npm run test              # Run all tests
-npm run test:e2e          # E2E tests headless
-npm run test:e2e:headed   # E2E tests with browser
-npx tsx scripts/performance-benchmark.ts  # Performance tests
-```
-
-**Key Files:**
-- `tests/` directory structure
-- `playwright.config.ts`
-- `vitest.config.ts`
-- `scripts/performance-benchmark.ts`
+- **Vitest 4.0** — Unit & integration tests with auto-mocked Prisma
+- **Playwright 1.58** — E2E tests with trace recording
+- **Coverage** — API routes (`src/app/api/**`) and lib functions (`src/lib/**`)
+- **Test Setup** — `tests/setup.ts` auto-mocks: prisma, auth-helpers, cache, redis, logger, notifications, webhooks, services
+- **Execution** — `npm run test`, `npm run test:e2e`, `npm run test:coverage`
 
 ---
 
@@ -948,41 +680,11 @@ UserRole, AISystemType, DataClassification, LifecycleStatus, AssessmentStatus, R
 
 ---
 
-## Performance Considerations
+## Security & Performance
 
-### Current Optimizations
-1. **Pagination:** All list endpoints support offset/limit pagination
-2. **Filtering:** Database-level filtering on list endpoints
-3. **Indexing:** Primary key and foreign key indexes configured
-4. **Query Selection:** Prisma select() for field-level optimization
+**Security:** NextAuth.js JWT (24h session, 30min idle), RBAC (5 roles), organizational data isolation, encrypted at-rest via PostgreSQL, TLS 1.3, audit logging, rate-limiting (role-based tiers), SSRF-protected webhooks, XSS sanitization, CSV injection prevention.
 
-### Recommended Optimizations (Phase 7)
-1. Add database indexes for frequently filtered columns
-2. Implement API response caching with Redis
-3. Add Cache-Control headers to API responses
-4. Optimize bundle size (split code by route)
-5. Image optimization for dashboard charts
-
----
-
-## Security Implementation
-
-### Authentication & Authorization
-- ✅ NextAuth.js JWT strategy
-- ✅ Secure session management (30-min timeout)
-- ✅ Role-based access control (5 roles)
-- ✅ Protected API routes via middleware
-
-### Data Protection
-- ✅ PostgreSQL encryption at rest (via cloud provider)
-- ✅ TLS 1.3 for all network communications
-- ✅ Secrets management via environment variables
-- ✅ No sensitive data in logs
-
-### Audit Trail
-- ✅ Audit logging table structure (not yet integrated)
-- ✅ Timestamp tracking on all entities
-- ✅ Soft deletes for historical tracking
+**Performance:** Pagination (all list endpoints), database-level filtering, Redis caching with stale-while-revalidate, response compression, bundle optimization (dynamic imports), query selection via Prisma select().
 
 ---
 
@@ -1032,21 +734,21 @@ npm run analyze             # Analyze bundle size
 
 ---
 
-## Feature Completeness Summary
+## Completion Status
 
-**MVP5 Complete (Phases 1-18 + 21):**
-Core features (auth, RBAC, AI inventory, risk assessment, dashboards), multi-tenant architecture, 23 compliance frameworks with 1,323 controls (NIST AI RMF, ISO 42001, OWASP LLM, MITRE ATLAS, Microsoft RAI, OECD AI Principles, Singapore AI Gov, CSA AICM, NIST 800-53, NIST CSF 2.0, ISO 27001, CIS Controls, COBIT, ITIL, PCI DSS, SCF v2025.4, EU AI Act, NIS2, DORA, CMMC 2.0, HIPAA, SOC 2, Google SAIF), evidence management, gap analysis, API keys, webhooks, notifications, audit logs, 833 tests (100% passing), 28+ E2E tests, WCAG 2.1 AA accessibility, multi-layer caching, rate limiting, unified adaptive theme system (light/dark toggle), dashboard consolidation (4-tab interface), customizable dashboard with Simple/Advanced widget modes and drag-and-drop reordering,
+**MVP5 + Phase 21 ✅ Complete**
+- Core: Auth, RBAC, AI inventory, risk assessment, 4-tab dashboard consolidation
+- 23 frameworks (1,323 controls, 172 mappings), evidence management, gap analysis
+- Advanced: Supply chain mapping, regulatory tracker, benchmarking, ROI calculator, burndown charts, Sankey overlap, bento grid layouts, insights/anomalies, compliance chain graph
+- Infrastructure: 42 models, 15 enums, 1,080 tests, WCAG 2.1 AA, Docker/CI-CD
 
-**Phase 21 Features:** risk supply chain mapping (React Flow vendor graph), regulatory change tracker (timeline + impact assessment), peer benchmarking (differential privacy + anonymized comparison), ROI calculator (ALE/ROSI formulas), remediation burndown charts (Recharts), framework control overlap (Sankey + matrix), bento grid layouts (3 presets with customization), data storytelling (anomaly detection + narrative insights), compliance chain graph (requirement→control→evidence visualization),
+**Phase 16-18 ✅ Complete**
+- Backend: Evidence versioning (SHA-256), virus scanning (ClamAV), storage quotas, bulk import (CSV/Excel), scheduled reports (PDF/Excel), task management (CRUD + comments), cron jobs
+- Frontend: Evidence versions panel, storage quota widget, task management page, bulk import wizard, report template manager, +158 i18n keys
 
-**Phase 16-18 Backend Features:** Evidence file versioning (SHA-256 checksums), virus scanning (ClamAV), storage quota management (org-level), bulk file upload, SMTP email service, scheduled report generation (PDF/Excel), Handlebars/Markdown templates, cron job management, recurring assessments, report file lifecycle management, bulk import service (CSV/Excel with Zod validation), task management CRUD, task comments and discussion threads, conflict detection and resolution, import job tracking with progress monitoring.
-
-**Phase 16-18 Frontend UI (NEW):** Evidence version history panel with diff viewer, storage quota indicator widget (admin-only), full task management page (list/detail/create/comments), bulk import wizard (multi-step with preview), report template manager, `/tasks` sidebar route, i18n expansion (+158 keys per language).
-
-**Infrastructure:** 42 database models, 15 enums, 35 lib modules, 97 API route files, 833 unit tests (46 files), 28 E2E tests, 100% TypeScript strict mode, production-ready build.
-
-**MVP6+ Planned:**
-Enterprise SSO/SAML integration, mobile app, real-time collaboration, advanced SIEM analytics, machine learning anomaly detection, multi-region deployment.
+**MVP6 (In Progress)**
+- Enterprise SSO/SAML (saml-jackson integration), SCIM 2.0 IdP sync, session tracking, IP allowlist enforcement
+- Docker setup, GitHub Actions CI/CD, security hardening
 
 ---
 
@@ -1059,73 +761,24 @@ Enterprise SSO/SAML integration, mobile app, real-time collaboration, advanced S
 
 ---
 
-## Security Hardening (Phase 15 - In Progress)
 
-**XSS Prevention (2026-02-05):**
-- Added `escapeHtml()` utility in `src/lib/global-search-service.ts`
-- Escapes HTML entities: `&`, `<`, `>`, `"`, `'`
-- Applied to `highlightMatches()` function for search results
-- Prevents injection of malicious scripts through user-generated content
-
-**CSV Injection Prevention (2026-02-05):**
-- Added `sanitizeCsvValue()` utility in `src/lib/export-generator.ts`
-- Detects dangerous CSV formula characters: `=`, `+`, `-`, `@`, `\t`, `\r`, `\n`
-- Prefixes dangerous values with single quote to neutralize formulas
-- Applied to all CSV/Excel export generators
-- Prevents arbitrary code execution in spreadsheet applications
-
----
-
-## Code Review Findings (2026-02-04)
-
-### Test & Build Status
-- **Tests:** 262/262 passing (100%)
+## Build & Quality Status
+- **Tests:** 1,080/1,080 passing (100% across 55 files)
+- **E2E:** 26/28 passing (2 flaky connection tests)
 - **TypeScript:** 0 errors (strict mode)
 - **Build:** Production build successful
-- **Type Coverage:** 100% (no `any` abuse)
-
-### Critical Issues Identified (In Progress - Phase 15)
-1. **Console.error in auth route** - Uses console.error instead of logger (info leakage risk)
-2. **Missing auth on framework controls endpoint** - No session check, should have defense-in-depth
-3. **Rate limit header bug** - Header shows `remaining+1` instead of total limit
-4. **Middleware path matching too broad** - Uses `.includes('.')` instead of regex, bypasses API routes
-
-### High Priority Issues
-5. **No XSS input sanitization** - Risk if dangerouslySetInnerHTML found (requires codebase scan)
-6. **Weak login rate limiting** - Only 100 req/min, should be 10 req/min for login attempts
-7. **Session token exposure in errors** - Token verification not wrapped in try-catch
-8. **Potential N+1 queries** - Some nested includes could be optimized with Promise.all
-
-### Medium Priority Issues
-9. **Weak password requirements** - Only checks length, no complexity requirements
-10. **Missing CORS headers** - No explicit CORS configuration in next.config.ts
-11. **Database connection pool not configured** - Defaults to 10, needs tuning for >100 systems
-12. **Notification links expose org ID** - Uses internal org CUID in URL (should use slug)
-13. **CUID vs UUID validation mismatch** - Zod schemas expect UUID but DB uses CUID
-14. **Redis key collision risk** - Simple colon delimiters in cache keys, should hash org IDs
-15. **Fire-and-forget notifications** - No retry mechanism if delivery fails
-
-**Full Review Report:** `plans/reports/code-review-260204-0935-codebase-review.md`
+- **Security:** XSS + CSV injection prevention implemented (Phase 15)
 
 ---
 
-## Important Notes for Developers
-
-1. **Database Setup Required:** PostgreSQL must be running before `npm run db:push`
-2. **Environment Variables:** Copy `.env.example` to `.env.local` and configure
-3. **Seed Data:** Run `npm run db:seed` after first migration
-4. **Type Safety:** Always use TypeScript types from `src/types/`
-5. **Component Imports:** Always import from `@/components` (alias)
-6. **API Responses:** Follow standard response format in lib/
-7. **i18n:** Always use next-intl `useTranslations()` hook
-8. **Forms:** Use React Hook Form + Zod for validation
+## Developer Quick Start
+- PostgreSQL required, copy `.env.example` → `.env.local`
+- `npm run dev` (port 3000), `npm run db:seed` after migration
+- API pattern: `getServerSession()` → RBAC check → Zod validation → Prisma query (+ orgId filter)
+- Zod v4 pattern: `z.record(z.string(), z.unknown())` requires 2 args (key + value schemas)
+- Test mocks: auto-setup in `tests/setup.ts`, use `vi.mocked()` for assertions
+- i18n: `useTranslations('namespace')`, EN/VI via `next-intl`
 
 ---
 
-**Codebase Summary Generated:** 2026-02-09
-**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend + Frontend UI)
-**Maintained By:** docs-manager agent
-**Test Status:** 833/833 passing (100%)
-**Security Status:** All CRITICAL + HIGH findings resolved
-**UI Components:** 124+ across 20 directories
-**Frontend Implementation:** 100% complete for Phases 16-18
+**Generated:** 2026-02-09 | **Test Status:** 1,080/1,080 ✅ | **Components:** 174 files | **Models:** 42+ | **API Routes:** 97 files | **Frameworks:** 23 with 1,323 controls | **Seed Files:** 24 (~7,293 LOC)

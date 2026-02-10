@@ -6,6 +6,40 @@
 
 ## Version History
 
+### 2.6.2 — Docker Optimization & Deployment (2026-02-10)
+**Date:** 2026-02-10
+**Impact:** Production-ready Docker deployment with critical security and performance fixes
+
+**Docker Enhancements:**
+- **3-stage Dockerfile:** deps → builder → runner (optimized image: 421MB)
+- **Multi-environment compose:** Base + dev override (hot-reload) + prod override (nginx)
+- **Nginx reverse proxy:** SSL termination, gzip, rate limiting, static caching
+- **Makefile automation:** 21 targets (dev, prod, build, logs, clean, backup, ssl)
+- **Health checks:** IPv4-specific `curl 127.0.0.1:3000/api/health`
+- **Resource limits:** Production memory (1GB) and CPU (1.5 cores) constraints
+
+**Critical Fixes (7 total):**
+1. **Prisma CLI availability:** Keep devDependencies in deps stage (TypeScript/Next.js build requirement)
+2. **Binary targets:** Added `linux-musl-openssl-3.0.x` for Alpine Linux compatibility
+3. **IPv4 health checks:** Changed `localhost` → `127.0.0.1` (Alpine networking)
+4. **Package-lock sync:** Ensured package.json/package-lock.json consistency
+5. **Security:** Removed .env.docker with credentials, added .env.docker.example template
+6. **Wait scripts:** Added postgres-ready check before migrations
+7. **Entrypoint:** Prisma generate + migrate + seed automation
+
+**Infrastructure:**
+- Files: Dockerfile (109L), docker-compose.yml/dev/prod, Makefile (116L), .dockerignore
+- Scripts: docker-entrypoint-startup.sh, wait-for-postgres-database-ready.sh, postgres-backup-with-rotation.sh
+- Nginx: reverse-proxy config (130L) with SSL, gzip, rate limiting
+- CI/CD: Added docker-build job, Trivy security scan
+
+**Metrics:** 421MB final image, 3.5s startup time, production-ready deployment
+**Tests:** 1,080/1,080 passing (100%) — Docker verified
+**Build Status:** Production-ready
+**Deployment Guide:** docs/deployment-guide.md updated with Docker instructions
+
+---
+
 ### 2.6.1 — Security Headers & API Quality Improvements (2026-02-09)
 **Date:** 2026-02-09
 **Impact:** Medium-priority security and code quality enhancements (MEDIUM findings)
@@ -469,56 +503,6 @@ API_VERSION="1.0.0"
 
 ---
 
-### MVP4.3 - 2026-02-04
-
-#### Framework UI Grouping, Icons & SCF Update
-**Date:** 2026-02-04 (pre-consolidation)
-**Impact:** UI improvement, data update
-
-**Changes:**
-- Frameworks page divided into: AI Risk Frameworks + Non-AI-Specific Frameworks
-- Per-framework icons (BrainCircuit, Settings2, ShieldCheck, ShieldAlert, Lock, Target, CreditCard, Layers)
-- SCF updated to v2025.4 (effective April 2025)
-- i18n updated with section headers (EN/VI)
-
-**Files Modified:**
-- `src/app/[locale]/(dashboard)/frameworks/page.tsx`
-- `prisma/seed-scf.ts`
-- `src/i18n/messages/en.json`
-- `src/i18n/messages/vi.json`
-
-**Tests:** 262/262 passing (100%)
-**Build Status:** ✅ TypeScript clean compile
-
----
-
-### MVP4.2 - 2026-02-04
-
-#### Framework UI Grouping, Icons & SCF Update
-**Date:** 2026-02-04
-**Impact:** UI improvement, data update
-
-**Changes:**
-- Frameworks page now divided into two sections: **AI Risk Frameworks** and **Non-AI-Specific Frameworks**
-- Each framework has a distinct lucide-react icon for visual identification (BrainCircuit, Settings2, ShieldCheck, ShieldAlert, Lock, Target, CreditCard, Layers)
-- SCF updated from v2024.1 to **v2025.4** (effective April 2025)
-- i18n updated with section header translations (EN/VI)
-- Extracted reusable `FrameworkCard` component in frameworks page
-- Added fallback icon system for future frameworks
-
-**Files Modified:**
-- `src/app/[locale]/(dashboard)/frameworks/page.tsx` — grouped layout + per-framework icons
-- `prisma/seed-scf.ts` — version 2024.1 → 2025.4
-- `src/i18n/messages/en.json` — section header translations
-- `src/i18n/messages/vi.json` — section header translations
-- `docs/codebase-summary.md` — updated framework inventory
-- `docs/project-changelog.md` — this entry
-- `docs/development-roadmap.md` — updated framework count
-
-**Tests:** 262/262 passing (100%)
-**Build Status:** ✅ TypeScript clean compile
-
----
 
 ### MVP4.1 - 2026-02-04
 
@@ -644,454 +628,46 @@ API_VERSION="1.0.0"
 
 ---
 
-## Version 3.0 (MVP3) - Framework Expansion & Optimizations - 2025-12-15
+## Versions 1.0-3.0 (MVP1-MVP3) - Foundation & Core Features
 
-### Phase 10: Multi-Framework Expansion
-**Timeline:** Dec 01 - Dec 15, 2025
-**Status:** ✅ Delivered
+| Phase | Timeline | Key Deliverables |
+|-------|----------|------------------|
+| **Phase 1: Setup** | Jun 01-15, 2025 | Next.js 16 + React 19 + Tailwind v4, Prisma ORM, 20 data models, i18n (EN/VI) |
+| **Phase 2: Auth** | Jun 15 - Jul 01, 2025 | NextAuth JWT, 5-tier RBAC, session management, middleware protection |
+| **Phase 3: AI Inventory** | Jul 01-15, 2025 | AISystem CRUD, lifecycle tracking, classification enums, soft delete |
+| **Phase 4: Frameworks** | Jul 15 - Aug 01, 2025 | NIST AI RMF 1.0 + ISO 42001, control mapping, hierarchy, bidirectional relationships |
+| **Phase 5: Risk Engine** | Aug 01-15, 2025 | 5-step assessment wizard, 5×5 risk matrix, 8 categories, inherent/residual scoring |
+| **Phase 6: Dashboard** | Sep 01-15, 2025 | KPI cards, risk heatmap, compliance scorecard, activity feed, CSV/JSON export |
+| **Phase 7: Testing** | Sep 15 - Oct 15, 2025 | Vitest (262+ tests), Playwright E2E, WCAG 2.1 AA compliance, coverage reporting |
+| **Phase 8: Performance** | Oct 15 - Nov 01, 2025 | Multi-layer cache (Redis + LRU), rate limiting, structured logging, health checks |
+| **Phase 9: Evidence** | Nov 15 - Dec 01, 2025 | File upload (SHA-256), multi-entity linking, approval workflow, gap analysis |
+| **Phase 10: Expansion** | Dec 01-15, 2025 | CIS v8.1, CSA AICM, NIST CSF 2.0, PCI DSS v4.0.1, cross-framework mappings |
 
-**Frameworks Added:**
-- CIS Controls v8.1 (23 control groups, 183 controls)
-- CSA AICM v1.0 (6 domains, 98 controls)
-- NIST Cybersecurity Framework 2.0 (6 functions, 23 categories)
-- PCI DSS v4.0.1 (6 pillars, 78 controls)
-
-**Database:**
-- Seed scripts for all frameworks
-- Control hierarchy relationships
-- Cross-framework mapping data
-
-**Files Added:**
-- `prisma/seed-cis-controls.ts`
-- `prisma/seed-csa-aicm.ts`
-- `prisma/seed-nist-csf.ts`
-- `prisma/seed-pci-dss.ts`
+**Status:** ✅ All phases delivered | **Total:** 10 phases, 6 months | **Foundation:** 20+ models, 262 tests, 23 frameworks
 
 ---
 
-### Phase 9: Evidence Management & Gap Analysis
-**Timeline:** Nov 15 - Dec 01, 2025
-**Status:** ✅ Delivered
-
-**Evidence Features:**
-- File upload with SHA-256 hashing
-- Evidence artifact metadata storage
-- Multi-entity linking (risks, controls, assessments)
-- Approval workflow with status tracking
-- Evidence versioning support
-
-**Gap Analysis:**
-- Framework-to-framework gap identification
-- Control coverage analysis
-- CSV export of gaps
-- Impact and remediation priority scoring
-- Gap matrix visualization
-
-**Database Schema:**
-- `Evidence` model (SHA-256 hash, metadata, status)
-- `EvidenceLink` model (polymorphic entity linking)
-- `Task` model (remediation tasks, treatment workflow)
-
-**Components Added:**
-- `evidence-upload-form.tsx`
-- `evidence-list-table.tsx`
-- `evidence-approval-panel.tsx`
-- `gap-analysis-visualization.tsx`
-- `gap-list-table.tsx`
-- `framework-comparison-chart.tsx`
-
 ---
 
-## Version 2.0 (MVP2) - Core Features Completion - 2025-11-01
+## Current Project Status (v2.6.1)
 
-### Phase 8: Performance & Caching Layer
-**Timeline:** Oct 15 - Nov 01, 2025
-**Status:** ✅ Delivered
-
-**Caching Implementation:**
-- Multi-layer caching (LRU in-memory + Redis fallback)
-- Cache warming on startup
-- Stale-while-revalidate strategy
-- Cache invalidation by entity type
-- Redis client with graceful degradation
-
-**Rate Limiting:**
-- Sliding window rate limiting
-- Role-based tier configuration
-- Per-IP tracking
-- API key rate limiting
-- Fallback to allow-all if Redis unavailable
-
-**Utilities Added:**
-- `src/lib/cache-service.ts`
-- `src/lib/cache-advanced.ts`
-- `src/lib/cache-invalidation.ts`
-- `src/lib/cache-warming-on-startup.ts`
-- `src/lib/rate-limiter.ts`
-
-**Monitoring:**
-- `src/lib/logger-structured.ts` - Structured logging
-- Health check endpoint with service status
-
----
-
-### Phase 7: Testing & Accessibility
-**Timeline:** Sep 15 - Oct 15, 2025
-**Status:** ✅ Delivered
-
-**Testing Infrastructure:**
-- Vitest setup with 30+ test suites
-- 262+ unit and integration tests
-- Playwright E2E tests (3 test suites)
-- Performance benchmarking script
-- Coverage reporting
-
-**WCAG 2.1 AA Compliance:**
-- Keyboard navigation with skip links
-- Semantic HTML structure
-- ARIA labels on interactive elements
-- Focus management and focus-visible indicators
-- Color contrast ratios verified
-- Screen reader support via Shadcn/ui
-
-**Test Coverage:**
-- API routes: 15+ test suites
-- Utilities: Risk scoring, caching, validation
-- E2E: Auth flows, dashboard, navigation
-
-**Files Added:**
-- `tests/setup.ts` - Global mocking and configuration
-- `tests/api/` - API endpoint tests
-- `tests/lib/` - Utility function tests
-- `tests/e2e/` - Playwright E2E tests
-- `playwright.config.ts`
-- `vitest.config.ts`
-
----
-
-### Phase 6: Dashboard & Reporting
-**Timeline:** Sep 01 - Sep 15, 2025
-**Status:** ✅ Delivered
-
-**Dashboard Features:**
-- Executive summary KPI cards (systems, assessments, risks count)
-- Risk distribution heatmap (5×5 matrix)
-- Framework compliance scorecard (% compliant per framework)
-- Activity feed with recent actions
-- Real-time stat calculations
-
-**Reporting:**
-- Risk register export (JSON API endpoint)
-- Assessment summary export
-- Compliance report generation
-- CSV/Excel export ready
-
-**Components Added:**
-- `risk-matrix-visualization.tsx`
-- `compliance-spider-chart.tsx`
-- Dashboard stat cards with Recharts
-
-**API Endpoints:**
-- `GET /api/dashboard/stats` - KPI data
-- `GET /api/dashboard/risk-heatmap` - Risk distribution
-- `GET /api/dashboard/compliance` - Framework scores
-- `GET /api/dashboard/activity` - Recent actions
-- `GET /api/reports/risk-register` - Export endpoint
-- `GET /api/reports/assessment-summary` - Assessment export
-
----
-
-## Version 1.0 (MVP1) - Core Platform - 2025-08-15
-
-### Phase 5: Risk Assessment Engine
-**Timeline:** Aug 01 - Aug 15, 2025
-**Status:** ✅ Delivered
-
-**Assessment Wizard:**
-- 5-step guided assessment creation
-- Step 1: Select AI system
-- Step 2: Enter assessment details
-- Step 3: Select framework (NIST or ISO)
-- Step 4: Identify and score risks
-- Step 5: Review and submit
-
-**Risk Scoring:**
-- 5×5 impact × likelihood matrix (1-5 scale)
-- 8 risk categories (Bias, Privacy, Security, Reliability, Transparency, Accountability, Safety, Other)
-- Inherent risk calculation (likelihood × impact)
-- Residual risk calculation (inherent × (1 - control effectiveness %))
-- Control effectiveness scoring (0-100%)
-
-**Risk Levels:**
-- Low: 1-4 (accept or monitor)
-- Medium: 5-9 (mitigate within 90 days)
-- High: 10-16 (mitigate within 30 days)
-- Critical: 17-25 (immediate action)
-
-**Components:**
-- `assessment-creation-wizard.tsx` (multi-step form)
-- `risk-entry-form.tsx` (risk input)
-- `risk-matrix-visualization.tsx` (5×5 matrix display)
-
-**API Endpoints:**
-- `POST /api/assessments` - Create assessment
-- `GET /api/assessments` - List assessments
-- `GET /api/assessments/[id]` - Get assessment details
-- `PUT /api/assessments/[id]` - Update assessment
-- `DELETE /api/assessments/[id]` - Delete assessment
-- `POST /api/assessments/[id]/risks` - Add risk
-
----
-
-### Phase 4: Framework Integration & Mapping
-**Timeline:** Jul 15 - Aug 01, 2025
-**Status:** ✅ Delivered
-
-**Frameworks Integrated:**
-- NIST AI RMF 1.0 with GenAI Profile
-  - 4 functions (Govern, Map, Measure, Manage)
-  - 19 categories
-  - 85+ controls
-- ISO/IEC 42001:2023
-  - 9 control areas
-  - 38 specific controls
-
-**Control Mapping:**
-- Bidirectional control relationships
-- Confidence levels (HIGH, MEDIUM, LOW)
-- Cross-framework traceability
-- Control hierarchy and nesting
-
-**Database Schema:**
-- `Framework` model (name, version, description)
-- `Control` model (code, name, hierarchy)
-- `ControlMapping` model (confidence, relationship)
-
-**Components:**
-- `framework-control-tree.tsx` - Hierarchical framework view
-- `framework-controls-table.tsx` - Controls list with search
-
-**API Endpoints:**
-- `GET /api/frameworks` - List frameworks
-- `GET /api/frameworks/[id]` - Get framework details
-- `GET /api/frameworks/[id]/controls` - Get controls
-- `GET /api/frameworks/mappings` - Get control mappings
-
----
-
-### Phase 3: AI System Inventory
-**Timeline:** Jul 01 - Jul 15, 2025
-**Status:** ✅ Delivered
-
-**AI System Management:**
-- Create new AI system record
-- Read/list AI systems with pagination
-- Update system details
-- Delete (soft delete for audit)
-- Filter by organization, status, classification
-
-**Data Fields:**
-- Name, description, type
-- Data classification (Public, Confidential, Restricted)
-- Lifecycle status (Development, Pilot, Production, Retired)
-- Owner and stakeholder assignment
-- Created/updated timestamps
-
-**Database Schema:**
-- `AISystem` model with enums (type, classification, lifecycle)
-- Organization-scoped (multi-tenant isolation)
-
-**Components:**
-- `ai-system-form.tsx` - CRUD form
-
-**API Endpoints:**
-- `POST /api/ai-systems` - Create system
-- `GET /api/ai-systems` - List systems
-- `GET /api/ai-systems/[id]` - Get system details
-- `PUT /api/ai-systems/[id]` - Update system
-- `DELETE /api/ai-systems/[id]` - Delete system
-
----
-
-### Phase 2: Authentication & Authorization
-**Timeline:** Jun 15 - Jul 01, 2025
-**Status:** ✅ Delivered
-
-**Authentication:**
-- NextAuth.js JWT strategy
-- Email/password login
-- Session management (24h JWT lifespan, 30min idle timeout)
-- Login page with i18n support
-- Session persistence via HttpOnly cookies
-
-**Authorization (RBAC):**
-- 5-tier role hierarchy
-  - ADMIN: Full system access
-  - RISK_MANAGER: Manage systems, assessments, risks
-  - ASSESSOR: Create/edit assessments, add risks
-  - AUDITOR: View-only access to reports
-  - VIEWER: Dashboard view-only
-- Hierarchical role checking via `hasMinimumRole()`
-- Protected middleware routes
-- Per-route authorization checks
-
-**Database Schema:**
-- `User` model with role enum
-- `Session` model for NextAuth
-- `Account` model for OAuth (prepared)
-
-**Files:**
-- `src/app/api/auth/[...nextauth]/route.ts` - NextAuth config
-- `src/lib/auth-helpers.ts` - RBAC utilities
-- `src/middleware.ts` - Route protection
-- `prisma/seed.ts` - 5 seeded test users
-
----
-
-### Phase 1: Project Setup & Architecture
-**Timeline:** Jun 01 - Jun 15, 2025
-**Status:** ✅ Delivered
-
-**Project Initialization:**
-- Next.js 16 App Router with TypeScript strict mode
-- React 19 with Tailwind CSS v4
-- Shadcn/ui component library (23 components)
-- Zustand for client-side state management (4 stores)
-- Prisma ORM with PostgreSQL 15
-- next-intl for i18n (EN/VI)
-- ESLint configuration
-
-**Database Design:**
-- 20 core data models
-- 11 enums for type safety
-- Multi-tenant architecture (organizationId filtering)
-- Relationships: Organization 1:N User, AISystem, Assessment
-- Timestamps and soft deletes for audit trail
-
-**i18n Setup:**
-- English (EN) locale with 1000+ keys
-- Vietnamese (VI) locale with 1000+ keys
-- Namespace-based translations
-- URL-based locale routing: `/{locale}/*`
-
-**Infrastructure Files:**
-- `next.config.ts` - Next.js configuration
-- `tsconfig.json` - TypeScript strict mode
-- `tailwind.config.ts` - Tailwind CSS theme
-- `components.json` - Shadcn/ui registry
-- `.env.example` - Environment template
-
----
-
-## Notable Changes
-
-### Git Statistics (MVP4)
-- **Modified Files:** 37
-- **New Files:** ~50
-- **Lines Added:** 2,336+
-- **Lines Removed:** 1,026+
-- **Net Change:** +1,310 lines
-
-### Code Quality Metrics
-- **Type Safety:** 100% (strict mode, no `any`)
-- **Test Pass Rate:** 262/262 (100%)
-- **Accessibility:** WCAG 2.1 AA compliant
-- **Bundle Size:** ~450KB gzip (target: <400KB)
-- **API Response (P95):** <500ms (target: <200ms)
-
-### Database Schema Evolution
-- **MVP1:** 5 core models (User, AISystem, Framework, Control, Assessment, Risk)
-- **MVP2:** +8 models (Evidence, Task, AuditLog, etc.)
-- **MVP3:** +2 models (APIKey, Webhook)
-- **MVP4:** +2 models (Invitation, Notification, SavedFilter, ScheduledJob)
-- **Current:** 20+ models, 11 enums
-
----
-
-## Breaking Changes
-
-### None in MVP1-4
-All releases have been backward-compatible with database migrations provided.
-
-### Planned (MVP5+)
-- API versioning (prefix `/api/v2/` for breaking changes)
-- Database schema changes with migration scripts
-
----
-
-## Dependencies Updated
-
-### Major Dependencies (MVP4)
-- Next.js: 16.1.6
-- React: 19.0
-- TypeScript: 5.9
-- Tailwind CSS: 4.1
-- Prisma: 5.22
-- NextAuth.js: 4.24
-- Zod: 4.3
-- Vitest: 4.0
-- Playwright: 1.58
-
-### Key Additions (MVP4)
-- `ioredis` 5.9 (Redis client)
-- `bull` (Job queue - planned)
-- `sharp` (Image optimization - planned)
-
----
-
-## Known Issues
-
-### Critical (Blocking Production - Phase 14)
-1. Console.error in auth route (info leakage)
-2. Missing auth on framework controls endpoint
-3. Rate limit header bug
-4. Middleware path matching too broad
-
-### High Priority (Before Next Release)
-1. No XSS sanitization
-2. Weak login rate limiting
-3. Session token exposure risk
-4. Potential N+1 queries
-
-### Medium Priority (Next Sprint)
-1. Weak password requirements
-2. Missing CORS configuration
-3. Connection pool not configured
-4. Notification org ID exposure
-5. CUID vs UUID validation mismatch
-
-See `plans/reports/code-review-260204-0935-codebase-review.md` for full details.
-
----
-
-## Recommendations for Next Phase
-
-### Immediate (Phase 14 Sprint)
-1. Fix 4 critical security issues (2-3 days)
-2. Add 8 high-priority security improvements (3-5 days)
-3. Run full security audit before production deployment
-
-### Short-Term (Phase 15-16)
-1. Implement file storage integration (S3/Blob)
-2. Add scheduled report generation
-3. Improve performance to <200ms P95
-4. Reduce bundle size to <400KB
-
-### Long-Term (Phase 17+)
-1. Multi-region deployment
-2. Enterprise SSO/SAML integration
-3. Advanced analytics and visualization
-4. Mobile application support
-
----
-
-**Document Version:** 2.6.0
-**Last Updated:** 2026-02-09 (MVP5 Complete: Phases 16-18 Backend + Frontend UI)
+**Document Version:** 2.6.1
+**Last Updated:** 2026-02-09
 **Maintained By:** docs-manager agent
-**Total Commits:** 71+ since project start
-**Total Tests:** 833/833 passing (100%) across 46 test files
-**UI Components:** 112+ (including 12 new for Phases 16-18)
-**Database Models:** 42 (Phases 1-18)
-**API Routes:** 97 route files
-**Security Status:** All CRITICAL + HIGH + 2 MEDIUM findings resolved
-**Production Ready:** ✅ MVP5 Complete - Backend + Frontend UI
+
+### Metrics
+- **Tests:** 1,080/1,080 passing (100%) across 55 test files
+- **UI Components:** 174+ (Phases 1-21)
+- **Database Models:** 42 (Phases 1-18)
+- **API Routes:** 97 route files
+- **Frameworks:** 23 frameworks, 1,323 controls, 172 mappings
+- **Type Safety:** 100% (strict mode)
+- **Accessibility:** WCAG 2.1 AA compliant
+- **Security Status:** All CRITICAL + HIGH findings resolved
+
+### Dependencies (Current)
+- Next.js 16.1.6, React 19.0, TypeScript 5.9, Tailwind CSS 4.1
+- Prisma 5.22, NextAuth.js 4.24, Zod 4.3
+- Vitest 4.0, Playwright 1.58, ioredis 5.9
+
+**Production Ready:** ✅ v2.6.1 - Security hardened + full enterprise features

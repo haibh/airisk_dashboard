@@ -105,26 +105,8 @@ List all AI systems with pagination and filtering.
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": "sys_123",
-      "name": "Customer Churn Prediction",
-      "type": "ML",
-      "status": "Production",
-      "dataClassification": "Confidential",
-      "description": "Predicts customer churn...",
-      "owner": "john@example.com",
-      "technicalOwner": "jane@example.com",
-      "createdAt": "2026-02-01T10:00:00Z",
-      "updatedAt": "2026-02-03T14:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 45,
-    "page": 1,
-    "pageSize": 10,
-    "totalPages": 5
-  }
+  "data": [{ "id": "sys_123", "name": "Churn Model", "type": "ML", "status": "Production", "dataClassification": "Confidential" }],
+  "pagination": { "total": 45, "page": 1, "pageSize": 10, "totalPages": 5 }
 }
 ```
 
@@ -156,17 +138,7 @@ Create a new AI system.
 
 **Response (201):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "sys_456",
-    "name": "Customer Churn Prediction",
-    "type": "ML",
-    "status": "Pilot",
-    "dataClassification": "Confidential",
-    "createdAt": "2026-02-03T15:00:00Z"
-  }
-}
+{ "success": true, "data": { "id": "sys_456", "name": "Churn Model", "type": "ML", "status": "Pilot" } }
 ```
 
 **Errors:**
@@ -184,27 +156,10 @@ Get a single AI system by ID.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "sys_123",
-    "name": "Customer Churn Prediction",
-    "type": "ML",
-    "status": "Production",
-    "dataClassification": "Confidential",
-    "description": "Predicts customer churn...",
-    "owner": "john@example.com",
-    "technicalOwner": "jane@example.com",
-    "riskOwner": "risk@example.com",
-    "createdAt": "2026-02-01T10:00:00Z",
-    "updatedAt": "2026-02-03T14:30:00Z"
-  }
-}
+{ "success": true, "data": { "id": "sys_123", "name": "Churn Model", "type": "ML", "status": "Production", "dataClassification": "Confidential" } }
 ```
 
-**Errors:**
-- 401: Unauthorized
-- 404: System not found
+**Errors:** 401: Unauthorized, 404: Not found
 
 ---
 
@@ -226,23 +181,10 @@ Update an AI system.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "sys_123",
-    "name": "Updated Name",
-    "status": "Production",
-    "dataClassification": "Restricted",
-    "updatedAt": "2026-02-03T15:15:00Z"
-  }
-}
+{ "success": true, "data": { "id": "sys_123", "name": "Updated Name", "status": "Production" } }
 ```
 
-**Errors:**
-- 401: Unauthorized
-- 403: Forbidden
-- 404: System not found
-- 400: Validation error
+**Errors:** 401/403/404/400
 
 ---
 
@@ -254,20 +196,10 @@ Soft delete an AI system (sets status to RETIRED).
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "message": "System retired successfully",
-  "data": {
-    "id": "sys_123",
-    "status": "Retired"
-  }
-}
+{ "success": true, "message": "System retired", "data": { "id": "sys_123", "status": "Retired" } }
 ```
 
-**Errors:**
-- 401: Unauthorized
-- 403: Forbidden
-- 404: System not found
+**Errors:** 401/403/404
 
 ---
 
@@ -290,29 +222,8 @@ List all assessments with pagination and filtering.
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": "assess_123",
-      "title": "Q1 2026 Risk Assessment",
-      "description": "Quarterly assessment...",
-      "aiSystemId": "sys_123",
-      "systemName": "Customer Churn Prediction",
-      "frameworkId": "fw_001",
-      "frameworkName": "NIST AI RMF",
-      "status": "APPROVED",
-      "riskCount": 15,
-      "criticalRiskCount": 2,
-      "createdBy": "assessor@example.com",
-      "createdAt": "2026-02-01T10:00:00Z",
-      "updatedAt": "2026-02-03T14:30:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 28,
-    "page": 1,
-    "pageSize": 10,
-    "totalPages": 3
-  }
+  "data": [{ "id": "assess_123", "title": "Q1 2026", "status": "APPROVED", "systemName": "Churn Model", "frameworkName": "NIST AI RMF", "riskCount": 15 }],
+  "pagination": { "total": 28, "page": 1, "pageSize": 10 }
 }
 ```
 
@@ -336,15 +247,7 @@ Create a new assessment.
 
 **Response (201):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "assess_456",
-    "title": "Q1 2026 Risk Assessment",
-    "status": "DRAFT",
-    "createdAt": "2026-02-03T15:00:00Z"
-  }
-}
+{ "success": true, "data": { "id": "assess_456", "title": "Q1 2026", "status": "DRAFT" } }
 ```
 
 ---
@@ -360,26 +263,8 @@ Get a single assessment with all risks.
 {
   "success": true,
   "data": {
-    "id": "assess_123",
-    "title": "Q1 2026 Risk Assessment",
-    "status": "APPROVED",
-    "aiSystemId": "sys_123",
-    "frameworkId": "fw_001",
-    "risks": [
-      {
-        "id": "risk_001",
-        "title": "Data Bias in Model",
-        "category": "Bias/Fairness",
-        "likelihood": 4,
-        "impact": 4,
-        "inherentScore": 16,
-        "controlEffectiveness": 70,
-        "residualScore": 5,
-        "status": "Open",
-        "createdAt": "2026-02-01T10:00:00Z"
-      }
-    ],
-    "createdAt": "2026-02-01T10:00:00Z"
+    "id": "assess_123", "title": "Q1 2026", "status": "APPROVED",
+    "risks": [{ "id": "risk_001", "title": "Data Bias", "category": "Bias", "likelihood": 4, "impact": 4, "inherentScore": 16, "residualScore": 5 }]
   }
 }
 ```
@@ -403,14 +288,7 @@ Update an assessment.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "assess_123",
-    "status": "IN_PROGRESS",
-    "updatedAt": "2026-02-03T15:15:00Z"
-  }
-}
+{ "success": true, "data": { "id": "assess_123", "status": "IN_PROGRESS" } }
 ```
 
 ---
@@ -423,23 +301,7 @@ Get all risks for an assessment.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "risk_001",
-      "assessmentId": "assess_123",
-      "title": "Data Bias in Model",
-      "category": "Bias/Fairness",
-      "likelihood": 4,
-      "impact": 4,
-      "inherentScore": 16,
-      "controlEffectiveness": 70,
-      "residualScore": 5,
-      "status": "Open"
-    }
-  ]
-}
+{ "success": true, "data": [{ "id": "risk_001", "title": "Data Bias", "category": "Bias", "likelihood": 4, "impact": 4, "inherentScore": 16, "residualScore": 5 }] }
 ```
 
 ---
@@ -467,18 +329,7 @@ Add a risk to an assessment.
 
 **Response (201):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "risk_789",
-    "assessmentId": "assess_123",
-    "title": "Model Transparency Issue",
-    "category": "Transparency",
-    "inherentScore": 9,
-    "residualScore": 5,
-    "status": "Open"
-  }
-}
+{ "success": true, "data": { "id": "risk_789", "title": "Transparency Issue", "category": "Transparency", "inherentScore": 9, "residualScore": 5 } }
 ```
 
 ---
@@ -493,23 +344,7 @@ Get a single risk by ID.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "risk_001",
-    "assessmentId": "assess_123",
-    "title": "Data Bias in Model",
-    "category": "Bias/Fairness",
-    "description": "Training data contains historical bias",
-    "likelihood": 4,
-    "impact": 4,
-    "inherentScore": 16,
-    "controlEffectiveness": 70,
-    "residualScore": 5,
-    "status": "Open",
-    "createdAt": "2026-02-01T10:00:00Z"
-  }
-}
+{ "success": true, "data": { "id": "risk_001", "title": "Data Bias", "category": "Bias", "likelihood": 4, "impact": 4, "inherentScore": 16, "residualScore": 5 } }
 ```
 
 ---
@@ -533,16 +368,7 @@ Update a risk.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "risk_001",
-    "title": "Updated Risk Title",
-    "inherentScore": 12,
-    "residualScore": 2,
-    "updatedAt": "2026-02-03T15:20:00Z"
-  }
-}
+{ "success": true, "data": { "id": "risk_001", "title": "Updated Risk", "inherentScore": 12, "residualScore": 2 } }
 ```
 
 ---
@@ -576,24 +402,8 @@ List all available frameworks.
 {
   "success": true,
   "data": [
-    {
-      "id": "fw_001",
-      "name": "NIST AI RMF",
-      "version": "1.0",
-      "effectiveDate": "2023-01-01",
-      "description": "NIST AI Risk Management Framework",
-      "isActive": true,
-      "controlCount": 85
-    },
-    {
-      "id": "fw_002",
-      "name": "ISO 42001",
-      "version": "2023",
-      "effectiveDate": "2023-10-01",
-      "description": "ISO AI Management System",
-      "isActive": true,
-      "controlCount": 38
-    }
+    { "id": "fw_001", "name": "NIST AI RMF", "version": "1.0", "isActive": true, "controlCount": 85 },
+    { "id": "fw_002", "name": "ISO 42001", "version": "2023", "isActive": true, "controlCount": 38 }
   ]
 }
 ```
@@ -608,19 +418,7 @@ Get a single framework with metadata.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": "fw_001",
-    "name": "NIST AI RMF",
-    "version": "1.0",
-    "effectiveDate": "2023-01-01",
-    "description": "NIST AI Risk Management Framework 1.0",
-    "isActive": true,
-    "controlCount": 85,
-    "categories": 19
-  }
-}
+{ "success": true, "data": { "id": "fw_001", "name": "NIST AI RMF", "version": "1.0", "isActive": true, "controlCount": 85, "categories": 19 } }
 ```
 
 ---
@@ -640,22 +438,8 @@ Get all controls for a framework.
 {
   "success": true,
   "data": [
-    {
-      "id": "ctrl_001",
-      "code": "GOVERN-1.1",
-      "title": "Risk Management Structure",
-      "description": "Organization has established structure...",
-      "category": "Govern",
-      "frameworkId": "fw_001"
-    },
-    {
-      "id": "ctrl_002",
-      "code": "MAP-2.1",
-      "title": "Context Definition",
-      "description": "AI system context is defined...",
-      "category": "Map",
-      "frameworkId": "fw_001"
-    }
+    { "id": "ctrl_001", "code": "GOVERN-1.1", "title": "Risk Management Structure", "category": "Govern" },
+    { "id": "ctrl_002", "code": "MAP-2.1", "title": "Context Definition", "category": "Map" }
   ]
 }
 ```
@@ -674,25 +458,12 @@ Get control mappings between frameworks.
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": "map_001",
-      "sourceControl": {
-        "id": "ctrl_001",
-        "code": "GOVERN-1.1",
-        "title": "Risk Management Structure",
-        "frameworkName": "NIST AI RMF"
-      },
-      "targetControl": {
-        "id": "ctrl_iso_001",
-        "code": "A.2.1",
-        "title": "Leadership and Commitment",
-        "frameworkName": "ISO 42001"
-      },
-      "confidence": "HIGH",
-      "rationale": "Both controls address organizational governance..."
-    }
-  ]
+  "data": [{
+    "id": "map_001",
+    "sourceControl": { "code": "GOVERN-1.1", "title": "Risk Management", "frameworkName": "NIST AI RMF" },
+    "targetControl": { "code": "A.2.1", "title": "Leadership", "frameworkName": "ISO 42001" },
+    "confidence": "HIGH"
+  }]
 }
 ```
 
@@ -705,18 +476,7 @@ Get dashboard statistics.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "totalAISystems": 45,
-    "activeAssessments": 12,
-    "criticalRisks": 3,
-    "mediumRisks": 18,
-    "lowRisks": 42,
-    "completedAssessments": 28,
-    "frameworkComplianceAverage": 72.5
-  }
-}
+{ "success": true, "data": { "totalAISystems": 45, "activeAssessments": 12, "criticalRisks": 3, "completedAssessments": 28, "frameworkComplianceAverage": 72.5 } }
 ```
 
 ---
@@ -726,23 +486,7 @@ Get risk distribution data for heatmap.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": {
-    "distribution": [
-      { "category": "Bias/Fairness", "count": 12, "critical": 1 },
-      { "category": "Privacy", "count": 8, "critical": 1 },
-      { "category": "Security", "count": 15, "critical": 1 },
-      { "category": "Reliability", "count": 10, "critical": 0 },
-      { "category": "Transparency", "count": 7, "critical": 0 }
-    ],
-    "byStatus": {
-      "Open": 34,
-      "InProgress": 12,
-      "Resolved": 8
-    }
-  }
-}
+{ "success": true, "data": { "distribution": [{ "category": "Bias", "count": 12, "critical": 1 }, { "category": "Privacy", "count": 8, "critical": 1 }], "byStatus": { "Open": 34, "InProgress": 12 } } }
 ```
 
 ---
@@ -752,109 +496,32 @@ Get framework compliance scores.
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": [
-    {
-      "frameworkId": "fw_001",
-      "frameworkName": "NIST AI RMF",
-      "compliancePercentage": 75,
-      "satisfiedControls": 64,
-      "totalControls": 85,
-      "lastAssessment": "2026-02-03T10:00:00Z"
-    },
-    {
-      "frameworkId": "fw_002",
-      "frameworkName": "ISO 42001",
-      "compliancePercentage": 68,
-      "satisfiedControls": 26,
-      "totalControls": 38,
-      "lastAssessment": "2026-02-01T14:30:00Z"
-    }
-  ]
-}
+{ "success": true, "data": [{ "frameworkId": "fw_001", "frameworkName": "NIST AI RMF", "compliancePercentage": 75, "satisfiedControls": 64, "totalControls": 85 }] }
 ```
 
 ---
 
 ### GET /dashboard/activity
-Get recent activity feed.
-
-**Query Parameters:**
-- `limit` (integer, default: 20): Number of recent activities
+Get recent activity feed. **Query:** `limit` (integer, default: 20)
 
 **Response (200):**
 ```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "activity_001",
-      "type": "assessment_created",
-      "title": "Assessment created",
-      "description": "New assessment 'Q1 2026' created for system 'Churn Model'",
-      "actor": "assessor@example.com",
-      "timestamp": "2026-02-03T15:20:00Z"
-    },
-    {
-      "id": "activity_002",
-      "type": "risk_updated",
-      "title": "Risk updated",
-      "description": "Risk 'Data Bias' updated with new effectiveness score",
-      "actor": "risk-manager@example.com",
-      "timestamp": "2026-02-03T14:50:00Z"
-    }
-  ]
-}
+{ "success": true, "data": [{ "id": "activity_001", "type": "assessment_created", "title": "Assessment created", "actor": "user@example.com", "timestamp": "2026-02-03T15:20:00Z" }] }
 ```
 
 ---
 
 ## Reports Endpoints
 
-### GET /reports/risk-register
-Export risk register (PDF or CSV).
+All report endpoints support PDF/CSV export and return binary content with appropriate `Content-Type` header.
 
-**Query Parameters:**
-- `format` (pdf|csv): Export format
-- `assessmentId` (string, optional): Filter by assessment
-- `status` (string, optional): Filter by risk status
+| Endpoint | Parameters | Description |
+|----------|-----------|-------------|
+| GET /reports/risk-register | `format` (pdf\|csv), `assessmentId`, `status` | Export risk register |
+| GET /reports/assessment-summary | `format` (pdf\|csv), `assessmentId` (required) | Export assessment summary |
+| GET /reports/compliance | `format` (pdf\|csv), `frameworkId` | Export compliance report |
 
-**Response (200):**
-```
-Content-Type: application/pdf or text/csv
-[Binary content or CSV data]
-```
-
----
-
-### GET /reports/assessment-summary
-Export assessment summary report.
-
-**Query Parameters:**
-- `format` (pdf|csv): Export format
-- `assessmentId` (string): Assessment ID (required)
-
-**Response (200):**
-```
-Content-Type: application/pdf or text/csv
-[Binary content or CSV data]
-```
-
----
-
-### GET /reports/compliance
-Export compliance report.
-
-**Query Parameters:**
-- `format` (pdf|csv): Export format
-- `frameworkId` (string, optional): Filter by framework
-
-**Response (200):**
-```
-Content-Type: application/pdf or text/csv
-[Binary content or CSV data]
-```
+**Response (200):** `Content-Type: application/pdf` or `text/csv` + binary content
 
 ---
 
@@ -893,22 +560,90 @@ X-RateLimit-Reset: 1645105200
 
 ---
 
-## Performance Guidelines
+## Health Check Endpoint
 
-**Response Time Targets (NFR-PERF-02):**
-- List endpoints: < 500ms
-- Single resource: < 200ms
-- Create/Update: < 300ms
-- Delete: < 200ms
-- Export: < 5 seconds
+### GET /health
+**Status:** Public (no authentication required)
+**Purpose:** Container health check and service status monitoring
 
-**Pagination Recommendations:**
-- Default page size: 10-25 items
-- Maximum page size: 100 items
-- Use pagination for lists > 50 items
+**Response (200):**
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-02-10T10:15:30.000Z",
+  "version": "2.6.2",
+  "services": {
+    "database": {
+      "status": "ok",
+      "version": "15.3"
+    },
+    "redis": {
+      "status": "ok"
+    },
+    "storage": {
+      "status": "ok",
+      "provider": "minio"
+    }
+  }
+}
+```
+
+**Response (503) - Service Degraded:**
+```json
+{
+  "status": "degraded",
+  "timestamp": "2026-02-10T10:15:30.000Z",
+  "version": "2.6.2",
+  "services": {
+    "database": {
+      "status": "ok",
+      "version": "15.3"
+    },
+    "redis": {
+      "status": "error",
+      "message": "Connection timeout"
+    },
+    "storage": {
+      "status": "ok"
+    }
+  }
+}
+```
+
+**Usage in Docker:**
+```yaml
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/api/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+```
+
+**Response Fields:**
+- `status`: Overall system status (`ok` | `degraded` | `error`)
+- `timestamp`: ISO 8601 timestamp
+- `version`: Application version
+- `services.database.status`: PostgreSQL connection status
+- `services.database.version`: PostgreSQL version (e.g., "15.3")
+- `services.redis.status`: Redis connection status
+- `services.storage.status`: S3/MinIO storage status
 
 ---
 
-**API Reference Version:** 1.0
-**Last Updated:** 2026-02-03
+## Performance Guidelines
+
+| Operation | Target | Notes |
+|-----------|--------|-------|
+| List endpoints | < 500ms | Use pagination for lists > 50 items |
+| Single resource | < 200ms | |
+| Create/Update | < 300ms | |
+| Delete | < 200ms | |
+| Export | < 5s | Max page size: 100 items |
+| Health check | < 100ms | Critical for container orchestration |
+
+---
+
+**API Reference Version:** 2.1
+**Last Updated:** 2026-02-10
 **Maintained By:** docs-manager agent
+**Recent Additions:** Health check endpoint documentation (Docker deployment)

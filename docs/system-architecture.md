@@ -12,7 +12,7 @@ State: Zustand 5.0 (client, 4 stores), API routes (server)
 Backend: Next.js 16 App Router + NextAuth.js 4.24 (JWT, 24h session)
 Database: PostgreSQL 15+ with Prisma ORM 5.22 (42 models, 15 enums)
 Internationalization: next-intl 4.8 (EN/VI)
-Testing: Vitest 4.0 (833 tests, 46 files) + Playwright 1.58 (28 E2E tests)
+Testing: Vitest 4.0 (1,080 tests, 55 files, 100% passing) + Playwright 1.58 (28 E2E, 26 passing)
 Caching: Redis 5.9 (ioredis) + multi-layer LRU cache
 Validation: Zod 4.3 (input schemas, API validation)
 Security: ClamAV virus scanning, HMAC-SHA256 webhook signing, timing-safe auth
@@ -30,13 +30,13 @@ Security: ClamAV virus scanning, HMAC-SHA256 webhook signing, timing-safe auth
 ┌───────────────▼──────────────────┐
 │   Next.js 16 App Router          │
 │  ├─ UI Routes (SSR, 29 pages)    │
-│  ├─ API Routes (REST, 97 routes) │
+│  ├─ API Routes (REST, 97 route files) │
 │  └─ Middleware (Auth + i18n)     │
 └───────────────┬──────────────────┘
                 │ Prisma ORM 5.22
 ┌───────────────▼──────────────────┐
 │   PostgreSQL 15+                 │
-│   (20 models + 11 enums)         │
+│   (42 models + 15 enums)         │
 │   (Connection pooling via Redis) │
 └──────────────────────────────────┘
 ```
@@ -129,7 +129,7 @@ Security: ClamAV virus scanning, HMAC-SHA256 webhook signing, timing-safe auth
 
 ---
 
-## Database Schema (20+ Models)
+## Database Schema (42 Models + 15 Enums)
 
 ### Core Models
 
@@ -274,174 +274,18 @@ Bias/Fairness, Privacy, Security, Reliability, Transparency, Accountability, Saf
 
 ---
 
-## Advanced Features Architecture (Phase 21 - Feb 2026)
+## Advanced Features Architecture (Phase 21 - Complete)
 
-### Risk Supply Chain Mapping
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Vendor Registry
-    ↓
-React Flow Graph Visualization
-    ├─ Nodes: Vendors with risk scores
-    ├─ Edges: Risk propagation paths
-    └─ Risk Cascade: Score aggregation through chains
-
-Database:
-    ├─ Vendor (id, name, risk_score, organization_id)
-    └─ VendorRiskPath (id, source_id, target_id, propagation_factor)
-```
-
-### Regulatory Change Tracker
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Regulatory Change Events
-    ↓
-Timeline Visualization
-    ├─ Filter by framework & date
-    ├─ Impact assessment engine
-    └─ Change propagation tracking
-
-Database:
-    ├─ RegulatoryChange (id, title, description, effective_date)
-    ├─ FrameworkChange (id, framework_id, version, change_type)
-    └─ ChangeImpact (id, control_id, risk_id, impact_score)
-```
-
-### Peer Benchmarking with Differential Privacy
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Org Metrics Collection
-    ↓
-Differential Privacy Layer (Laplace Noise)
-    ↓
-Anonymized Aggregation
-    ├─ Percentile ranking
-    ├─ Peer comparison by framework
-    └─ Risk distribution analysis
-
-Database:
-    ├─ BenchmarkSnapshot (id, org_id, timestamp, metrics_json)
-    └─ BenchmarkResult (id, aggregate_metrics, privacy_epsilon)
-
-Privacy Formula:
-    - Laplace(μ, b) where b = sensitivity / epsilon
-    - sensitivity = 1.0, epsilon = 0.5 (strong privacy)
-```
-
-### ROI Calculator
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Risk Cost Profile Input
-    ↓
-ALE Calculation
-    ├─ ALE = frequency × loss_value
-    └─ Baseline risk cost
-
-Mitigation Strategy Modeling
-    ↓
-ROSI Calculation
-    ├─ Benefit = ALE × (1 - residual_rate)
-    ├─ Cost = mitigation_investment
-    └─ ROSI = (benefit - cost) / cost
-
-Scenario Comparison
-    └─ Baseline vs. Strategy 1, 2, 3...
-
-Database:
-    ├─ RiskCostProfile (id, risk_id, frequency, loss_value)
-    ├─ MitigationInvestment (id, risk_id, cost, effectiveness%)
-    └─ ROSICalculation (id, baseline_ale, scenarios_json)
-```
-
-### Data Storytelling with Anomaly Detection
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Data Collection (Risks, Assessments, Controls)
-    ↓
-Z-Score Analysis
-    ├─ μ = mean, σ = std dev
-    ├─ Z = (x - μ) / σ
-    └─ Anomaly: |Z| > 2.5 (99.4% confidence)
-
-Narrative Generation
-    ├─ Select template from InsightTemplate
-    ├─ Populate with data points
-    └─ Highlight anomalies
-
-Database:
-    ├─ InsightTemplate (id, template_text, rules_json)
-    ├─ GeneratedInsight (id, assessment_id, content, confidence)
-    └─ AnomalyEvent (id, entity_id, z_score, flagged_at)
-```
-
-### Remediation Burndown & Framework Overlap
-**Status:** ✅ Complete (Phase 21)
-
-**Burndown Chart:**
-```
-Sprint Data Collection
-    ↓
-Recharts Visualization
-    ├─ X-axis: Days in sprint
-    ├─ Y-axis: Tasks remaining
-    └─ Velocity: Tasks closed per sprint
-
-Framework Overlap (Sankey + Matrix):
-    ├─ React Flow Sankey diagram (framework → controls)
-    ├─ Mapping coverage matrix (23 frameworks × control groups)
-    └─ Highlight unmapped controls
-```
-
-### Bento Grid Layouts
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-3 Preset Layouts
-    ├─ Executive (6 consolidated widgets)
-    ├─ Analyst (12 detailed widgets)
-    └─ Auditor (8 compliance-focused widgets)
-
-dnd-kit Reordering
-    ├─ rectSortingStrategy
-    ├─ Drag-drop enabled per widget
-    └─ CSS Grid responsive layout
-
-State Management:
-    ├─ DashboardLayout model (user's layout config)
-    ├─ useLayoutConfig hook (localStorage + DB)
-    └─ Widget order & visibility persistence
-```
-
-### Compliance Chain Graph
-**Status:** ✅ Complete (Phase 21)
-
-**Architecture:**
-```
-Requirement Node
-    ↓ (mapped to)
-Control Node
-    ↓ (verified by)
-Evidence Node
-
-React Flow Visualization:
-    ├─ Chain diagram with node styling
-    ├─ Coverage donut: % requirements with evidence
-    └─ Filter by framework & control
-
-Database:
-    └─ ComplianceChain (id, requirement_id, control_id, evidence_id)
-```
+| Feature | Purpose | Key Components |
+|---------|---------|-----------------|
+| **Risk Supply Chain** | Vendor graph + risk cascade | Vendor, VendorRiskPath models; React Flow visualization |
+| **Regulatory Tracker** | Change timeline + impact assessment | RegulatoryChange, FrameworkChange, ChangeImpact models; timeline viz |
+| **Benchmarking** | Peer comparison (Laplace noise, ε=0.5) | BenchmarkSnapshot, BenchmarkResult; differential privacy aggregation |
+| **ROI Calculator** | ALE/ROSI modeling (scenarios, cost analysis) | RiskCostProfile, MitigationInvestment, ROSICalculation models |
+| **Anomaly Detection** | Z-score analysis (|Z|>2.5) + narratives | Z-score engine, InsightTemplate, GeneratedInsight, AnomalyEvent models |
+| **Burndown Charts** | Sprint task velocity + framework overlap | Recharts sprint viz; Sankey diagram (framework → controls) |
+| **Dashboard Layouts** | 3 presets (Executive/Analyst/Auditor) + dnd-kit reordering | DashboardLayout model; localStorage + DB persistence |
+| **Compliance Chain** | Requirement→Control→Evidence traceability | ComplianceChain model; React Flow chain diagram |
 
 ---
 
@@ -591,22 +435,49 @@ Shared Resources:
 
 ## Deployment Architecture
 
+### Docker Containerization (Feb 2026)
+
+**3-Stage Dockerfile (421MB image):** deps (all) → builder (Next.js + Prisma) → runner (Alpine, prod only)
+
+**Docker Compose Stack:**
+- Base: App + PostgreSQL + Redis + MinIO
+- Dev: Source mount, hot-reload, auto-seed
+- Prod: Nginx reverse proxy (SSL/TLS, gzip, rate limit 100 req/min, 1-year asset cache)
+
+**Health Check:** IPv4 `127.0.0.1:3000/api/health` (30s interval, returns services status)
+
+**Resource Limits (Prod):** 1GB memory, 1.5 CPU cores, JSON log rotation (10MB/file, 3 files)
+
+**Makefile (21 targets):** `dev`, `prod`, `build`, `logs`, `clean`, `backup`, `ssl-self-signed`, etc.
+
+**Critical Fixes:**
+- Keep devDeps in deps stage (Prisma/TypeScript build requirement)
+- Alpine binary target: `linux-musl-openssl-3.0.x`
+- IPv4 health checks for Alpine networking
+- Automated entrypoint: Prisma generate + migrate + seed
+- Wait scripts for database readiness
+
+**Files:** Dockerfile, docker-compose.{base,dev,prod}, Makefile, .dockerignore, nginx-reverse-proxy.conf, startup/backup scripts
+
 ### Environments
 **Development:** Node.js 18+, PostgreSQL, .env.local, localhost:3000
+**Docker Dev:** `make dev` (source mount, hot-reload, auto-seed, debug ports)
+**Docker Prod:** `make prod` (nginx, SSL, resource limits, log rotation)
 
-**Production:**
-- Containerized (Docker)
+**Production (Cloud):**
+- Containerized (Docker 421MB image)
 - Managed PostgreSQL (AWS RDS, Google Cloud SQL)
-- TLS/SSL certificate
+- TLS/SSL certificate (nginx termination)
 - Load balancer (ALB, Azure LB)
 - CDN for static assets
 - Auto-scaling groups
 
 ### CI/CD
-- GitHub Actions workflow
-- Automated testing on PR
-- Docker image build
-- Cloud deployment
+- GitHub Actions workflow (.github/workflows/ci.yml, deploy.yml)
+- Automated testing on PR (1,080 tests)
+- Docker image build + push (docker-build job)
+- Trivy security scan (security-scan job)
+- Cloud deployment automation
 - HTML report + traces
 
 ---
@@ -694,159 +565,22 @@ Response: { database: ok, redis: ok, application: ok }
 
 ## Multi-Tenant Features (MVP4 Complete)
 
-### Phase 11: Organization & User Management
-- Organization profile management (name, industry, address, settings)
-- User CRUD with pagination, filtering, role management
-- User invitation system (email-based, token validation, expiry)
-- User profile editing, password change
-- Active/inactive user tracking with last login timestamp
-
-### Phase 12: API Keys & Webhooks
-- API key generation with SHA-256 hashing, prefix-based identification
-- Key permission levels (READ, WRITE, ADMIN), max 10 keys per org
-- Webhook CRUD with SSRF protection, secret signing (HMAC-SHA256)
-- Webhook event dispatcher (ai_system.created/updated/deleted, assessment.*)
-- Webhook delivery worker with retry logic, delivery logs
-- Test webhook functionality
-
-### Phase 13: Notifications, Audit Log & Polish
-- Notification service (7 types: ASSESSMENT_APPROVED, RISK_ESCALATED, etc.)
-- Real-time notification dropdown with 60s polling, unread count badge
-- Audit log viewer with advanced filters (user, action, entity, date range)
-- Audit log CSV export for compliance reporting
-- Notification detail diff viewer for change tracking
-
-### Security Enhancements
-- API key authentication middleware with SHA-256 validation
-- Webhook signature verification (HMAC-SHA256)
-- SSRF protection for webhook URLs (block private IPs, localhost)
-- User session tracking (isActive check, lastLoginAt updates)
+| Phase | Feature | Key Details |
+|-------|---------|-------------|
+| **P11** | Org & User Mgmt | Org profile, user CRUD, email invitations (token-based), profile editing, login tracking |
+| **P12** | API Keys & Webhooks | SHA-256 hashing, max 10/org, SSRF protection, HMAC-SHA256 signing, event dispatcher, retry logic |
+| **P13** | Notifications & Audit | 7 notification types, 60s polling, audit log + filters + CSV export, diff viewer |
+| **Security** | Auth & Validation | API key middleware (SHA-256), webhook verification (HMAC-SHA256), SSRF blocking, session tracking |
 
 ---
 
-## MVP5 Backend Implementation (Phases 16-18)
+## MVP5 Backend Implementation (Phases 16-18 — Complete)
 
-### Phase 16: File Storage & Evidence
-**Status:** ✅ Complete | **Date:** 2026-02-09
-
-**Architecture:**
-```
-Evidence Files
-    ↓
-Virus Scanner (ClamAV)
-    ↓
-S3/Blob Storage
-    ↓
-EvidenceVersion Tracking
-    ↓
-Storage Quota Management
-
-Components:
-├─ VirusScannerService — Scan with threat detection
-├─ StorageQuotaService — Enforce org and user limits
-├─ BulkUploadService — Batch processing
-└─ EvidenceVersionService — History and rollback
-
-Database:
-├─ Evidence — Original (enhanced)
-├─ EvidenceVersion — New for versioning
-└─ StorageQuota — New for limit tracking
-```
-
-**Key Features:**
-- ClamAV integration with automatic scanning
-- Version history with diff tracking
-- Org-level quotas (10GB default) and per-user limits (100MB)
-- Bulk upload with progress tracking
-- Signed URLs for secure downloads
-
-### Phase 17: Scheduled Reports & Cron Jobs
-**Status:** ✅ Complete | **Date:** 2026-02-09
-
-**Architecture:**
-```
-Schedule Event
-    ↓
-Cron Parser (node-cron)
-    ↓
-Job Queue (Bull/BullMQ)
-    ↓
-Report Generator
-├─ PDF (node-html2pdf)
-├─ Excel (ExcelJS)
-└─ Template (Handlebars)
-    ↓
-Email Delivery (SMTP/Nodemailer)
-    ↓
-S3 Storage
-    ↓
-Cleanup Job (Retention Policy)
-
-Components:
-├─ ScheduledJobQueue — Job processing
-├─ CronTriggerHandler — Execution logic
-├─ EmailService — SMTP with templates
-├─ ExcelReportGenerator — Multi-sheet workbooks
-├─ PdfReportGenerator — HTML-to-PDF
-├─ FileReportManager — S3 + lifecycle
-└─ ReportCleanupHandler — Retention enforcement
-
-Database:
-├─ ReportTemplate — Template definitions
-├─ ScheduledJob — Job config and logs
-└─ JobExecution — Run history
-```
-
-**Key Features:**
-- Cron expressions (standard format)
-- Multiple report formats (PDF, Excel, HTML)
-- HTML email with Handlebars templating
-- S3 storage with signed URLs (7-day expiry)
-- Automatic cleanup after 90 days (configurable)
-- Recurring assessment automation
-
-### Phase 18: Advanced Features
-**Status:** ✅ Complete | **Date:** 2026-02-09
-
-**Architecture:**
-```
-Bulk Import (CSV/Excel)
-    ↓
-Data Validation (Zod)
-    ↓
-Conflict Detection
-├─ Duplicate risks
-├─ Framework mapping conflicts
-└─ Control conflicts
-    ↓
-Import Job Queue
-    ↓
-Database Transaction
-    ↓
-Task Creation
-
-Components:
-├─ BulkImportService — CSV/Excel parsing
-├─ RiskImportValidator — Zod schemas
-├─ ConflictResolutionEngine — Merging
-├─ TaskManagementService — Task CRUD
-└─ GapAnalysisFilter — Advanced queries
-
-Database:
-├─ Task — Enhanced with workflow
-├─ TaskComment — Discussion threads
-├─ ImportJob — Bulk import tracking
-└─ ImportLog — Error/warning logs
-```
-
-**Key Features:**
-- CSV/Excel import with streaming for large files
-- Zod validation with detailed error messages
-- Duplicate detection by risk name + framework
-- Conflict resolution with merge suggestions
-- Task assignment and deadline management
-- Task comments with mention support
-- Import job status tracking and error logs
+| Phase | Feature | Architecture | Key Details |
+|-------|---------|--------------|------------|
+| **P16** | File Storage & Evidence | Evidence → Virus Scan (ClamAV) → S3/Blob → Quota Mgmt | Version history, org quotas (10GB), bulk upload, signed URLs |
+| **P17** | Scheduled Reports & Cron | Cron → Queue → Generators (PDF/Excel) → Email (SMTP) → S3 | Templates (Handlebars), 7-day signed URLs, 90-day cleanup |
+| **P18** | Bulk Import & Tasks | CSV/Excel → Zod validation → Conflict detection → Tasks | Streaming import, duplicate detection, conflict resolution, comments |
 
 ---
 
@@ -858,4 +592,4 @@ Database:
 ---
 
 **Architecture Version:** 3.5 | **Last Updated:** 2026-02-09 | **Maintained By:** docs-manager agent
-**Test Coverage:** 833/833 passing (100%) | **Security:** All CRITICAL + HIGH resolved
+**Test Coverage:** 1,080/1,080 passing (100%) | **Security:** All CRITICAL + HIGH resolved
