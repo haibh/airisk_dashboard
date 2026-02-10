@@ -600,6 +600,22 @@
     "modelDrift": "Trôi dạt Mô hình",
     "comingSoon": "Sắp ra mắt — Cần tích hợp MLOps"
   },
+  "changePassword": {
+    "title": "Đổi Mật khẩu",
+    "description": "Vì lý do bảo mật, bạn phải đổi mật khẩu trước khi tiếp tục.",
+    "current": "Mật khẩu Hiện tại",
+    "new": "Mật khẩu Mới",
+    "confirm": "Xác nhận Mật khẩu Mới",
+    "submit": "Đặt Mật khẩu Mới",
+    "submitting": "Đang đổi...",
+    "success": "Đổi mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.",
+    "mismatch": "Mật khẩu không khớp",
+    "incorrect": "Mật khẩu hiện tại không đúng",
+    "samePassword": "Mật khẩu mới phải khác mật khẩu hiện tại",
+    "minLength": "Mật khẩu phải có ít nhất 8 ký tự",
+    "minLengthHint": "Tối thiểu 8 ký tự",
+    "error": "Đổi mật khẩu thất bại"
+  },
   "landing": {
     "title": "AIRM-IP",
     "subtitle": "Nền tảng Quản lý Rủi ro AI Thông minh",

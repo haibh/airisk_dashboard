@@ -9,6 +9,7 @@ declare module 'next-auth' {
       organizationId: string;
       organizationName: string;
       ssoProvider?: string;
+      mustChangePassword?: boolean;
     } & DefaultSession['user'];
   }
 
@@ -17,6 +18,7 @@ declare module 'next-auth' {
     organizationId: string;
     organizationName: string;
     ssoProvider?: string;
+    mustChangePassword?: boolean;
   }
 }
 
@@ -27,5 +29,6 @@ declare module 'next-auth/jwt' {
     organizationId: string;
     organizationName: string;
     ssoProvider?: string;
+    mustChangePassword?: boolean;
   }
 }

@@ -3,7 +3,7 @@
 # ========================================
 FROM node:20-alpine AS deps
 
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
 # Upgrade npm to match local version for lockfile compatibility
 RUN npm install -g npm@11

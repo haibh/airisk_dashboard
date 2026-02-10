@@ -4,32 +4,55 @@ Enterprise-grade platform for managing AI risks, compliance frameworks, and gove
 
 ## Quick Start
 
-### Local Development
+### Docker (Recommended)
 ```bash
-# Install dependencies and setup database
+# 1. Copy environment config
+cp .env.docker.example .env.docker
+
+# 2. Start dev environment (PostgreSQL, Redis, MinIO, App with hot-reload)
+make dev
+
+# 3. Push schema and seed database (first time only)
+docker exec airm-ip-app-dev sh -c 'npx prisma db push'
+docker exec airm-ip-app-dev sh -c 'npx prisma db seed'
+
+# 4. Open http://localhost:3000
+```
+
+### Local Development (without Docker)
+```bash
+# 1. Install dependencies and setup database
 cp .env.example .env.local
 npm install
 npm run db:generate
 npm run db:push
 npm run db:seed
 
-# Start development server (http://localhost:3000)
+# 2. Start development server (http://localhost:3000)
 npm run dev
 ```
 
-### Docker (Recommended)
+### Test Accounts
+
+The seed script creates 5 test accounts (one per role). All accounts require a **password change on first login**.
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@airm-ip.local` | `Test@123456` | Admin (full access) |
+| `riskmanager@airm-ip.local` | `Test@123456` | Risk Manager |
+| `assessor@airm-ip.local` | `Test@123456` | Assessor |
+| `auditor@airm-ip.local` | `Test@123456` | Auditor |
+| `viewer@airm-ip.local` | `Test@123456` | Viewer (read-only) |
+
+> After first login you will be redirected to a password change page. Set a new password, then sign in again to access the dashboard.
+
+### Docker Commands
 ```bash
-# Development with hot-reload
-cp .env.docker.example .env.docker
-make dev
-
-# Production
-make prod
-
-# Logs, cleanup, backups
-make logs
-make clean
-make backup
+make dev                 # Start dev environment with hot-reload
+make prod                # Start production environment
+make logs                # View container logs
+make clean               # Stop and remove containers
+make backup              # Backup PostgreSQL database
 ```
 
 ## Features
@@ -187,18 +210,6 @@ npm run test:e2e:headed  # Run E2E with browser visible
 # Single test file
 npm run test -- tests/api/ai-systems-endpoint.test.ts
 npm run test:e2e -- tests/e2e/auth-login-flow.spec.ts
-```
-
-### Docker (via Makefile)
-```bash
-make dev                 # Start dev environment with hot-reload
-make prod                # Start production environment
-make build               # Build Docker images
-make logs                # View container logs
-make clean               # Stop and remove containers
-make backup              # Backup PostgreSQL database
-make restore             # Restore database from backup
-make ssl-self-signed     # Generate self-signed SSL certificate
 ```
 
 ## Environment Setup

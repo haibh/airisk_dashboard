@@ -18,7 +18,7 @@ services:
     container_name: airm-ip-app-dev
     # Override entrypoint for dev mode
     entrypoint: []
-    command: ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run dev"]
+    command: ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npx next dev --port 3000"]
     volumes:
       # Mount source for hot-reload
       - ./src:/app/src:cached

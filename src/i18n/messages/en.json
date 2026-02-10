@@ -600,6 +600,22 @@
     "modelDrift": "Model Drift",
     "comingSoon": "Coming Soon — Requires MLOps Integration"
   },
+  "changePassword": {
+    "title": "Change Your Password",
+    "description": "For security, you must change your password before continuing.",
+    "current": "Current Password",
+    "new": "New Password",
+    "confirm": "Confirm New Password",
+    "submit": "Set New Password",
+    "submitting": "Changing...",
+    "success": "Password changed! Please sign in with your new password.",
+    "mismatch": "Passwords do not match",
+    "incorrect": "Current password is incorrect",
+    "samePassword": "New password must be different from current password",
+    "minLength": "Password must be at least 8 characters",
+    "minLengthHint": "Minimum 8 characters",
+    "error": "Failed to change password"
+  },
   "landing": {
     "title": "AIRM-IP",
     "subtitle": "AI Risk Management Intelligence Platform",

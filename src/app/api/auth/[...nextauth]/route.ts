@@ -62,9 +62,9 @@ export const authOptions: NextAuthOptions = {
             organizationId: user.organizationId,
             organizationName: user.organization.name,
             ssoProvider: user.ssoProvider || undefined,
+            mustChangePassword: user.mustChangePassword,
           };
         } catch (error) {
-          console.error('Auth error:', error);
           return null;
         }
       },
@@ -87,6 +87,7 @@ export const authOptions: NextAuthOptions = {
         token.organizationId = user.organizationId;
         token.organizationName = user.organizationName;
         token.ssoProvider = user.ssoProvider;
+        token.mustChangePassword = user.mustChangePassword;
       }
       return token;
     },
@@ -97,6 +98,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationId = token.organizationId as string;
         session.user.organizationName = token.organizationName as string;
         session.user.ssoProvider = token.ssoProvider as string | undefined;
+        session.user.mustChangePassword = token.mustChangePassword as boolean | undefined;
       }
       return session;
     },

@@ -72,6 +72,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // Force password change redirect
+  const pathWithoutLocale = pathname.replace(/^\/(en|vi)/, '');
+  if (token.mustChangePassword && pathWithoutLocale !== '/change-password') {
+    const locale = pathname.match(/^\/(en|vi)/)?.[1] || defaultLocale;
+    const changePasswordUrl = new URL(`/${locale}/change-password`, request.url);
+    return NextResponse.redirect(changePasswordUrl);
+  }
+
   // Authenticated — continue with i18n
   const response = intlMiddleware(request);
   response.headers.set('x-correlation-id', correlationId);

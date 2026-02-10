@@ -63,8 +63,9 @@ model User {
   languagePref  String    @default("en")
   emailVerified DateTime?
   image         String?
-  isActive      Boolean   @default(true)
-  lastLoginAt   DateTime?
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(false)
+  lastLoginAt        DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -187,6 +188,8 @@ model AISystem {
   riskAssessments RiskAssessment[]
   evidenceLinks   EvidenceLink[]
 
+  @@index([organizationId, lifecycleStatus])
+  @@index([organizationId, riskTier])
   @@map("ai_systems")
 }
 
@@ -372,6 +375,8 @@ model RiskAssessment {
   risks         Risk[]
   evidenceLinks EvidenceLink[]
 
+  @@index([organizationId, status])
+  @@index([frameworkId])
   @@map("risk_assessments")
 }
 
@@ -411,6 +416,9 @@ model Risk {
   scoreHistory  RiskScoreHistory[]
   costProfile   RiskCostProfile?
 
+  @@index([assessmentId, inherentScore])
+  @@index([assessmentId, treatmentStatus])
+  @@index([category])
   @@map("risks")
 }
 
@@ -520,6 +528,7 @@ model Evidence {
   links    EvidenceLink[]
   versions EvidenceVersion[]
 
+  @@index([organizationId, reviewStatus])
   @@map("evidence")
 }
 
@@ -668,6 +677,7 @@ model AuditLog {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+  @@index([organizationId, createdAt])
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")

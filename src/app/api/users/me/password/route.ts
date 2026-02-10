@@ -50,10 +50,10 @@ export async function PUT(request: NextRequest) {
     // Hash new password
     const newPasswordHash = await hashPassword(newPassword);
 
-    // Update password
+    // Update password and clear forced change flag
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { passwordHash: newPasswordHash },
+      data: { passwordHash: newPasswordHash, mustChangePassword: false },
     });
 
     // Write audit log
