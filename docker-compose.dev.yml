@@ -1,0 +1,52 @@
+# =============================================================================
+# AIRM-IP Docker Compose — Development Override
+# =============================================================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or:    make dev
+#
+# Features:
+#   - Source code mounted for hot-reload (no rebuild needed)
+#   - Debug ports exposed
+#   - Verbose logging
+#   - Database seeding on start
+# =============================================================================
+
+services:
+  app:
+    build:
+      target: deps
+    container_name: airm-ip-app-dev
+    # Override entrypoint for dev mode
+    entrypoint: []
+    command: ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run dev"]
+    volumes:
+      # Mount source for hot-reload
+      - ./src:/app/src:cached
+      - ./public:/app/public:cached
+      - ./prisma:/app/prisma:cached
+      - ./next.config.ts:/app/next.config.ts:cached
+      - ./tsconfig.json:/app/tsconfig.json:cached
+      - ./tailwind.config.ts:/app/tailwind.config.ts:cached
+      - ./postcss.config.mjs:/app/postcss.config.mjs:cached
+      # Prevent overwriting container node_modules
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - SEED_ON_START=true
+    healthcheck:
+      # Dev server takes longer to start
+      start_period: 120s
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"

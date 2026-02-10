@@ -35,8 +35,7 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# package manager
-package-lock.json
+# package manager (keep package-lock.json tracked for reproducible builds)
 yarn.lock
 pnpm-lock.yaml
 
@@ -46,6 +45,7 @@ pnpm-lock.yaml
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.docker.example
 
 # vercel
 .vercel

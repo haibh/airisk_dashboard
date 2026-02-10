@@ -17,9 +17,10 @@ build
 .gitignore
 .gitattributes
 
-# Environment files (except example)
+# Environment files (except examples)
 .env*
 !.env.example
+!.env.docker.example
 
 # Testing
 tests
@@ -70,9 +71,15 @@ local
 storage
 .docker
 
+# Docker compose overrides (not needed inside image)
+docker-compose*.yml
+Makefile
+docker/
+
 # Misc
 .DS_Store
 *.pem
 screenshots
 transcripts
 conversations
+risk-expert.zip

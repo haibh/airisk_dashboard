@@ -1,0 +1,137 @@
+# =============================================================================
+# AIRM-IP Docker Compose — Production Override
+# =============================================================================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Or:    make prod
+#
+# Features:
+#   - Nginx reverse proxy with SSL termination
+#   - Resource limits for all services
+#   - JSON logging driver with rotation
+#   - Internal-only ports (no external exposure for DB/Redis/MinIO)
+#   - Automated database backups
+# =============================================================================
+
+services:
+  # ========================================
+  # Nginx Reverse Proxy
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    container_name: airm-ip-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx-reverse-proxy.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - airm-network
+
+  app:
+    # Production: don't expose port directly (nginx handles)
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  postgres:
+    # Production: don't expose DB port externally
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  redis:
+    # Production: don't expose Redis port externally
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  minio:
+    # Production: don't expose MinIO ports externally
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========================================
+  # Database Backup (runs daily via cron)
+  # ========================================
+  backup:
+    image: postgres:15-alpine
+    container_name: airm-ip-backup
+    restart: "no"
+    volumes:
+      - ./scripts/postgres-backup-with-rotation.sh:/backup.sh:ro
+      - backup-data:/backups
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-airm}:${POSTGRES_PASSWORD:-airm_secret}@postgres:5432/${POSTGRES_DB:-airm_ip}?schema=public
+      - BACKUP_DIR=/backups
+      - RETENTION_DAYS=30
+    entrypoint: ["/bin/bash", "/backup.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - backup
+    networks:
+      - airm-network
+
+volumes:
+  backup-data:
+    driver: local
